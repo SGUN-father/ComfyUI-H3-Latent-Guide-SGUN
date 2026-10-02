@@ -2,6 +2,7 @@ import asyncio
 import gc
 import importlib.util
 import json
+import os
 import sys
 import tempfile
 import unittest
@@ -24,6 +25,7 @@ from comfy_extras.nodes_video import SaveVideo
 from comfy_execution.graph_utils import ExecutionBlocker
 import execution
 import folder_paths
+import nodes
 from comfy.model_base import MiniMaxH3
 from comfy.model_patcher import ModelPatcher
 from comfy.patcher_extension import WrappersMP
@@ -218,6 +220,64 @@ class TestLongVideo(unittest.TestCase):
         self.assertEqual(list(self.directory.rglob("segment_*")), [])
         with self.assertRaisesRegex(Exception, "outside the output"):
             self.run_node(1, filename_prefix="../escape/H3")
+
+    def test_latent_list_scans_nested_directories_and_refreshes_newest_first(self):
+        roots = {kind: self.directory / kind for kind in ("output", "input", "temp")}
+        for root in roots.values():
+            root.mkdir()
+        with patch.object(folder_paths, "get_directory_by_type", side_effect=lambda kind: str(roots[kind])):
+            self.assertEqual(latent_io.list_h3_latents(), [latent_io.EMPTY_LATENT_LIST])
+            paths = [("output", "video/run/segment_0001.h3latent"),
+                     ("input", "uploaded.h3latent"), ("temp", "test.H3LATENT")]
+            for index, (kind, relative) in enumerate(paths, 1):
+                path = roots[kind] / relative
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.touch()
+                os.utime(path, ns=(index * 1_000_000_000, index * 1_000_000_000))
+            (roots["output"] / "ignored.h3latent.tmp").touch()
+            (roots["input"] / "ordinary.latent").touch()
+            expected = [f"{relative} [{kind}]" for kind, relative in reversed(paths)]
+            self.assertEqual(latent_io.list_h3_latents(), expected)
+            response = asyncio.run(latent_io.get_h3_latents(None))
+            self.assertEqual(json.loads(response.text), expected)
+            newest = roots["output"] / "video/run/segment_0002.h3latent"
+            newest.touch()
+            os.utime(newest, ns=(4_000_000_000, 4_000_000_000))
+            self.assertEqual(json.loads(asyncio.run(latent_io.get_h3_latents(None)).text),
+                             ["video/run/segment_0002.h3latent [output]"] + expected)
+            schema = LoadLatent.GET_NODE_INFO_V1()
+            combo = schema["input"]["optional"]["latent_file"][1]
+            self.assertEqual(combo["remote"]["route"], latent_io.LATENT_LIST_ROUTE)
+            self.assertTrue(combo["remote"]["refresh_button"])
+
+    def test_latent_dropdown_loads_and_legacy_manual_path_takes_priority(self):
+        source = native_latent(124)
+        latent_io.save_h3_latent(source, str(self.directory / "selected.h3latent"), {})
+        selected = "selected.h3latent [output]"
+        loaded = LoadLatent.execute(latent_file=selected)[0]
+        self.assertTrue(torch.equal(loaded["samples"].tensors[0], source["samples"].tensors[0]))
+        self.assertEqual(LoadLatent.fingerprint_inputs(latent_file=selected),
+                         LoadLatent.fingerprint_inputs(selected))
+        loaded = LoadLatent.execute(selected, latent_io.EMPTY_LATENT_LIST)[0]
+        self.assertTrue(torch.equal(loaded["samples"].tensors[1], source["samples"].tensors[1]))
+        for selection in (latent_io.EMPTY_LATENT_LIST, "../escape.h3latent [output]"):
+            with self.assertRaises(ValueError):
+                LoadLatent.execute(latent_file=selection)
+        with patch.dict(nodes.NODE_CLASS_MAPPINGS, {"H3LoadLatent": LoadLatent}):
+            for inputs in ({"latent_path": selected}, {"latent_path": "", "latent_file": selected},
+                           {"latent_path": selected, "latent_file": "deleted.h3latent [output]"}):
+                prompt = {"load": {"class_type": "H3LoadLatent", "inputs": inputs},
+                          "save": {"class_type": "SaveLatent", "inputs": {
+                              "samples": ["load", 0], "filename_prefix": "test"}}}
+                valid, error, _, node_errors = asyncio.run(execution.validate_prompt("latent-dropdown", prompt, None))
+                self.assertTrue(valid, (error, node_errors))
+
+    def test_latent_refresh_route_is_registered_on_extension_load(self):
+        routes = latent_io.web.RouteTableDef()
+        with patch.object(package.PromptServer, "instance", SimpleNamespace(routes=routes), create=True):
+            asyncio.run(package.H3LatentGuideExtension().on_load())
+        self.assertEqual([(route.method, route.path) for route in routes],
+                         [("GET", latent_io.LATENT_LIST_ROUTE)])
 
     def test_streaming_save_retains_only_tail_and_blocked_merge_skips_native_save(self):
         seen, images, full = [], [], []
