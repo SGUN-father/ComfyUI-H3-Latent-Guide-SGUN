@@ -1,6 +1,7 @@
 """Native MiniMax H3 latent continuation and long-video generation."""
 
 import logging
+from server import PromptServer
 
 from comfy.nested_tensor import NestedTensor
 from comfy.ldm.minimax.model import FRAME_RESCALE
@@ -101,10 +102,13 @@ class MiniMaxH3LatentContinuationGuide(io.ComfyNode):
 
 
 from .long_video import H3LongVideo, H3VideoPromptPlan
-from .latent_io import H3LoadLatent
+from .latent_io import H3LoadLatent, LATENT_LIST_ROUTE, get_h3_latents
 
 
 class H3LatentGuideExtension(ComfyExtension):
+    async def on_load(self):
+        PromptServer.instance.routes.get(LATENT_LIST_ROUTE)(get_h3_latents)
+
     async def get_node_list(self):
         return [MiniMaxH3LatentContinuationGuide, H3LoopPromptSchedule, H3LongVideo, H3VideoPromptPlan, H3LoadLatent]
 
