@@ -6,6 +6,17 @@
 
 一个节点完成 MiniMax H3 Ref2VA 分段采样、原生音视频 LATENT 续接、解码和即时保存。模型、CLIP、视频/音频 VAE、加速、图片和提示词编辑留在外面。每段完成即保存 MP4，可选保存完整 LATENT；合并默认关闭，需要整片时使用外部官方 Save Video。
 
+## 示例工作流
+
+- [普通调度器版：20 秒战斗](examples/H3_长视频_一体节点_20秒战斗.json)：4 段 × 5 秒，使用节点内置调度器。
+- [自定义 Sigmas 版](examples/H3_长视频_一体节点_自定义Sigmas.json)：通过 Manual Sigmas 输入采样序列。
+
+下载 JSON 后拖入 ComfyUI，或使用「工作流 → 打开」导入。两个模板都包含参数说明 Note。
+
+配套参考图：[红发少年](examples/red_superboy_on_city_roof.png)、[机械巨兽](examples/mecha_dragon_lightning.png)。将两张图片放入 ComfyUI 的 `input` 目录并在 Load Image 节点选择，也可以替换成自己的图片并修改提示词。
+
+模板保存的是作者本机的模型文件名；导入后按自己的安装情况重新选择 H3 模型、CLIP、视频/音频 VAE 和 Turbo LoRA。注意力后端与稀疏注意力节点来自新版 ComfyUI；若当前环境不支持所选加速后端，将 MODEL 从 LoRA 节点直接连接到 H3 长视频节点即可。合并视频和保存每段 LATENT 默认关闭，需要时在主节点开启。
+
 ## 安装与连接
 
 将本目录放入 ComfyUI `custom_nodes`，重启后导入新版配套工作流。不要同时安装旧名和新名两个副本。包来源标识为 `H3-Latent-Guide-SGUN`。使用官方 H3 Ref2VA 权重及其 CLIP、两个 VAE。无需新增依赖，不调用外部命令。
