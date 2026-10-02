@@ -1,0 +1,1144 @@
+{
+  "id": "b9e072cc-c907-4b0f-9b58-76d22c8cf0d7",
+  "revision": 15,
+  "last_node_id": 200,
+  "last_link_id": 13,
+  "nodes": [
+    {
+      "id": 127,
+      "type": "UNETLoader",
+      "pos": [
+        20,
+        30
+      ],
+      "size": [
+        620,
+        90
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "UNETLoader",
+        "models": [
+          {
+            "name": "minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/diffusion_models/minimax_h3_ref2va_pruned_int8_convrot.safetensors",
+            "directory": "diffusion_models"
+          }
+        ]
+      },
+      "widgets_values": [
+        "Cobijada_H3_Hybrid_Uncensored_pruned_hybrid_int8_convrot_pruned.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "Cobijada_H3_Hybrid_Uncensored_pruned_hybrid_int8_convrot_pruned.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 145,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        20,
+        170
+      ],
+      "size": [
+        620,
+        90
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "LoraLoaderModelOnly",
+        "models": [
+          {
+            "name": "minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/loras/minimax_h3_ref2v_turbo_4step_v0.1_comfyui_bf16.safetensors",
+            "directory": "loras"
+          }
+        ]
+      },
+      "widgets_values": [
+        "minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+        0.75
+      ],
+      "widgets_values_named": {
+        "lora_name": "minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
+        "strength_model": 0.75
+      }
+    },
+    {
+      "id": 172,
+      "type": "ModelAttentionBackend",
+      "pos": [
+        20,
+        330
+      ],
+      "size": [
+        360,
+        80
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "ModelAttentionBackend"
+      },
+      "widgets_values": [
+        "comfy kitchen attention"
+      ],
+      "widgets_values_named": {
+        "attention": "comfy kitchen attention"
+      }
+    },
+    {
+      "id": 173,
+      "type": "BlockSparseAttention",
+      "pos": [
+        20,
+        480
+      ],
+      "size": [
+        360,
+        250
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 3
+        }
+      ],
+      "outputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.37.0",
+        "Node name for S&R": "BlockSparseAttention"
+      },
+      "widgets_values": [
+        "sol-attn",
+        1.3,
+        0.2,
+        1,
+        "",
+        12288,
+        256,
+        "exact_kv_and_rows",
+        true
+      ],
+      "widgets_values_named": {
+        "selection": "sol-attn",
+        "selection.tau": 1.3,
+        "start_percent": 0.2,
+        "end_percent": 1,
+        "dense_blocks": "",
+        "min_tokens": 12288,
+        "extra_tokens": 256,
+        "sink_conditioning": "exact_kv_and_rows",
+        "verbose": true
+      }
+    },
+    {
+      "id": 128,
+      "type": "CLIPLoader",
+      "pos": [
+        20,
+        810
+      ],
+      "size": [
+        620,
+        120
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "CLIPLoader",
+        "models": [
+          {
+            "name": "qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/text_encoders/qwen3vl_32b_minimax_h3_nvfp4_awq.safetensors",
+            "directory": "text_encoders"
+          }
+        ]
+      },
+      "widgets_values": [
+        "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+        "minimax",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+        "type": "minimax",
+        "device": "default"
+      }
+    },
+    {
+      "id": 119,
+      "type": "VAELoader",
+      "pos": [
+        20,
+        990
+      ],
+      "size": [
+        620,
+        70
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            6
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "minimax_h3_video_vae_int8_convrot.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_video_vae_int8_convrot.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "minimax_h3_video_vae_int8_convrot.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_video_vae_int8_convrot.safetensors"
+      }
+    },
+    {
+      "id": 120,
+      "type": "VAELoader",
+      "pos": [
+        20,
+        1130
+      ],
+      "size": [
+        620,
+        70
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "VAELoader",
+        "models": [
+          {
+            "name": "minimax_h3_audio_vae_fp32.safetensors",
+            "url": "https://huggingface.co/Comfy-Org/MiniMax-H3/resolve/main/vae/minimax_h3_audio_vae_fp32.safetensors",
+            "directory": "vae"
+          }
+        ]
+      },
+      "widgets_values": [
+        "minimax_h3_audio_vae_fp32.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+      }
+    },
+    {
+      "id": 137,
+      "type": "LoadImage",
+      "pos": [
+        710,
+        10
+      ],
+      "size": [
+        310,
+        330
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "red_superboy_on_city_roof.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "red_superboy_on_city_roof.png",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 139,
+      "type": "LoadImage",
+      "pos": [
+        1060,
+        10
+      ],
+      "size": [
+        310,
+        330
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            10
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "mecha_dragon_lightning.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "mecha_dragon_lightning.png",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 177,
+      "type": "H3VideoPromptPlan",
+      "pos": [
+        1570,
+        20
+      ],
+      "size": [
+        800,
+        900
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "提示词",
+          "type": "H3_PROMPTS",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "title": "提示词：共用描述 + 各段剧情",
+      "properties": {
+        "Node name for S&R": "H3VideoPromptPlan"
+      },
+      "widgets_values_named": {
+        "common": "subject_definitions:\n<Subject 1> is the freckled red-haired boy superhero from <Picture 1>, with the black eye mask, black suit, large white chest star, red gloves, red boots and flowing red cape. Preserve his face, costume, small human scale and athletic silhouette. His power is a white-gold star-shaped energy shield and a white-gold pulse emitted through his hands.\n<Subject 2> is the colossal black armored mech-kaiju from <Picture 2>, with red glowing eyes, the red chest core, jagged mechanical jaws, angular black armor and thin blue lightning above its head. Preserve its much larger scale and heavy mechanical silhouette. It attacks using a red beam emitted from its chest core.\n<Subject 3> is the wet rooftop and blue-black night city from <Picture 1>, with a concrete parapet, rain puddles, red window reflections and bold comic ink shading.\n\nsummary:\n[reference generation] A continuous comic-book battle between <Subject 1> and <Subject 2> above <Subject 3>. The boy blocks the mech's beam, evades it, launches a flying counterattack and lands back on the roof. Reference images define the two fighters and setting; all action is newly generated.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - retain the referenced face, red hair, eye mask, black suit, white star, red boots and cape.\n<Subject 2> (appears in [Shot 1]): fully_preserved - retain the referenced black armored mech, red eyes and core, jagged jaws and blue lightning; keep it colossal compared with the boy.\n<Subject 3> (appears in [Shot 1]): fully_preserved - reuse the wet rooftop, parapet, city reflections and night comic style.\n\ndetailed_description:\nBold moving comic-book ink illustration, heavy black outlines, red accents and blue-black night shadows. Exactly the boy and the colossal mech are the visible combatants. A clear three-quarter viewpoint shows the boy in the near foreground and the mech beyond the rooftop, with readable spacing. The camera follows their ongoing motion as one continuous take; contact, evasion and recoil remain visible. The boy's white-gold energy is visually distinct from the mech's red beam and blue electricity. Preserve identity, relative scale, lighting and the geography of the roof throughout the battle.\n",
+        "segments": "[Shot 1] Begin with <Subject 1> standing on the left side of the wet rooftop, facing <Subject 2>, whose towering torso rises behind the nearby skyline on the right. The boy bends his knees, plants his left boot ahead of his right boot and raises his forearms. His red cape streams backward in the wind. The mech leans its heavy upper body toward him; its red chest core condenses into a bright point. Show the energy originate at that core, then shoot across the visible gap toward the boy. The boy opens a white-gold star-shaped shield in front of his raised hands before the red beam reaches him. The beam strikes the center of the shield with a sharp electrical crack. Its force pushes his upper body backward and slides his rear boot a short distance through a puddle; his forward heel stays planted, his elbows flex and he recovers a firm brace. Water splashes from the boot rather than from an unrelated explosion. Keep both the source core and the shield contact in the same view. The camera makes a brisk, smooth lateral track to the right to reveal the diagonal beam and the boy's strained posture, maintaining continuous motion. End with the red beam still pressing against the white-gold shield, the boy braced low and the cape moving; carry this active contact into the next segment.\n\noverall_soundscape:\nContinuous rooftop wind and cape flapping, a rising mechanical core whine, the red beam's hiss, the sharp shield impact and boots scraping through water. The beam contact continues through the end. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the opening motion context: <Subject 1> is braced behind his white-gold shield and <Subject 2>'s red chest beam is still hitting it. Maintain their current spacing, body direction, red cape motion and the camera's rightward tracking speed. The boy first presses his forward foot into the wet roof, then makes one quick sideways step out of the beam's line. His shield tilts with his hands and leaves the beam path. The red beam passes behind his shoulder and strikes the now-empty patch of roof he just vacated. Show that miss clearly: a narrow scorched stripe and a small burst of concrete fragments appear at the roof contact, while the boy remains intact. The mech pivots its torso to follow him, with heavy shoulder movement and delayed inertia. Before the beam can sweep back, the boy crouches, loads both legs and pushes off the roof. Show both boots leave the surface, a splash from the takeoff point and his cape trailing behind him. He accelerates upward and forward through the visible gap toward the mech's chest, propelled by a brief white-gold glow from his star emblem. The camera tracks the takeoff and tilts upward smoothly, keeping the roof edge below and the mech ahead to prove the flight path. End with the boy clearly airborne and advancing toward the red core, his hands coming forward; maintain this flight through the final frame.\n\noverall_soundscape:\nContinue the wind and beam hiss from the opening context. A concrete impact and falling fragments mark the missed beam; boot splash, cape snap and an accelerating air rush accompany the takeoff. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the boy's existing upward-forward flight from the opening context, preserving his pose, cape direction and the mech's position. The roof remains below, visibly separated from the boy. <Subject 1> brings both palms toward the red core of <Subject 2> and concentrates his white-gold star energy between them. The much larger mech begins drawing its armored forearms inward to protect the core, but its heavy arms have visible inertia. The boy releases one compact white-gold pulse before the forearms close. Show the pulse originate between his palms, cross the short remaining gap and visibly strike the black armor immediately around the red core. A brief ring of white sparks expands only from that impact. The mech's upper torso jolts backward immediately from the strike, its jaw lifting and its shoulders recoiling before its forearms close over the core. Small armor sparks and thin smoke remain at the struck panel; its red light flickers. The discharge gives the boy a smaller, opposite recoil: his arms spread to balance and his cape swings forward as his upward flight slows and turns into a backward descent toward the same rooftop. The camera follows the impact and then tilts slightly down to keep both fighters and the roof below in view. End with the boy descending toward the roof and the mech still recovering behind its crossed forearms, with the scorched roof stripe remaining below.\n\noverall_soundscape:\nContinuous rushing air and cape movement. One rising energy tone leads to one sharp pulse release, one heavy metallic impact and armor creaking during the immediate recoil. Electrical crackles and a lowering core hum persist afterward. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the opening context with <Subject 1> descending backward toward the same wet rooftop, his red cape moving forward from the recoil. <Subject 2> remains beyond the roof with its forearms guarding its flickering red chest core; preserve the thin smoke and the scorched stripe on the roof. The camera smoothly follows the boy's descent without changing the scene or resetting the viewpoint. Show his red boots meet the roof together, his knees bend deeply to absorb the landing and his hands briefly open for balance. A ring of rainwater splashes from the actual landing point. He takes one short recovery step, turns his torso toward the mech and raises a compact white-gold shield in a ready guard. The mech tries to charge its core once more, but the red light sputters; one weak blue arc crawls across its armored shoulder and dies out. Its heavy forearms lower slowly as it takes a small backward stabilizing step between the buildings, still huge relative to the boy. This retreat ends the exchange. The boy holds his recovered stance while his cape continues fluttering and the puddle ripples spread. The camera eases into a wider view that keeps the boy, damaged roof patch and retreating mech together. End with ongoing wind, thinning smoke and both fighters clearly separated, rather than a freeze frame or a new attack.\n\noverall_soundscape:\nCarry the previous air rush into boot landing, puddle splash, cloth movement and a short metallic electrical sputter. The mech's retreat produces one heavy distant step, then its core hum diminishes beneath continuous rooftop wind. No speech.\n\nnon_diegetic_music:\nN/A",
+        "repeat_last": false,
+        "start_segment": 1
+      },
+      "widgets_values": [
+        "subject_definitions:\n<Subject 1> is the freckled red-haired boy superhero from <Picture 1>, with the black eye mask, black suit, large white chest star, red gloves, red boots and flowing red cape. Preserve his face, costume, small human scale and athletic silhouette. His power is a white-gold star-shaped energy shield and a white-gold pulse emitted through his hands.\n<Subject 2> is the colossal black armored mech-kaiju from <Picture 2>, with red glowing eyes, the red chest core, jagged mechanical jaws, angular black armor and thin blue lightning above its head. Preserve its much larger scale and heavy mechanical silhouette. It attacks using a red beam emitted from its chest core.\n<Subject 3> is the wet rooftop and blue-black night city from <Picture 1>, with a concrete parapet, rain puddles, red window reflections and bold comic ink shading.\n\nsummary:\n[reference generation] A continuous comic-book battle between <Subject 1> and <Subject 2> above <Subject 3>. The boy blocks the mech's beam, evades it, launches a flying counterattack and lands back on the roof. Reference images define the two fighters and setting; all action is newly generated.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - retain the referenced face, red hair, eye mask, black suit, white star, red boots and cape.\n<Subject 2> (appears in [Shot 1]): fully_preserved - retain the referenced black armored mech, red eyes and core, jagged jaws and blue lightning; keep it colossal compared with the boy.\n<Subject 3> (appears in [Shot 1]): fully_preserved - reuse the wet rooftop, parapet, city reflections and night comic style.\n\ndetailed_description:\nBold moving comic-book ink illustration, heavy black outlines, red accents and blue-black night shadows. Exactly the boy and the colossal mech are the visible combatants. A clear three-quarter viewpoint shows the boy in the near foreground and the mech beyond the rooftop, with readable spacing. The camera follows their ongoing motion as one continuous take; contact, evasion and recoil remain visible. The boy's white-gold energy is visually distinct from the mech's red beam and blue electricity. Preserve identity, relative scale, lighting and the geography of the roof throughout the battle.\n",
+        "[Shot 1] Begin with <Subject 1> standing on the left side of the wet rooftop, facing <Subject 2>, whose towering torso rises behind the nearby skyline on the right. The boy bends his knees, plants his left boot ahead of his right boot and raises his forearms. His red cape streams backward in the wind. The mech leans its heavy upper body toward him; its red chest core condenses into a bright point. Show the energy originate at that core, then shoot across the visible gap toward the boy. The boy opens a white-gold star-shaped shield in front of his raised hands before the red beam reaches him. The beam strikes the center of the shield with a sharp electrical crack. Its force pushes his upper body backward and slides his rear boot a short distance through a puddle; his forward heel stays planted, his elbows flex and he recovers a firm brace. Water splashes from the boot rather than from an unrelated explosion. Keep both the source core and the shield contact in the same view. The camera makes a brisk, smooth lateral track to the right to reveal the diagonal beam and the boy's strained posture, maintaining continuous motion. End with the red beam still pressing against the white-gold shield, the boy braced low and the cape moving; carry this active contact into the next segment.\n\noverall_soundscape:\nContinuous rooftop wind and cape flapping, a rising mechanical core whine, the red beam's hiss, the sharp shield impact and boots scraping through water. The beam contact continues through the end. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the opening motion context: <Subject 1> is braced behind his white-gold shield and <Subject 2>'s red chest beam is still hitting it. Maintain their current spacing, body direction, red cape motion and the camera's rightward tracking speed. The boy first presses his forward foot into the wet roof, then makes one quick sideways step out of the beam's line. His shield tilts with his hands and leaves the beam path. The red beam passes behind his shoulder and strikes the now-empty patch of roof he just vacated. Show that miss clearly: a narrow scorched stripe and a small burst of concrete fragments appear at the roof contact, while the boy remains intact. The mech pivots its torso to follow him, with heavy shoulder movement and delayed inertia. Before the beam can sweep back, the boy crouches, loads both legs and pushes off the roof. Show both boots leave the surface, a splash from the takeoff point and his cape trailing behind him. He accelerates upward and forward through the visible gap toward the mech's chest, propelled by a brief white-gold glow from his star emblem. The camera tracks the takeoff and tilts upward smoothly, keeping the roof edge below and the mech ahead to prove the flight path. End with the boy clearly airborne and advancing toward the red core, his hands coming forward; maintain this flight through the final frame.\n\noverall_soundscape:\nContinue the wind and beam hiss from the opening context. A concrete impact and falling fragments mark the missed beam; boot splash, cape snap and an accelerating air rush accompany the takeoff. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the boy's existing upward-forward flight from the opening context, preserving his pose, cape direction and the mech's position. The roof remains below, visibly separated from the boy. <Subject 1> brings both palms toward the red core of <Subject 2> and concentrates his white-gold star energy between them. The much larger mech begins drawing its armored forearms inward to protect the core, but its heavy arms have visible inertia. The boy releases one compact white-gold pulse before the forearms close. Show the pulse originate between his palms, cross the short remaining gap and visibly strike the black armor immediately around the red core. A brief ring of white sparks expands only from that impact. The mech's upper torso jolts backward immediately from the strike, its jaw lifting and its shoulders recoiling before its forearms close over the core. Small armor sparks and thin smoke remain at the struck panel; its red light flickers. The discharge gives the boy a smaller, opposite recoil: his arms spread to balance and his cape swings forward as his upward flight slows and turns into a backward descent toward the same rooftop. The camera follows the impact and then tilts slightly down to keep both fighters and the roof below in view. End with the boy descending toward the roof and the mech still recovering behind its crossed forearms, with the scorched roof stripe remaining below.\n\noverall_soundscape:\nContinuous rushing air and cape movement. One rising energy tone leads to one sharp pulse release, one heavy metallic impact and armor creaking during the immediate recoil. Electrical crackles and a lowering core hum persist afterward. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the opening context with <Subject 1> descending backward toward the same wet rooftop, his red cape moving forward from the recoil. <Subject 2> remains beyond the roof with its forearms guarding its flickering red chest core; preserve the thin smoke and the scorched stripe on the roof. The camera smoothly follows the boy's descent without changing the scene or resetting the viewpoint. Show his red boots meet the roof together, his knees bend deeply to absorb the landing and his hands briefly open for balance. A ring of rainwater splashes from the actual landing point. He takes one short recovery step, turns his torso toward the mech and raises a compact white-gold shield in a ready guard. The mech tries to charge its core once more, but the red light sputters; one weak blue arc crawls across its armored shoulder and dies out. Its heavy forearms lower slowly as it takes a small backward stabilizing step between the buildings, still huge relative to the boy. This retreat ends the exchange. The boy holds his recovered stance while his cape continues fluttering and the puddle ripples spread. The camera eases into a wider view that keeps the boy, damaged roof patch and retreating mech together. End with ongoing wind, thinning smoke and both fighters clearly separated, rather than a freeze frame or a new attack.\n\noverall_soundscape:\nCarry the previous air rush into boot landing, puddle splash, cloth movement and a short metallic electrical sputter. The mech's retreat produces one heavy distant step, then its core hum diminishes beneath continuous rooftop wind. No speech.\n\nnon_diegetic_music:\nN/A",
+        false,
+        1
+      ],
+      "color": "#322",
+      "bgcolor": "#533"
+    },
+    {
+      "id": 178,
+      "type": "H3LongVideo",
+      "pos": [
+        870,
+        440
+      ],
+      "size": [
+        570,
+        1115
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 4
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 5
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 6
+        },
+        {
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 7
+        },
+        {
+          "name": "prompts",
+          "type": "H3_PROMPTS",
+          "link": 8
+        },
+        {
+          "name": "ref_images.ref_image_0",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": 9
+        },
+        {
+          "name": "ref_images.ref_image_1",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": 10
+        },
+        {
+          "name": "ref_images.ref_image_2",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "shape": 7,
+          "link": 13
+        },
+        {
+          "name": "ref_videos.ref_video_0",
+          "type": "IMAGE",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "ref_video_audios.ref_video_audio_0",
+          "type": "AUDIO",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "ref_audios.ref_audio_0",
+          "type": "AUDIO",
+          "shape": 7,
+          "link": null
+        },
+        {
+          "name": "previous_latent",
+          "type": "LATENT",
+          "shape": 7,
+          "link": null,
+          "label": "上一段 LATENT"
+        }
+      ],
+      "outputs": [
+        {
+          "name": "合并视频",
+          "type": "VIDEO",
+          "links": [
+            12
+          ]
+        },
+        {
+          "name": "最后一段 latent",
+          "type": "LATENT",
+          "links": []
+        },
+        {
+          "name": "生成信息",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "分段视频",
+          "type": "VIDEO",
+          "shape": 6,
+          "links": []
+        },
+        {
+          "name": "LATENT 文件路径",
+          "type": "STRING",
+          "shape": 6,
+          "links": []
+        }
+      ],
+      "title": "H3 长视频：分段生成 + 合并 by神棍",
+      "properties": {
+        "Node name for S&R": "H3LongVideo"
+      },
+      "widgets_values_named": {
+        "segments": 4,
+        "duration": 5.0,
+        "aspect_ratio": "16:9 (Widescreen)",
+        "megapixels": 0.4,
+        "seed": 261662374822964,
+        "steps": 8,
+        "sampler_name": "res_multistep",
+        "scheduler": "simple",
+        "context_frames": 22,
+        "seed_mode": "increment",
+        "denoise": 1.0,
+        "ref_image_size": "match",
+        "control_after_generate": "fixed",
+        "merge_video": false,
+        "save_latents": false,
+        "filename_prefix": "video/H3_CustomSigmas/H3_parts",
+        "dynamic_mask": false
+      },
+      "widgets_values": [
+        4,
+        5.0,
+        "16:9 (Widescreen)",
+        0.4,
+        261662374822964,
+        "fixed",
+        8,
+        "res_multistep",
+        "simple",
+        22,
+        "increment",
+        1.0,
+        "match",
+        false,
+        false,
+        "video/H3_CustomSigmas/H3_parts",
+        false
+      ],
+      "color": "#233",
+      "bgcolor": "#355"
+    },
+    {
+      "id": 180,
+      "type": "SaveVideo",
+      "pos": [
+        2440,
+        60
+      ],
+      "size": [
+        700,
+        540
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 12
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "title": "保存合并视频（主节点开启合并才执行）",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "video/H3_CustomSigmas/H3_combined",
+        "auto",
+        "auto",
+        "auto"
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "video/H3_CustomSigmas/H3_combined",
+        "format": "auto",
+        "format.codec": "auto",
+        "codec": "auto"
+      }
+    },
+    {
+      "id": 181,
+      "type": "ManualSigmas",
+      "pos": [
+        1570,
+        1000
+      ],
+      "size": [
+        800,
+        100
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            13
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "Node name for S&R": "ManualSigmas"
+      },
+      "title": "自定义 Sigmas · 接入后覆盖内部调度器（10步）",
+      "widgets_values": [
+        "1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0"
+      ],
+      "widgets_values_named": {
+        "sigmas": "1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0"
+      }
+    },
+    {
+      "id": 191,
+      "type": "H3LoadLatent",
+      "pos": [
+        1570,
+        1210
+      ],
+      "size": [
+        800,
+        180
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "音视频 LATENT",
+          "type": "LATENT",
+          "links": []
+        }
+      ],
+      "title": "可选：加载上一段 H3 LATENT（重抽时连接）",
+      "properties": {
+        "Node name for S&R": "H3LoadLatent"
+      },
+      "widgets_values": [
+        ""
+      ],
+      "widgets_values_named": {
+        "latent_path": ""
+      },
+      "color": "#233",
+      "bgcolor": "#355"
+    },
+    {
+      "id": 192,
+      "type": "Note",
+      "pos": [
+        20,
+        1740
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "01｜段数、时长与分辨率",
+      "properties": {
+        "text": "H3-Latent-Guide-SGUN 参数说明书 · by神棍\n主节点：H3 长视频：分段生成 + 合并 by神棍\n下列“默认值”指新建节点时的默认值；导入模板时使用模板中保存的值。\n\n生成段数（segments）｜默认 4，最小 1\n填写本次要新生成的总段数。\n1：生成一段；2：生成两段；4：生成四段。\n每段设 5.0 时，约 20 秒填 4；约 60 秒填 12。\n接入“上一段 LATENT”时，该输入段不计入段数，也不加入本次合并输出。\n\n每段时长（duration）｜默认 5.0 秒\n控制每一个新片段的目标时长，不是整部视频的总时长。\n沿用官方 24fps 和 17k+5 帧对齐规则，实际时长允许略有出入。\n5.0 的无前段首段生成 124 帧；默认上下文下的续段导出 119 帧。\n四段共 481 帧，约 20.04 秒。首段保留完整画面，不删除开头 4 帧。\n续段删除的是前段上下文的重复画面。\n\n宽高比（aspect_ratio）｜默认 16:9 (Widescreen)\n使用官方分辨率选择器；输出宽高按 32 的倍数对齐。\n所选比例是目标比例，最终宽高比会因对齐略有偏差。\n\n百万像素（megapixels）｜默认 0.4\n目标像素预算，0.4 表示约 40 万像素。\n0.4 + 16:9 在当前实现中得到 864×480，约 0.415 百万像素。\n不会再裁成严格 0.4 百万像素或严格 16:9。\n提高此值会增加采样、解码的资源占用和耗时。\n\n快速起步：生成段数 4、每段 5.0、16:9、0.4。\n提示词准备四段，运行即逐段保存四个片段。默认关闭合并；需要整片时开启“合并视频”，外部 Save Video 再保存整片。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "H3-Latent-Guide-SGUN 参数说明书 · by神棍\n主节点：H3 长视频：分段生成 + 合并 by神棍\n下列“默认值”指新建节点时的默认值；导入模板时使用模板中保存的值。\n\n生成段数（segments）｜默认 4，最小 1\n填写本次要新生成的总段数。\n1：生成一段；2：生成两段；4：生成四段。\n每段设 5.0 时，约 20 秒填 4；约 60 秒填 12。\n接入“上一段 LATENT”时，该输入段不计入段数，也不加入本次合并输出。\n\n每段时长（duration）｜默认 5.0 秒\n控制每一个新片段的目标时长，不是整部视频的总时长。\n沿用官方 24fps 和 17k+5 帧对齐规则，实际时长允许略有出入。\n5.0 的无前段首段生成 124 帧；默认上下文下的续段导出 119 帧。\n四段共 481 帧，约 20.04 秒。首段保留完整画面，不删除开头 4 帧。\n续段删除的是前段上下文的重复画面。\n\n宽高比（aspect_ratio）｜默认 16:9 (Widescreen)\n使用官方分辨率选择器；输出宽高按 32 的倍数对齐。\n所选比例是目标比例，最终宽高比会因对齐略有偏差。\n\n百万像素（megapixels）｜默认 0.4\n目标像素预算，0.4 表示约 40 万像素。\n0.4 + 16:9 在当前实现中得到 864×480，约 0.415 百万像素。\n不会再裁成严格 0.4 百万像素或严格 16:9。\n提高此值会增加采样、解码的资源占用和耗时。\n\n快速起步：生成段数 4、每段 5.0、16:9、0.4。\n提示词准备四段，运行即逐段保存四个片段。默认关闭合并；需要整片时开启“合并视频”，外部 Save Video 再保存整片。"
+      ],
+      "widgets_values_named": {
+        "text": "H3-Latent-Guide-SGUN 参数说明书 · by神棍\n主节点：H3 长视频：分段生成 + 合并 by神棍\n下列“默认值”指新建节点时的默认值；导入模板时使用模板中保存的值。\n\n生成段数（segments）｜默认 4，最小 1\n填写本次要新生成的总段数。\n1：生成一段；2：生成两段；4：生成四段。\n每段设 5.0 时，约 20 秒填 4；约 60 秒填 12。\n接入“上一段 LATENT”时，该输入段不计入段数，也不加入本次合并输出。\n\n每段时长（duration）｜默认 5.0 秒\n控制每一个新片段的目标时长，不是整部视频的总时长。\n沿用官方 24fps 和 17k+5 帧对齐规则，实际时长允许略有出入。\n5.0 的无前段首段生成 124 帧；默认上下文下的续段导出 119 帧。\n四段共 481 帧，约 20.04 秒。首段保留完整画面，不删除开头 4 帧。\n续段删除的是前段上下文的重复画面。\n\n宽高比（aspect_ratio）｜默认 16:9 (Widescreen)\n使用官方分辨率选择器；输出宽高按 32 的倍数对齐。\n所选比例是目标比例，最终宽高比会因对齐略有偏差。\n\n百万像素（megapixels）｜默认 0.4\n目标像素预算，0.4 表示约 40 万像素。\n0.4 + 16:9 在当前实现中得到 864×480，约 0.415 百万像素。\n不会再裁成严格 0.4 百万像素或严格 16:9。\n提高此值会增加采样、解码的资源占用和耗时。\n\n快速起步：生成段数 4、每段 5.0、16:9、0.4。\n提示词准备四段，运行即逐段保存四个片段。默认关闭合并；需要整片时开启“合并视频”，外部 Save Video 再保存整片。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    },
+    {
+      "id": 193,
+      "type": "Note",
+      "pos": [
+        1080,
+        1740
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "02｜模型、VAE、提示词与参考图片",
+      "properties": {
+        "text": "必接接口\n\nmodel｜MODEL\n连接官方 H3 Ref2VA 模型。LoRA、注意力后端、稀疏注意力等加速节点在外部接入，处理后的 MODEL 再连这里。\n本节点使用官方参考生视频的联合音视频流程，请与该流程的模型权重配套使用。\n\nclip｜CLIP\n连接与 H3 配套的文本编码器。内部逐段编码提示词，并处理参考素材标签。\n\n视频 VAE（vae）｜VAE\n连接 H3 视频 VAE。负责参考素材编码和生成视频解码。上一段 LATENT 直接续接，不需要 VAE 再编码。\n\n音频 VAE（audio_vae）｜VAE\n连接 H3 音频 VAE。负责联合音视频 latent 的音频编码/解码。\n即使没有外部参考音频，这个接口也必须连接。\n\n提示词（prompts）｜H3_PROMPTS\n连接“H3 长视频提示词”节点输出。\n这里接收分段提示词计划，不接普通文本或 CLIP 的 CONDITIONING。\n\n参考图片（ref_images / ref_image_0、ref_image_1…）｜可选 IMAGE\n外部 Load Image 的图片输出接入；未接图片可以运行。\n同一组图片会用于本次所有片段，帮助维持人物、服装和场景一致性。\n按实际接入顺序在提示词中引用 <Picture 1>、<Picture 2>…；接口后缀从 0 开始，提示词标签从 1 开始。\n扩展接口上限不代表模型适合无限增加参考素材；先使用必要的图片。\n\n参考图尺寸（ref_image_size）｜默认 match\nmatch：保留图片比例，按生成画面的像素面积缩小参考图；不主动放大小图。适合常规生成。\nmax：保留更多参考细节，超过短边 2048 像素时才缩小；不主动放大小图。\nmax 的参考 token 可能更多，会增加采样时间和显存占用；它不改变输出分辨率。\n两种模式都按官方要求对齐图片尺寸。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "必接接口\n\nmodel｜MODEL\n连接官方 H3 Ref2VA 模型。LoRA、注意力后端、稀疏注意力等加速节点在外部接入，处理后的 MODEL 再连这里。\n本节点使用官方参考生视频的联合音视频流程，请与该流程的模型权重配套使用。\n\nclip｜CLIP\n连接与 H3 配套的文本编码器。内部逐段编码提示词，并处理参考素材标签。\n\n视频 VAE（vae）｜VAE\n连接 H3 视频 VAE。负责参考素材编码和生成视频解码。上一段 LATENT 直接续接，不需要 VAE 再编码。\n\n音频 VAE（audio_vae）｜VAE\n连接 H3 音频 VAE。负责联合音视频 latent 的音频编码/解码。\n即使没有外部参考音频，这个接口也必须连接。\n\n提示词（prompts）｜H3_PROMPTS\n连接“H3 长视频提示词”节点输出。\n这里接收分段提示词计划，不接普通文本或 CLIP 的 CONDITIONING。\n\n参考图片（ref_images / ref_image_0、ref_image_1…）｜可选 IMAGE\n外部 Load Image 的图片输出接入；未接图片可以运行。\n同一组图片会用于本次所有片段，帮助维持人物、服装和场景一致性。\n按实际接入顺序在提示词中引用 <Picture 1>、<Picture 2>…；接口后缀从 0 开始，提示词标签从 1 开始。\n扩展接口上限不代表模型适合无限增加参考素材；先使用必要的图片。\n\n参考图尺寸（ref_image_size）｜默认 match\nmatch：保留图片比例，按生成画面的像素面积缩小参考图；不主动放大小图。适合常规生成。\nmax：保留更多参考细节，超过短边 2048 像素时才缩小；不主动放大小图。\nmax 的参考 token 可能更多，会增加采样时间和显存占用；它不改变输出分辨率。\n两种模式都按官方要求对齐图片尺寸。"
+      ],
+      "widgets_values_named": {
+        "text": "必接接口\n\nmodel｜MODEL\n连接官方 H3 Ref2VA 模型。LoRA、注意力后端、稀疏注意力等加速节点在外部接入，处理后的 MODEL 再连这里。\n本节点使用官方参考生视频的联合音视频流程，请与该流程的模型权重配套使用。\n\nclip｜CLIP\n连接与 H3 配套的文本编码器。内部逐段编码提示词，并处理参考素材标签。\n\n视频 VAE（vae）｜VAE\n连接 H3 视频 VAE。负责参考素材编码和生成视频解码。上一段 LATENT 直接续接，不需要 VAE 再编码。\n\n音频 VAE（audio_vae）｜VAE\n连接 H3 音频 VAE。负责联合音视频 latent 的音频编码/解码。\n即使没有外部参考音频，这个接口也必须连接。\n\n提示词（prompts）｜H3_PROMPTS\n连接“H3 长视频提示词”节点输出。\n这里接收分段提示词计划，不接普通文本或 CLIP 的 CONDITIONING。\n\n参考图片（ref_images / ref_image_0、ref_image_1…）｜可选 IMAGE\n外部 Load Image 的图片输出接入；未接图片可以运行。\n同一组图片会用于本次所有片段，帮助维持人物、服装和场景一致性。\n按实际接入顺序在提示词中引用 <Picture 1>、<Picture 2>…；接口后缀从 0 开始，提示词标签从 1 开始。\n扩展接口上限不代表模型适合无限增加参考素材；先使用必要的图片。\n\n参考图尺寸（ref_image_size）｜默认 match\nmatch：保留图片比例，按生成画面的像素面积缩小参考图；不主动放大小图。适合常规生成。\nmax：保留更多参考细节，超过短边 2048 像素时才缩小；不主动放大小图。\nmax 的参考 token 可能更多，会增加采样时间和显存占用；它不改变输出分辨率。\n两种模式都按官方要求对齐图片尺寸。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    },
+    {
+      "id": 194,
+      "type": "Note",
+      "pos": [
+        2140,
+        1740
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "03｜视频/音频参考与上一段 LATENT",
+      "properties": {
+        "text": "以下都是可选接口，未连接时可以正常生成。\n\n参考视频（ref_videos / ref_video_0…）｜IMAGE 帧批次\n与官方参考节点相同，接收视频画面帧批次，不是 VIDEO 类型。\n可用 Load Video → Get Video Components → images 接入。\n按 24fps 准备，至少 5 帧；内部按 H3 帧网格对齐，过长时截取。\n提示词按接入顺序使用 <Video 1>、<Video 2>…。\n整份参考在各段重复使用，不会沿全片时间自动切换。\n\n参考视频音轨（ref_video_audios / ref_video_audio_0…）｜AUDIO\n与相同后缀的参考视频配对：ref_video_audio_0 对应 ref_video_0。\n可接 Get Video Components 的 audio；没有配对视频时不要只接音轨。\n配对音轨也占用提示词中的 <Audio j> 编号。\n\n独立参考音频（ref_audios / ref_audio_0…）｜AUDIO\n可接音频加载节点。音频标签从 <Audio 1> 开始：先编号参考视频音轨，再编号独立音频。\n例如已有一条视频配对音轨，第一条独立音频为 <Audio 2>。\n描述声音、音色或音效等用途；并非把原音轨直接复制到输出。\n\n上一段 LATENT（previous_latent）｜LATENT\n用于承接已生成片段的结尾，或单独重抽下一段。\n接配套“H3 读取音视频 LATENT by神棍”，或另一生成节点的“最后一段 latent”。\n必须是 H3 原生联合音视频 LATENT，两个流都完整，分辨率与本次相同。\n直接取尾部上下文，不经过视频压缩、解码或 VAE 再编码。\n输入段不计入生成段数，也不出现在本次分段/合并输出。\n原“上一段视频”接口已替换；MP4 不能直接接此接口。\nref_video 是全片参考素材，与上一段 LATENT 的续接用途不同。\n\nH3 读取音视频 LATENT（H3LoadLatent）\nLATENT 文件路径（latent_path）：填本插件保存的 .h3latent 相对路径。\n例如 video/H3-SGUN/H3_00001/segment_0002.h3latent [output]。\n路径从“生成信息”或“LATENT 文件路径”输出复制；上传到 input 的文件可填相对文件名。\n路径限定在 ComfyUI input/output/temp；不填写任意外部目录。\n恢复完整视频和音频，保留 dtype/数值；不是普通单流 Save/Load Latent 文件。\n模板中的读取节点默认空路径、未连接，不参与全新生成。\n\n生成段数 1 + 不接上一段 LATENT：正常生成一个完整首段。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "以下都是可选接口，未连接时可以正常生成。\n\n参考视频（ref_videos / ref_video_0…）｜IMAGE 帧批次\n与官方参考节点相同，接收视频画面帧批次，不是 VIDEO 类型。\n可用 Load Video → Get Video Components → images 接入。\n按 24fps 准备，至少 5 帧；内部按 H3 帧网格对齐，过长时截取。\n提示词按接入顺序使用 <Video 1>、<Video 2>…。\n整份参考在各段重复使用，不会沿全片时间自动切换。\n\n参考视频音轨（ref_video_audios / ref_video_audio_0…）｜AUDIO\n与相同后缀的参考视频配对：ref_video_audio_0 对应 ref_video_0。\n可接 Get Video Components 的 audio；没有配对视频时不要只接音轨。\n配对音轨也占用提示词中的 <Audio j> 编号。\n\n独立参考音频（ref_audios / ref_audio_0…）｜AUDIO\n可接音频加载节点。音频标签从 <Audio 1> 开始：先编号参考视频音轨，再编号独立音频。\n例如已有一条视频配对音轨，第一条独立音频为 <Audio 2>。\n描述声音、音色或音效等用途；并非把原音轨直接复制到输出。\n\n上一段 LATENT（previous_latent）｜LATENT\n用于承接已生成片段的结尾，或单独重抽下一段。\n接配套“H3 读取音视频 LATENT by神棍”，或另一生成节点的“最后一段 latent”。\n必须是 H3 原生联合音视频 LATENT，两个流都完整，分辨率与本次相同。\n直接取尾部上下文，不经过视频压缩、解码或 VAE 再编码。\n输入段不计入生成段数，也不出现在本次分段/合并输出。\n原“上一段视频”接口已替换；MP4 不能直接接此接口。\nref_video 是全片参考素材，与上一段 LATENT 的续接用途不同。\n\nH3 读取音视频 LATENT（H3LoadLatent）\nLATENT 文件路径（latent_path）：填本插件保存的 .h3latent 相对路径。\n例如 video/H3-SGUN/H3_00001/segment_0002.h3latent [output]。\n路径从“生成信息”或“LATENT 文件路径”输出复制；上传到 input 的文件可填相对文件名。\n路径限定在 ComfyUI input/output/temp；不填写任意外部目录。\n恢复完整视频和音频，保留 dtype/数值；不是普通单流 Save/Load Latent 文件。\n模板中的读取节点默认空路径、未连接，不参与全新生成。\n\n生成段数 1 + 不接上一段 LATENT：正常生成一个完整首段。"
+      ],
+      "widgets_values_named": {
+        "text": "以下都是可选接口，未连接时可以正常生成。\n\n参考视频（ref_videos / ref_video_0…）｜IMAGE 帧批次\n与官方参考节点相同，接收视频画面帧批次，不是 VIDEO 类型。\n可用 Load Video → Get Video Components → images 接入。\n按 24fps 准备，至少 5 帧；内部按 H3 帧网格对齐，过长时截取。\n提示词按接入顺序使用 <Video 1>、<Video 2>…。\n整份参考在各段重复使用，不会沿全片时间自动切换。\n\n参考视频音轨（ref_video_audios / ref_video_audio_0…）｜AUDIO\n与相同后缀的参考视频配对：ref_video_audio_0 对应 ref_video_0。\n可接 Get Video Components 的 audio；没有配对视频时不要只接音轨。\n配对音轨也占用提示词中的 <Audio j> 编号。\n\n独立参考音频（ref_audios / ref_audio_0…）｜AUDIO\n可接音频加载节点。音频标签从 <Audio 1> 开始：先编号参考视频音轨，再编号独立音频。\n例如已有一条视频配对音轨，第一条独立音频为 <Audio 2>。\n描述声音、音色或音效等用途；并非把原音轨直接复制到输出。\n\n上一段 LATENT（previous_latent）｜LATENT\n用于承接已生成片段的结尾，或单独重抽下一段。\n接配套“H3 读取音视频 LATENT by神棍”，或另一生成节点的“最后一段 latent”。\n必须是 H3 原生联合音视频 LATENT，两个流都完整，分辨率与本次相同。\n直接取尾部上下文，不经过视频压缩、解码或 VAE 再编码。\n输入段不计入生成段数，也不出现在本次分段/合并输出。\n原“上一段视频”接口已替换；MP4 不能直接接此接口。\nref_video 是全片参考素材，与上一段 LATENT 的续接用途不同。\n\nH3 读取音视频 LATENT（H3LoadLatent）\nLATENT 文件路径（latent_path）：填本插件保存的 .h3latent 相对路径。\n例如 video/H3-SGUN/H3_00001/segment_0002.h3latent [output]。\n路径从“生成信息”或“LATENT 文件路径”输出复制；上传到 input 的文件可填相对文件名。\n路径限定在 ComfyUI input/output/temp；不填写任意外部目录。\n恢复完整视频和音频，保留 dtype/数值；不是普通单流 Save/Load Latent 文件。\n模板中的读取节点默认空路径、未连接，不参与全新生成。\n\n生成段数 1 + 不接上一段 LATENT：正常生成一个完整首段。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    },
+    {
+      "id": 195,
+      "type": "Note",
+      "pos": [
+        20,
+        2760
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 26,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "04｜种子与官方四种控制方式",
+      "properties": {
+        "text": "种子（seed）｜默认 0\n决定本次第一段的初始随机噪声。\n同一种子配合相同提示词、模型、参考和采样设置，便于比较修改；只固定种子不能保证不同设置下的画面相同。\n\n生成后控制（control_after_generate）｜官方前端附加控件\n控制下一次排队任务的起始种子，不负责本次任务内部的片段切换。\nfixed：下一次仍使用当前种子。\nincrement：下一次递增。\ndecrement：下一次递减。\nrandomize：下一次随机。\n此控件由 ComfyUI 前端管理，本模板保存为 fixed。\n\n各段种子（seed_mode）｜默认 increment\n控制当前一次任务中，每个片段实际使用的种子。\n首段始终使用上方的种子 S；后续按以下方式取值：\nfixed：S、S、S、S…\nincrement：S、S+1、S+2、S+3…\ndecrement：S、S-1、S-2、S-3…\nrandomize：首段 S，第二段起各自随机。\n递减最低到 0，递增最高到无符号 64 位种子上限。\n\n示例：种子 100，“生成后控制”设 fixed，“各段种子”设 increment，四段实际种子为 100、101、102、103；下次任务仍从 100 开始。\n\n重抽时的种子\n“起始提示词段号”只选择文本，不会自动推算该段原来的种子。\n需要复现第 3 段时，从“生成信息”里的 seeds 数组取第 3 个值，手动填到种子。\n需要新的抽卡结果时，换一个起始种子；单段运行时“各段种子”不影响第一段。\n每段完成还会把实际种子写入输出目录的 segments.jsonl；中途停止时可查询已完成段的记录。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "种子（seed）｜默认 0\n决定本次第一段的初始随机噪声。\n同一种子配合相同提示词、模型、参考和采样设置，便于比较修改；只固定种子不能保证不同设置下的画面相同。\n\n生成后控制（control_after_generate）｜官方前端附加控件\n控制下一次排队任务的起始种子，不负责本次任务内部的片段切换。\nfixed：下一次仍使用当前种子。\nincrement：下一次递增。\ndecrement：下一次递减。\nrandomize：下一次随机。\n此控件由 ComfyUI 前端管理，本模板保存为 fixed。\n\n各段种子（seed_mode）｜默认 increment\n控制当前一次任务中，每个片段实际使用的种子。\n首段始终使用上方的种子 S；后续按以下方式取值：\nfixed：S、S、S、S…\nincrement：S、S+1、S+2、S+3…\ndecrement：S、S-1、S-2、S-3…\nrandomize：首段 S，第二段起各自随机。\n递减最低到 0，递增最高到无符号 64 位种子上限。\n\n示例：种子 100，“生成后控制”设 fixed，“各段种子”设 increment，四段实际种子为 100、101、102、103；下次任务仍从 100 开始。\n\n重抽时的种子\n“起始提示词段号”只选择文本，不会自动推算该段原来的种子。\n需要复现第 3 段时，从“生成信息”里的 seeds 数组取第 3 个值，手动填到种子。\n需要新的抽卡结果时，换一个起始种子；单段运行时“各段种子”不影响第一段。\n每段完成还会把实际种子写入输出目录的 segments.jsonl；中途停止时可查询已完成段的记录。"
+      ],
+      "widgets_values_named": {
+        "text": "种子（seed）｜默认 0\n决定本次第一段的初始随机噪声。\n同一种子配合相同提示词、模型、参考和采样设置，便于比较修改；只固定种子不能保证不同设置下的画面相同。\n\n生成后控制（control_after_generate）｜官方前端附加控件\n控制下一次排队任务的起始种子，不负责本次任务内部的片段切换。\nfixed：下一次仍使用当前种子。\nincrement：下一次递增。\ndecrement：下一次递减。\nrandomize：下一次随机。\n此控件由 ComfyUI 前端管理，本模板保存为 fixed。\n\n各段种子（seed_mode）｜默认 increment\n控制当前一次任务中，每个片段实际使用的种子。\n首段始终使用上方的种子 S；后续按以下方式取值：\nfixed：S、S、S、S…\nincrement：S、S+1、S+2、S+3…\ndecrement：S、S-1、S-2、S-3…\nrandomize：首段 S，第二段起各自随机。\n递减最低到 0，递增最高到无符号 64 位种子上限。\n\n示例：种子 100，“生成后控制”设 fixed，“各段种子”设 increment，四段实际种子为 100、101、102、103；下次任务仍从 100 开始。\n\n重抽时的种子\n“起始提示词段号”只选择文本，不会自动推算该段原来的种子。\n需要复现第 3 段时，从“生成信息”里的 seeds 数组取第 3 个值，手动填到种子。\n需要新的抽卡结果时，换一个起始种子；单段运行时“各段种子”不影响第一段。\n每段完成还会把实际种子写入输出目录的 segments.jsonl；中途停止时可查询已完成段的记录。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    },
+    {
+      "id": 196,
+      "type": "Note",
+      "pos": [
+        1080,
+        2760
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 27,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "05｜步数、采样器、调度器与自定义 Sigma",
+      "properties": {
+        "text": "采样步数（steps）｜默认 8\n未连接 sigmas 时，用于内部调度器计算采样序列。\n应与外部加速 LoRA、模型设置配套；8 步是本模板的设置，不代表任意模型都适合 8 步。\n增加步数通常增加耗时，质量收益需实际比较。\n\n采样器（sampler_name）｜默认 res_multistep\n选择如何按照 sigma 序列进行采样；可选项来自 ComfyUI。\n接入自定义 sigmas 后，这个采样器仍然生效。\n\n调度器（scheduler）｜默认 simple\n未接 sigmas 时，使用模型、步数和降噪设置生成内部 sigma 序列。\n接入 sigmas 后会跳过内部调度器。\n\n降噪（denoise）｜默认 1.0\n只作用于内部调度器；低于 1 会截取采样序列。\n这里生成的是新的目标 latent，通常从 1.0 开始测试。\n它不是“上一段上下文的保留强度”。接自定义 sigmas 时此值不再作用于输入序列。\n\nsigmas｜可选 SIGMAS 接口\n连接官方自定义 Sigmas / Manual Sigmas 等节点。\n接入后：内部 steps、scheduler、denoise 被覆盖；直接按输入序列采样，不再追加内部截取。\n相同输入序列会用于本次每一个片段。\n普通完整序列从高到低并以 0 结束；通常实际采样步数 = 数值个数 - 1。\n序列应与当前 H3 模型及加速方案匹配。\n\n配套“自定义 Sigmas”工作流使用的序列：\n1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0\n共 11 个值，实际是 10 步；即使主节点面板仍显示“采样步数 8”，也按这 10 步运行。\n\n不接 sigmas：按主节点面板设置运行。\n接入 sigmas：按外部序列运行；要恢复面板调度，断开 sigmas 连线即可。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "采样步数（steps）｜默认 8\n未连接 sigmas 时，用于内部调度器计算采样序列。\n应与外部加速 LoRA、模型设置配套；8 步是本模板的设置，不代表任意模型都适合 8 步。\n增加步数通常增加耗时，质量收益需实际比较。\n\n采样器（sampler_name）｜默认 res_multistep\n选择如何按照 sigma 序列进行采样；可选项来自 ComfyUI。\n接入自定义 sigmas 后，这个采样器仍然生效。\n\n调度器（scheduler）｜默认 simple\n未接 sigmas 时，使用模型、步数和降噪设置生成内部 sigma 序列。\n接入 sigmas 后会跳过内部调度器。\n\n降噪（denoise）｜默认 1.0\n只作用于内部调度器；低于 1 会截取采样序列。\n这里生成的是新的目标 latent，通常从 1.0 开始测试。\n它不是“上一段上下文的保留强度”。接自定义 sigmas 时此值不再作用于输入序列。\n\nsigmas｜可选 SIGMAS 接口\n连接官方自定义 Sigmas / Manual Sigmas 等节点。\n接入后：内部 steps、scheduler、denoise 被覆盖；直接按输入序列采样，不再追加内部截取。\n相同输入序列会用于本次每一个片段。\n普通完整序列从高到低并以 0 结束；通常实际采样步数 = 数值个数 - 1。\n序列应与当前 H3 模型及加速方案匹配。\n\n配套“自定义 Sigmas”工作流使用的序列：\n1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0\n共 11 个值，实际是 10 步；即使主节点面板仍显示“采样步数 8”，也按这 10 步运行。\n\n不接 sigmas：按主节点面板设置运行。\n接入 sigmas：按外部序列运行；要恢复面板调度，断开 sigmas 连线即可。"
+      ],
+      "widgets_values_named": {
+        "text": "采样步数（steps）｜默认 8\n未连接 sigmas 时，用于内部调度器计算采样序列。\n应与外部加速 LoRA、模型设置配套；8 步是本模板的设置，不代表任意模型都适合 8 步。\n增加步数通常增加耗时，质量收益需实际比较。\n\n采样器（sampler_name）｜默认 res_multistep\n选择如何按照 sigma 序列进行采样；可选项来自 ComfyUI。\n接入自定义 sigmas 后，这个采样器仍然生效。\n\n调度器（scheduler）｜默认 simple\n未接 sigmas 时，使用模型、步数和降噪设置生成内部 sigma 序列。\n接入 sigmas 后会跳过内部调度器。\n\n降噪（denoise）｜默认 1.0\n只作用于内部调度器；低于 1 会截取采样序列。\n这里生成的是新的目标 latent，通常从 1.0 开始测试。\n它不是“上一段上下文的保留强度”。接自定义 sigmas 时此值不再作用于输入序列。\n\nsigmas｜可选 SIGMAS 接口\n连接官方自定义 Sigmas / Manual Sigmas 等节点。\n接入后：内部 steps、scheduler、denoise 被覆盖；直接按输入序列采样，不再追加内部截取。\n相同输入序列会用于本次每一个片段。\n普通完整序列从高到低并以 0 结束；通常实际采样步数 = 数值个数 - 1。\n序列应与当前 H3 模型及加速方案匹配。\n\n配套“自定义 Sigmas”工作流使用的序列：\n1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0\n共 11 个值，实际是 10 步；即使主节点面板仍显示“采样步数 8”，也按这 10 步运行。\n\n不接 sigmas：按主节点面板设置运行。\n接入 sigmas：按外部序列运行；要恢复面板调度，断开 sigmas 连线即可。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    },
+    {
+      "id": 197,
+      "type": "Note",
+      "pos": [
+        2140,
+        2760
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 28,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "06｜续接上下文与官方默认解码/编码",
+      "properties": {
+        "text": "上下文帧数（context_frames）｜默认 22 帧\n从上一段音视频 LATENT 尾部取上下文，让下一段承接动作和声音。\n常用 5、22、39、56…，遵循 17k+5 帧网格，受可用尾部长度限制。\n续段采样包含此前缀，导出时删掉重复部分；无前段的首段完整保留。\n上下文更长通常更费资源，也可能继承前段误差，不是越大越好。\n只有单段且不接上一段 LATENT 时，不产生续接前缀。\n\n动态掩码（dynamic_mask）｜默认 false\nfalse：保持现有原生 Guide 续接。\ntrue：把上一段音视频尾部复制到新段的一次性目标前缀；视频上下文按实际 sigma 动态重绘，越靠近接缝越强调保留。\n音频前缀保持保护，新段的画面与音频正常生成；完成后仍删除重叠前缀。\n仅第二段起或接入上一段 LATENT 时生效；全新单段不使用动态掩码，也不会因此报缺少上下文。\n不修改原存档、不对上一段额外加噪、不改变传入 sigma 序列，也不增加第二轮采样。\n在本段 MODEL 克隆上同步采样器和 H3 的实时掩码，保留原参考素材和外部加速包装。\n需 ComfyUI 原生 H3 音视频掩码接口；已有其他动态掩码（如 Differential Diffusion）时会明确报冲突，避免静默覆盖。\n这是漂移/接缝控制选项，不能恢复已丢失细节；动作稳定和清晰度可能存在取舍，建议同种子开关对照。\n\nH3 视频解码｜官方原生方式\n调用官方 VAE Decode，H3 VAE 内部已经按专用网格分块。\n当前默认空间块 256 像素、最低空间重叠 64 像素、时间切片基准 17 帧。\n补帧、重叠和拼接由 H3 VAE 处理，无需手动填写。\nH3 后端不使用通用分块节点的空间/时间块参数，已移除无实际作用的控件。\n这些网格数值描述解码策略，不代表每段只生成 17 帧。\n\n分段视频编码｜官方默认质量\n每段裁掉续接重叠并同步裁音频后，立即保存为 H.264/AAC MP4。\n不保留整片视频缓冲；下一段开始前释放上一段大批原始画面和完整中间 LATENT。\n不提供分段 CRF 控件，当前官方 H.264 默认 CRF 为 18。\n开启合并时，外部 Save Video 选择 auto/MP4 + codec auto 可按官方规则流式拼接视频包。\n其他编码或自定义 CRF 可能触发转码；提高最终编码质量不能恢复之前的压缩损失。\nLATENT 文件不经过视频编码，数值不受 CRF 影响。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "上下文帧数（context_frames）｜默认 22 帧\n从上一段音视频 LATENT 尾部取上下文，让下一段承接动作和声音。\n常用 5、22、39、56…，遵循 17k+5 帧网格，受可用尾部长度限制。\n续段采样包含此前缀，导出时删掉重复部分；无前段的首段完整保留。\n上下文更长通常更费资源，也可能继承前段误差，不是越大越好。\n只有单段且不接上一段 LATENT 时，不产生续接前缀。\n\n动态掩码（dynamic_mask）｜默认 false\nfalse：保持现有原生 Guide 续接。\ntrue：把上一段音视频尾部复制到新段的一次性目标前缀；视频上下文按实际 sigma 动态重绘，越靠近接缝越强调保留。\n音频前缀保持保护，新段的画面与音频正常生成；完成后仍删除重叠前缀。\n仅第二段起或接入上一段 LATENT 时生效；全新单段不使用动态掩码，也不会因此报缺少上下文。\n不修改原存档、不对上一段额外加噪、不改变传入 sigma 序列，也不增加第二轮采样。\n在本段 MODEL 克隆上同步采样器和 H3 的实时掩码，保留原参考素材和外部加速包装。\n需 ComfyUI 原生 H3 音视频掩码接口；已有其他动态掩码（如 Differential Diffusion）时会明确报冲突，避免静默覆盖。\n这是漂移/接缝控制选项，不能恢复已丢失细节；动作稳定和清晰度可能存在取舍，建议同种子开关对照。\n\nH3 视频解码｜官方原生方式\n调用官方 VAE Decode，H3 VAE 内部已经按专用网格分块。\n当前默认空间块 256 像素、最低空间重叠 64 像素、时间切片基准 17 帧。\n补帧、重叠和拼接由 H3 VAE 处理，无需手动填写。\nH3 后端不使用通用分块节点的空间/时间块参数，已移除无实际作用的控件。\n这些网格数值描述解码策略，不代表每段只生成 17 帧。\n\n分段视频编码｜官方默认质量\n每段裁掉续接重叠并同步裁音频后，立即保存为 H.264/AAC MP4。\n不保留整片视频缓冲；下一段开始前释放上一段大批原始画面和完整中间 LATENT。\n不提供分段 CRF 控件，当前官方 H.264 默认 CRF 为 18。\n开启合并时，外部 Save Video 选择 auto/MP4 + codec auto 可按官方规则流式拼接视频包。\n其他编码或自定义 CRF 可能触发转码；提高最终编码质量不能恢复之前的压缩损失。\nLATENT 文件不经过视频编码，数值不受 CRF 影响。"
+      ],
+      "widgets_values_named": {
+        "text": "上下文帧数（context_frames）｜默认 22 帧\n从上一段音视频 LATENT 尾部取上下文，让下一段承接动作和声音。\n常用 5、22、39、56…，遵循 17k+5 帧网格，受可用尾部长度限制。\n续段采样包含此前缀，导出时删掉重复部分；无前段的首段完整保留。\n上下文更长通常更费资源，也可能继承前段误差，不是越大越好。\n只有单段且不接上一段 LATENT 时，不产生续接前缀。\n\n动态掩码（dynamic_mask）｜默认 false\nfalse：保持现有原生 Guide 续接。\ntrue：把上一段音视频尾部复制到新段的一次性目标前缀；视频上下文按实际 sigma 动态重绘，越靠近接缝越强调保留。\n音频前缀保持保护，新段的画面与音频正常生成；完成后仍删除重叠前缀。\n仅第二段起或接入上一段 LATENT 时生效；全新单段不使用动态掩码，也不会因此报缺少上下文。\n不修改原存档、不对上一段额外加噪、不改变传入 sigma 序列，也不增加第二轮采样。\n在本段 MODEL 克隆上同步采样器和 H3 的实时掩码，保留原参考素材和外部加速包装。\n需 ComfyUI 原生 H3 音视频掩码接口；已有其他动态掩码（如 Differential Diffusion）时会明确报冲突，避免静默覆盖。\n这是漂移/接缝控制选项，不能恢复已丢失细节；动作稳定和清晰度可能存在取舍，建议同种子开关对照。\n\nH3 视频解码｜官方原生方式\n调用官方 VAE Decode，H3 VAE 内部已经按专用网格分块。\n当前默认空间块 256 像素、最低空间重叠 64 像素、时间切片基准 17 帧。\n补帧、重叠和拼接由 H3 VAE 处理，无需手动填写。\nH3 后端不使用通用分块节点的空间/时间块参数，已移除无实际作用的控件。\n这些网格数值描述解码策略，不代表每段只生成 17 帧。\n\n分段视频编码｜官方默认质量\n每段裁掉续接重叠并同步裁音频后，立即保存为 H.264/AAC MP4。\n不保留整片视频缓冲；下一段开始前释放上一段大批原始画面和完整中间 LATENT。\n不提供分段 CRF 控件，当前官方 H.264 默认 CRF 为 18。\n开启合并时，外部 Save Video 选择 auto/MP4 + codec auto 可按官方规则流式拼接视频包。\n其他编码或自定义 CRF 可能触发转码；提高最终编码质量不能恢复之前的压缩损失。\nLATENT 文件不经过视频编码，数值不受 CRF 影响。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    },
+    {
+      "id": 198,
+      "type": "Note",
+      "pos": [
+        20,
+        3780
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 29,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "07｜提示词节点的全部参数",
+      "properties": {
+        "text": "节点：H3 长视频提示词（H3VideoPromptPlan）\n\n全片固定描述（common）｜默认空文本\n每一段都会加入这份描述。\n适合写人物身份、服装、场景、画风、镜头基调、参考标签等需要持续保持的信息。\n可留空，只使用各段剧情。\n\n分段剧情（segments）｜默认空文本\n按顺序写每段动作、镜头和声音；独占一行的 --- 是段落分隔符。\n每个片段的最终文本 = 全片固定描述 + 对应段的剧情。\n例如：\n第一段：两人拉开距离，开始交手。\n---\n第二段：承接上段动作，近距离格挡与反击。\n---\n第三段：保持人物和场景，继续下一组动作。\n不要把 --- 写在一句话中，也不要连续分隔制造空段。\n\n不足时复用最后一段（repeat_last）｜默认 false\nfalse：从起始段开始，剧情段数必须够本次所有片段；不足会在采样前报错。\ntrue：不够的部分重复最后一段剧情；只写一段也可用于全片。\n当分段剧情留空时，可只写固定描述，并开启复用。\n复用文本不保证每段动作都会自然不同，最好把重要变化逐段写清楚。\n\n起始提示词段号（start_segment）｜默认 1，从 1 开始\n正常从头生成填 1。\n只重抽第 3 段填 3；生成节点生成段数填 1，并接第 2 段的 LATENT。\n多段生成时，从选中的段依次往后取剧情。\n该起始段必须真实存在，开启“复用最后一段”也不能选择不存在的起始段。\n这里只选择提示词，不会自动选择上一段 LATENT、种子或保存文件名。\n\n输出“提示词”接主节点的 prompts 接口。\n想改某一段剧情，只修改对应的 --- 区块；固定描述会继续自动加入。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "节点：H3 长视频提示词（H3VideoPromptPlan）\n\n全片固定描述（common）｜默认空文本\n每一段都会加入这份描述。\n适合写人物身份、服装、场景、画风、镜头基调、参考标签等需要持续保持的信息。\n可留空，只使用各段剧情。\n\n分段剧情（segments）｜默认空文本\n按顺序写每段动作、镜头和声音；独占一行的 --- 是段落分隔符。\n每个片段的最终文本 = 全片固定描述 + 对应段的剧情。\n例如：\n第一段：两人拉开距离，开始交手。\n---\n第二段：承接上段动作，近距离格挡与反击。\n---\n第三段：保持人物和场景，继续下一组动作。\n不要把 --- 写在一句话中，也不要连续分隔制造空段。\n\n不足时复用最后一段（repeat_last）｜默认 false\nfalse：从起始段开始，剧情段数必须够本次所有片段；不足会在采样前报错。\ntrue：不够的部分重复最后一段剧情；只写一段也可用于全片。\n当分段剧情留空时，可只写固定描述，并开启复用。\n复用文本不保证每段动作都会自然不同，最好把重要变化逐段写清楚。\n\n起始提示词段号（start_segment）｜默认 1，从 1 开始\n正常从头生成填 1。\n只重抽第 3 段填 3；生成节点生成段数填 1，并接第 2 段的 LATENT。\n多段生成时，从选中的段依次往后取剧情。\n该起始段必须真实存在，开启“复用最后一段”也不能选择不存在的起始段。\n这里只选择提示词，不会自动选择上一段 LATENT、种子或保存文件名。\n\n输出“提示词”接主节点的 prompts 接口。\n想改某一段剧情，只修改对应的 --- 区块；固定描述会继续自动加入。"
+      ],
+      "widgets_values_named": {
+        "text": "节点：H3 长视频提示词（H3VideoPromptPlan）\n\n全片固定描述（common）｜默认空文本\n每一段都会加入这份描述。\n适合写人物身份、服装、场景、画风、镜头基调、参考标签等需要持续保持的信息。\n可留空，只使用各段剧情。\n\n分段剧情（segments）｜默认空文本\n按顺序写每段动作、镜头和声音；独占一行的 --- 是段落分隔符。\n每个片段的最终文本 = 全片固定描述 + 对应段的剧情。\n例如：\n第一段：两人拉开距离，开始交手。\n---\n第二段：承接上段动作，近距离格挡与反击。\n---\n第三段：保持人物和场景，继续下一组动作。\n不要把 --- 写在一句话中，也不要连续分隔制造空段。\n\n不足时复用最后一段（repeat_last）｜默认 false\nfalse：从起始段开始，剧情段数必须够本次所有片段；不足会在采样前报错。\ntrue：不够的部分重复最后一段剧情；只写一段也可用于全片。\n当分段剧情留空时，可只写固定描述，并开启复用。\n复用文本不保证每段动作都会自然不同，最好把重要变化逐段写清楚。\n\n起始提示词段号（start_segment）｜默认 1，从 1 开始\n正常从头生成填 1。\n只重抽第 3 段填 3；生成节点生成段数填 1，并接第 2 段的 LATENT。\n多段生成时，从选中的段依次往后取剧情。\n该起始段必须真实存在，开启“复用最后一段”也不能选择不存在的起始段。\n这里只选择提示词，不会自动选择上一段 LATENT、种子或保存文件名。\n\n输出“提示词”接主节点的 prompts 接口。\n想改某一段剧情，只修改对应的 --- 区块；固定描述会继续自动加入。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    },
+    {
+      "id": 199,
+      "type": "Note",
+      "pos": [
+        1080,
+        3780
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "08｜即时保存、合并开关与五个输出",
+      "properties": {
+        "text": "合并视频（merge_video）｜默认 false\nfalse：只逐段保存视频，合并视频输出通过 ComfyUI 官方阻断机制跳过下游 Save Video。\ntrue：提供本次所有新段的合并 VIDEO，连接外部 Save Video 保存整片。\n输入的上一段 LATENT 不加入本次整片。两种模式都从磁盘读取片段。\n外部保存仍有 I/O、音频编码和可能的转码开销，关闭合并可省去此步骤和整片文件。\n\n保存每段 LATENT（save_latents）｜默认 false\ntrue：每段完成后保存完整音视频 .h3latent，供跨任务续接或重抽使用。\nfalse：不保存 LATENT 文件，内部同一任务的潜空间续接仍然正常。\n文件保存完整采样结果，续段含上下文前缀；不是裁剪后的片段或只存尾部。\n文件格式为 safetensors，不含 pickle；保留原 dtype 和数值。\n文件数量/磁盘占用随段数增长，写文件时需要本段 CPU 拷贝。\n不输出所有完整 LATENT 的列表，避免执行器缓存整片张量。\n\n分段保存前缀（filename_prefix）｜默认 video/H3-SGUN/H3\n相对于 ComfyUI output；每次任务建立独立编号目录，避免覆盖先前结果。\n例如 H3_00001/segment_0001.mp4、segment_0001.h3latent、segments.jsonl。\n工作流模板使用 video/H3_Integrated_Fight/H3_parts 前缀。\nJSONL 逐段记录实际种子、帧数和文件路径；已完成文件中止后仍在本地目录。\n云平台是否保留/展示失败任务文件，由平台决定。\n\n主节点五个输出\n合并视频｜VIDEO：开启合并后有效；默认关闭会自动跳过此路下游。\n最后一段 latent｜LATENT：最后一次采样的完整联合音视频 LATENT，可直接接另一生成节点；不是全片合集。\n生成信息｜STRING JSON：实际尺寸、fps、segments、frames_per_segment、total_frames、duration_seconds；seeds、seed_mode、continued_from_latent；保存目录/路径/清单及开关状态。\ndynamic_mask 为开关值；continuation_methods 逐段记录 none（全新首段）、guide（普通续接）或 dynamic_mask（动态续接），不把没有上下文的首段误记为已使用动态掩码。\ncontext_cache_peak_bytes 仅统计内部 CPU 尾部张量缓存，不是整机内存或显存峰值。\n分段视频｜VIDEO 列表：已即时保存的磁盘文件，可用于编辑，无需再接 Save Video 重复保存。\nLATENT 文件路径｜STRING 列表：按本次段号排序的可加载路径；未开启保存则为空。\n\n保存时机\n主节点是输出节点，运行一段即保存一段。后续中止不删除已完成文件。\n模板已移除重复保存片段的外部节点，保留一个可选整片 Save Video。\n主节点只预览最后一个片段，全部片段和LATENT路径仍在生成信息/列表输出中，避免长片同时显示大量预览。\n外部整片 filename_prefix/format/codec 在该保存节点调节。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "合并视频（merge_video）｜默认 false\nfalse：只逐段保存视频，合并视频输出通过 ComfyUI 官方阻断机制跳过下游 Save Video。\ntrue：提供本次所有新段的合并 VIDEO，连接外部 Save Video 保存整片。\n输入的上一段 LATENT 不加入本次整片。两种模式都从磁盘读取片段。\n外部保存仍有 I/O、音频编码和可能的转码开销，关闭合并可省去此步骤和整片文件。\n\n保存每段 LATENT（save_latents）｜默认 false\ntrue：每段完成后保存完整音视频 .h3latent，供跨任务续接或重抽使用。\nfalse：不保存 LATENT 文件，内部同一任务的潜空间续接仍然正常。\n文件保存完整采样结果，续段含上下文前缀；不是裁剪后的片段或只存尾部。\n文件格式为 safetensors，不含 pickle；保留原 dtype 和数值。\n文件数量/磁盘占用随段数增长，写文件时需要本段 CPU 拷贝。\n不输出所有完整 LATENT 的列表，避免执行器缓存整片张量。\n\n分段保存前缀（filename_prefix）｜默认 video/H3-SGUN/H3\n相对于 ComfyUI output；每次任务建立独立编号目录，避免覆盖先前结果。\n例如 H3_00001/segment_0001.mp4、segment_0001.h3latent、segments.jsonl。\n工作流模板使用 video/H3_Integrated_Fight/H3_parts 前缀。\nJSONL 逐段记录实际种子、帧数和文件路径；已完成文件中止后仍在本地目录。\n云平台是否保留/展示失败任务文件，由平台决定。\n\n主节点五个输出\n合并视频｜VIDEO：开启合并后有效；默认关闭会自动跳过此路下游。\n最后一段 latent｜LATENT：最后一次采样的完整联合音视频 LATENT，可直接接另一生成节点；不是全片合集。\n生成信息｜STRING JSON：实际尺寸、fps、segments、frames_per_segment、total_frames、duration_seconds；seeds、seed_mode、continued_from_latent；保存目录/路径/清单及开关状态。\ndynamic_mask 为开关值；continuation_methods 逐段记录 none（全新首段）、guide（普通续接）或 dynamic_mask（动态续接），不把没有上下文的首段误记为已使用动态掩码。\ncontext_cache_peak_bytes 仅统计内部 CPU 尾部张量缓存，不是整机内存或显存峰值。\n分段视频｜VIDEO 列表：已即时保存的磁盘文件，可用于编辑，无需再接 Save Video 重复保存。\nLATENT 文件路径｜STRING 列表：按本次段号排序的可加载路径；未开启保存则为空。\n\n保存时机\n主节点是输出节点，运行一段即保存一段。后续中止不删除已完成文件。\n模板已移除重复保存片段的外部节点，保留一个可选整片 Save Video。\n主节点只预览最后一个片段，全部片段和LATENT路径仍在生成信息/列表输出中，避免长片同时显示大量预览。\n外部整片 filename_prefix/format/codec 在该保存节点调节。"
+      ],
+      "widgets_values_named": {
+        "text": "合并视频（merge_video）｜默认 false\nfalse：只逐段保存视频，合并视频输出通过 ComfyUI 官方阻断机制跳过下游 Save Video。\ntrue：提供本次所有新段的合并 VIDEO，连接外部 Save Video 保存整片。\n输入的上一段 LATENT 不加入本次整片。两种模式都从磁盘读取片段。\n外部保存仍有 I/O、音频编码和可能的转码开销，关闭合并可省去此步骤和整片文件。\n\n保存每段 LATENT（save_latents）｜默认 false\ntrue：每段完成后保存完整音视频 .h3latent，供跨任务续接或重抽使用。\nfalse：不保存 LATENT 文件，内部同一任务的潜空间续接仍然正常。\n文件保存完整采样结果，续段含上下文前缀；不是裁剪后的片段或只存尾部。\n文件格式为 safetensors，不含 pickle；保留原 dtype 和数值。\n文件数量/磁盘占用随段数增长，写文件时需要本段 CPU 拷贝。\n不输出所有完整 LATENT 的列表，避免执行器缓存整片张量。\n\n分段保存前缀（filename_prefix）｜默认 video/H3-SGUN/H3\n相对于 ComfyUI output；每次任务建立独立编号目录，避免覆盖先前结果。\n例如 H3_00001/segment_0001.mp4、segment_0001.h3latent、segments.jsonl。\n工作流模板使用 video/H3_Integrated_Fight/H3_parts 前缀。\nJSONL 逐段记录实际种子、帧数和文件路径；已完成文件中止后仍在本地目录。\n云平台是否保留/展示失败任务文件，由平台决定。\n\n主节点五个输出\n合并视频｜VIDEO：开启合并后有效；默认关闭会自动跳过此路下游。\n最后一段 latent｜LATENT：最后一次采样的完整联合音视频 LATENT，可直接接另一生成节点；不是全片合集。\n生成信息｜STRING JSON：实际尺寸、fps、segments、frames_per_segment、total_frames、duration_seconds；seeds、seed_mode、continued_from_latent；保存目录/路径/清单及开关状态。\ndynamic_mask 为开关值；continuation_methods 逐段记录 none（全新首段）、guide（普通续接）或 dynamic_mask（动态续接），不把没有上下文的首段误记为已使用动态掩码。\ncontext_cache_peak_bytes 仅统计内部 CPU 尾部张量缓存，不是整机内存或显存峰值。\n分段视频｜VIDEO 列表：已即时保存的磁盘文件，可用于编辑，无需再接 Save Video 重复保存。\nLATENT 文件路径｜STRING 列表：按本次段号排序的可加载路径；未开启保存则为空。\n\n保存时机\n主节点是输出节点，运行一段即保存一段。后续中止不删除已完成文件。\n模板已移除重复保存片段的外部节点，保留一个可选整片 Save Video。\n主节点只预览最后一个片段，全部片段和LATENT路径仍在生成信息/列表输出中，避免长片同时显示大量预览。\n外部整片 filename_prefix/format/codec 在该保存节点调节。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    },
+    {
+      "id": 200,
+      "type": "Note",
+      "pos": [
+        2140,
+        3780
+      ],
+      "size": [
+        1000,
+        900
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "09｜LATENT 重抽、长片与资源建议",
+      "properties": {
+        "text": "全新生成一段\n生成段数 = 1；上一段 LATENT 不连接；起始提示词段号 = 1。\n运行后直接保存一个 MP4。需要以后重抽/续接就提前开启“保存每段 LATENT”。\n\n单独重抽第 3 段\n1. 用 H3 读取音视频 LATENT 加载第 2 段的 .h3latent，连接“上一段 LATENT”。\n2. 提示词节点“起始提示词段号”设 3。\n3. 主节点“生成段数”设 1，分辨率保持与第 2 段相同。\n4. 填新种子；比较相同噪声时，用原生成信息/segments.jsonl 第 3 段的实际种子。\n5. 需要继续重抽后续段时，开启保存 LATENT。\n输出只包含新第 3 段；目录内文件重新从 segment_0001 编号。\n若原第 4 段要承接新动作，需以新第 3 段的 LATENT 继续生成。\n没有提前保存第 2 段 LATENT 时，本接口不能从 MP4 恢复原采样数值。\n可在同一工作流直接传“最后一段 latent”，或重新生成并保存所需段。\n\n长片与资源\n默认合并关闭、LATENT 保存关闭；视频边生成边落盘，最后可自行在剪辑软件拼接。\n内部只保留必要的 CPU 上下文尾部；默认 22 帧时保留 39 帧的 AV 网格以容纳至少一秒音频。\n下一段采样前释放上一段完整中间 LATENT 和解码画面；最后一段完整 LATENT 仍作为输出保留。\n片段路径、预览记录随段数增长，磁盘与耗时同样增长，不代表可以无限生成。\n模型和单段采样/解码的显存开销仍在；资源不足先降低百万像素、每段时长和参考素材规模。\n先跑 1–4 段，并发保持 1，检查显存、系统内存和磁盘剩余，再增加段数。\n外部节点若把 VIDEO 列表解成整片 IMAGE，可能重新产生大幅内存占用。\n开启合并可用外部 Save Video 的 auto/MP4 + codec auto；不需要全片 IMAGE 拼接。\n\n长链质量\n固定参考图片和全片描述有助一致性，不能保证无限续接不劣化。\n上下文更长不一定更好，默认 22 帧作为起点；明显劣化时回到较好段的 LATENT 重抽。\n动态掩码默认关闭；可固定模型、提示词、sigma和种子，对比开/关的接缝、动作、人物和后几段画质，再决定是否使用。\n\nLinux / RunningHub\n使用原生 ComfyUI、folder_paths 和 safetensors/PyAV，不调用 Windows 专属命令。\nLinux 尚未实机测试；平台需支持本插件、近期官方 H3/V3 和相同模型/加速配置。\n云端本地文件不等于可跨任务保留；需要平台允许保存、下载和重新上传 .h3latent。\n不要把本地通过的测试当作 RunningHub 文件保留或资源安全上限保证。\n说明书使用内置 Note，不参与采样。",
+        "h3_parameter_manual": true
+      },
+      "widgets_values": [
+        "全新生成一段\n生成段数 = 1；上一段 LATENT 不连接；起始提示词段号 = 1。\n运行后直接保存一个 MP4。需要以后重抽/续接就提前开启“保存每段 LATENT”。\n\n单独重抽第 3 段\n1. 用 H3 读取音视频 LATENT 加载第 2 段的 .h3latent，连接“上一段 LATENT”。\n2. 提示词节点“起始提示词段号”设 3。\n3. 主节点“生成段数”设 1，分辨率保持与第 2 段相同。\n4. 填新种子；比较相同噪声时，用原生成信息/segments.jsonl 第 3 段的实际种子。\n5. 需要继续重抽后续段时，开启保存 LATENT。\n输出只包含新第 3 段；目录内文件重新从 segment_0001 编号。\n若原第 4 段要承接新动作，需以新第 3 段的 LATENT 继续生成。\n没有提前保存第 2 段 LATENT 时，本接口不能从 MP4 恢复原采样数值。\n可在同一工作流直接传“最后一段 latent”，或重新生成并保存所需段。\n\n长片与资源\n默认合并关闭、LATENT 保存关闭；视频边生成边落盘，最后可自行在剪辑软件拼接。\n内部只保留必要的 CPU 上下文尾部；默认 22 帧时保留 39 帧的 AV 网格以容纳至少一秒音频。\n下一段采样前释放上一段完整中间 LATENT 和解码画面；最后一段完整 LATENT 仍作为输出保留。\n片段路径、预览记录随段数增长，磁盘与耗时同样增长，不代表可以无限生成。\n模型和单段采样/解码的显存开销仍在；资源不足先降低百万像素、每段时长和参考素材规模。\n先跑 1–4 段，并发保持 1，检查显存、系统内存和磁盘剩余，再增加段数。\n外部节点若把 VIDEO 列表解成整片 IMAGE，可能重新产生大幅内存占用。\n开启合并可用外部 Save Video 的 auto/MP4 + codec auto；不需要全片 IMAGE 拼接。\n\n长链质量\n固定参考图片和全片描述有助一致性，不能保证无限续接不劣化。\n上下文更长不一定更好，默认 22 帧作为起点；明显劣化时回到较好段的 LATENT 重抽。\n动态掩码默认关闭；可固定模型、提示词、sigma和种子，对比开/关的接缝、动作、人物和后几段画质，再决定是否使用。\n\nLinux / RunningHub\n使用原生 ComfyUI、folder_paths 和 safetensors/PyAV，不调用 Windows 专属命令。\nLinux 尚未实机测试；平台需支持本插件、近期官方 H3/V3 和相同模型/加速配置。\n云端本地文件不等于可跨任务保留；需要平台允许保存、下载和重新上传 .h3latent。\n不要把本地通过的测试当作 RunningHub 文件保留或资源安全上限保证。\n说明书使用内置 Note，不参与采样。"
+      ],
+      "widgets_values_named": {
+        "text": "全新生成一段\n生成段数 = 1；上一段 LATENT 不连接；起始提示词段号 = 1。\n运行后直接保存一个 MP4。需要以后重抽/续接就提前开启“保存每段 LATENT”。\n\n单独重抽第 3 段\n1. 用 H3 读取音视频 LATENT 加载第 2 段的 .h3latent，连接“上一段 LATENT”。\n2. 提示词节点“起始提示词段号”设 3。\n3. 主节点“生成段数”设 1，分辨率保持与第 2 段相同。\n4. 填新种子；比较相同噪声时，用原生成信息/segments.jsonl 第 3 段的实际种子。\n5. 需要继续重抽后续段时，开启保存 LATENT。\n输出只包含新第 3 段；目录内文件重新从 segment_0001 编号。\n若原第 4 段要承接新动作，需以新第 3 段的 LATENT 继续生成。\n没有提前保存第 2 段 LATENT 时，本接口不能从 MP4 恢复原采样数值。\n可在同一工作流直接传“最后一段 latent”，或重新生成并保存所需段。\n\n长片与资源\n默认合并关闭、LATENT 保存关闭；视频边生成边落盘，最后可自行在剪辑软件拼接。\n内部只保留必要的 CPU 上下文尾部；默认 22 帧时保留 39 帧的 AV 网格以容纳至少一秒音频。\n下一段采样前释放上一段完整中间 LATENT 和解码画面；最后一段完整 LATENT 仍作为输出保留。\n片段路径、预览记录随段数增长，磁盘与耗时同样增长，不代表可以无限生成。\n模型和单段采样/解码的显存开销仍在；资源不足先降低百万像素、每段时长和参考素材规模。\n先跑 1–4 段，并发保持 1，检查显存、系统内存和磁盘剩余，再增加段数。\n外部节点若把 VIDEO 列表解成整片 IMAGE，可能重新产生大幅内存占用。\n开启合并可用外部 Save Video 的 auto/MP4 + codec auto；不需要全片 IMAGE 拼接。\n\n长链质量\n固定参考图片和全片描述有助一致性，不能保证无限续接不劣化。\n上下文更长不一定更好，默认 22 帧作为起点；明显劣化时回到较好段的 LATENT 重抽。\n动态掩码默认关闭；可固定模型、提示词、sigma和种子，对比开/关的接缝、动作、人物和后几段画质，再决定是否使用。\n\nLinux / RunningHub\n使用原生 ComfyUI、folder_paths 和 safetensors/PyAV，不调用 Windows 专属命令。\nLinux 尚未实机测试；平台需支持本插件、近期官方 H3/V3 和相同模型/加速配置。\n云端本地文件不等于可跨任务保留；需要平台允许保存、下载和重新上传 .h3latent。\n不要把本地通过的测试当作 RunningHub 文件保留或资源安全上限保证。\n说明书使用内置 Note，不参与采样。"
+      },
+      "color": "#433e2b",
+      "bgcolor": "#282519"
+    }
+  ],
+  "links": [
+    [
+      1,
+      127,
+      0,
+      145,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      145,
+      0,
+      172,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      172,
+      0,
+      173,
+      0,
+      "MODEL"
+    ],
+    [
+      4,
+      173,
+      0,
+      178,
+      0,
+      "MODEL"
+    ],
+    [
+      5,
+      128,
+      0,
+      178,
+      1,
+      "CLIP"
+    ],
+    [
+      6,
+      119,
+      0,
+      178,
+      2,
+      "VAE"
+    ],
+    [
+      7,
+      120,
+      0,
+      178,
+      3,
+      "VAE"
+    ],
+    [
+      8,
+      177,
+      0,
+      178,
+      4,
+      "H3_PROMPTS"
+    ],
+    [
+      9,
+      137,
+      0,
+      178,
+      5,
+      "IMAGE"
+    ],
+    [
+      10,
+      139,
+      0,
+      178,
+      6,
+      "IMAGE"
+    ],
+    [
+      12,
+      178,
+      0,
+      180,
+      0,
+      "VIDEO"
+    ],
+    [
+      13,
+      181,
+      0,
+      178,
+      8,
+      "SIGMAS"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "参数说明书 · H3-Latent-Guide-SGUN · by神棍",
+      "bounding": [
+        -10,
+        1650,
+        3190,
+        3060
+      ],
+      "color": "#C4A86A",
+      "font_size": 28,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.45,
+      "offset": [
+        70,
+        30
+      ]
+    },
+    "frontendVersion": "1.53.6"
+  },
+  "version": 0.4
+}
