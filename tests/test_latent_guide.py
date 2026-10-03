@@ -185,9 +185,15 @@ class TestLatentGuide(unittest.TestCase):
         self.assertIn("已替换", messages.output[0])
 
     def test_context_snaps_down_and_fits_both_clips(self):
-        for case in ((23, 243, 141, 22), (99, 56, 141, 56), (99, 243, 22, 22)):
+        for case in ((23, 243, 141, 22), (99, 56, 141, 56), (23, 243, 39, 22), (99, 5, 22, 5)):
             with self.subTest(case=case):
                 check_context_snaps_down_and_fits_both_clips(*case)
+
+    def test_context_cannot_cover_the_entire_target(self):
+        for context_frames, previous_frames, target_frames in ((22, 243, 22), (99, 243, 22), (5, 243, 5)):
+            with self.subTest(context=context_frames, previous=previous_frames, target=target_frames):
+                with self.assertRaisesRegex(ValueError, "上下文.*覆盖本段全部.*裁剪后没有新画面"):
+                    Guide.execute(conditioning(), av_latent(target_frames), av_latent(previous_frames), context_frames)
 
     def test_resolution_mismatch_is_reported(self):
         with self.assertRaisesRegex(ValueError, "分辨率"):

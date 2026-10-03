@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import gc
 import importlib.util
 import json
@@ -22,6 +23,8 @@ sys.argv = [sys.argv[0], "--cpu"]
 from comfy.nested_tensor import NestedTensor
 from comfy_api.latest import io
 from comfy_extras.nodes_video import SaveVideo
+from comfy_execution.caching import BasicCache, CacheKeySetInputSignature
+from comfy_execution.graph import DynamicPrompt
 from comfy_execution.graph_utils import ExecutionBlocker
 import execution
 import folder_paths
@@ -60,7 +63,7 @@ class TestLongVideo(unittest.TestCase):
 
     def run_node(self, count=4, plan=None, **kwargs):
         return LongVideo.execute(kwargs.pop("model", None), None, None, None, plan or {"prompts": ["one"], "repeat_last": True},
-                                 count, 5.0, "16:9 (Widescreen)", 0.4, kwargs.pop("seed", 100),
+                                 count, kwargs.pop("duration", 5.0), "16:9 (Widescreen)", 0.4, kwargs.pop("seed", 100),
                                  8, "res_multistep", "simple", sigmas=kwargs.pop("sigmas", torch.tensor([1.0, 0.0])),
                                  **kwargs)
 
@@ -140,6 +143,135 @@ class TestLongVideo(unittest.TestCase):
                 self.assertEqual(json.loads(output[2])["seeds"], expected)
                 self.assertEqual(randomized.call_count, 3 if mode == "randomize" else 0)
 
+    def test_randomize_redraws_only_later_segments_on_each_run(self):
+        with patch.object(LongVideo, "_render_segment", return_value=(native_latent(), object(), 119)) as render, \
+             patch.object(module.random, "randint", side_effect=[11, 12, 21, 22]) as randomized:
+            first = self.run_node(count=3, seed=100, seed_mode="randomize")
+            second = self.run_node(count=3, seed=100, seed_mode="randomize")
+        self.assertEqual(json.loads(first[2])["seeds"], [100, 11, 12])
+        self.assertEqual(json.loads(second[2])["seeds"], [100, 21, 22])
+        self.assertEqual([call.args[10] for call in render.call_args_list], [100, 11, 12, 100, 21, 22])
+        self.assertEqual(randomized.call_count, 4)
+
+    def assert_native_cache_reuse(self, inputs, reusable):
+        class LinkedValueSource:
+            @classmethod
+            def INPUT_TYPES(cls):
+                return {"required": {"value": ("*", {})}}
+
+        prompt = {"long": {"class_type": "H3LongVideo", "inputs": inputs}}
+        for name, value in inputs.items():
+            if isinstance(value, list):
+                prompt[value[0]] = {"class_type": "H3CacheTestValue", "inputs": {
+                    "value": 4 if name == "segments" else "randomize"}}
+
+        async def check():
+            cache = BasicCache(CacheKeySetInputSignature)
+            marker = object()
+            keys = []
+            for queue in range(2):
+                # IsChangedCache writes into the prompt; each queue needs a fresh copy.
+                dynprompt = DynamicPrompt(copy.deepcopy(prompt))
+                changed = execution.IsChangedCache(f"queue-{queue}", dynprompt, cache)
+                await cache.set_prompt(dynprompt, list(prompt), changed)
+                fingerprint = await changed.get("long")
+                # Exceptions fall back to a bare NaN: reject that false success.
+                self.assertIsInstance(fingerprint, list)
+                self.assertEqual(len(fingerprint), 1)
+                keys.append(cache.cache_key_set.get_data_key("long"))
+                if queue == 0:
+                    cache.set_local("long", marker)
+                elif reusable:
+                    self.assertIs(cache.get_local("long"), marker)
+                    self.assertEqual(keys[0], keys[1])
+                else:
+                    self.assertIsNone(cache.get_local("long"))
+                    self.assertNotEqual(keys[0], keys[1])
+
+        with patch.dict(module.nodes.NODE_CLASS_MAPPINGS,
+                        {"H3LongVideo": LongVideo, "H3CacheTestValue": LinkedValueSource}):
+            asyncio.run(check())
+
+    def test_native_randomize_multisegment_cache_misses_across_queues(self):
+        self.assert_native_cache_reuse({"segments": 4, "seed_mode": "randomize", "seed": 100}, False)
+
+    def test_native_deterministic_and_single_segment_cache_reuse(self):
+        for mode in ("fixed", "increment", "decrement", "randomize"):
+            for count in (1, 4):
+                if mode == "randomize" and count > 1:
+                    continue
+                with self.subTest(mode=mode, count=count):
+                    self.assert_native_cache_reuse({"segments": count, "seed_mode": mode, "seed": 100}, True)
+        self.assert_native_cache_reuse({}, True)
+
+    def test_native_unresolved_randomization_inputs_invalidate_cache(self):
+        for inputs in ({"segments": ["count", 0], "seed_mode": "randomize"},
+                       {"segments": 4, "seed_mode": ["mode", 0]},
+                       {"segments": ["count", 0], "seed_mode": ["mode", 0]}):
+            with self.subTest(inputs=inputs):
+                self.assert_native_cache_reuse(inputs, False)
+
+    def test_trim_audio_pads_real_h3_quantization_shortfall(self):
+        # 158 video frames allocate 263 H3 audio tokens at 800 samples/token.
+        waveform = torch.linspace(-0.5, 0.5, 263 * 800).reshape(1, 1, -1).repeat(1, 2, 1)
+        original = waveform.clone()
+        result = module._trim_audio({"waveform": waveform, "sample_rate": 32000}, 22, 136)
+        self.assertEqual(result["sample_rate"], 32000)
+        self.assertEqual(result["waveform"].shape, (1, 2, 181333))
+        self.assertTrue(torch.equal(result["waveform"][..., :181067], waveform[..., 29333:]))
+        self.assertTrue(torch.equal(result["waveform"][..., 181067:], torch.zeros(1, 2, 266)))
+        self.assertTrue(torch.equal(waveform, original), "input waveform was modified")
+
+    def test_trim_audio_truncates_long_track_after_context(self):
+        waveform = torch.arange(240, dtype=torch.float32).reshape(2, 2, 60)
+        result = module._trim_audio({"waveform": waveform, "sample_rate": 240}, 2, 3)
+        self.assertEqual(result["waveform"].shape, (2, 2, 30))
+        self.assertTrue(torch.equal(result["waveform"], waveform[..., 20:50]))
+
+    def test_trim_audio_handles_empty_and_fully_trimmed_tracks(self):
+        for samples, trim in ((0, 0), (20, 2), (10, 4)):
+            with self.subTest(samples=samples, trim=trim):
+                result = module._trim_audio({"waveform": torch.ones(2, 2, samples), "sample_rate": 240}, trim, 3)
+                self.assertEqual(result["waveform"].shape, (2, 2, 30))
+                self.assertEqual(torch.count_nonzero(result["waveform"]).item(), 0)
+
+    def test_trim_audio_preserves_dtype_and_device(self):
+        devices = [torch.device("cpu")]
+        if torch.cuda.is_available():
+            devices.append(torch.device("cuda"))
+        for device in devices:
+            for dtype in (torch.float16, torch.bfloat16, torch.float32):
+                for samples in (0, 15, 60):
+                    with self.subTest(device=device, dtype=dtype, samples=samples):
+                        waveform = torch.ones(2, 2, samples, dtype=dtype, device=device)
+                        result = module._trim_audio({"waveform": waveform, "sample_rate": 240}, 1, 3)["waveform"]
+                        self.assertEqual(result.shape, (2, 2, 30))
+                        self.assertEqual(result.dtype, waveform.dtype)
+                        self.assertEqual(result.device, waveform.device)
+                        retained = min(max(samples - 10, 0), 30)
+                        self.assertTrue(torch.equal(result[..., :retained], waveform[..., 10:10 + retained]))
+                        self.assertEqual(torch.count_nonzero(result[..., retained:]).item(), 0)
+
+    def test_trim_audio_default_segment_lengths_remain_exact(self):
+        for source_frames, trim, output_frames, samples in ((124, 0, 124, 165333), (141, 22, 119, 158667)):
+            with self.subTest(source_frames=source_frames):
+                waveform = torch.ones(1, 2, round(source_frames * 40 / 24) * 800)
+                result = module._trim_audio({"waveform": waveform, "sample_rate": 32000}, trim, output_frames)
+                self.assertEqual(result["waveform"].shape, (1, 2, samples))
+                self.assertEqual(torch.count_nonzero(result["waveform"]).item(), 2 * samples)
+
+    def test_render_pads_quantized_audio_before_video_encoding(self):
+        self.mock_pipeline([])
+        lengths = []
+        create_video = module.CreateVideo.execute
+        def create(images, fps, audio, **kwargs):
+            lengths.append(audio["waveform"].shape[-1])
+            return create_video(images, fps, audio, **kwargs)
+        with patch.object(module.CreateVideo, "execute", new=create):
+            output = self.run_node(count=2, duration=5.8)
+        self.assertEqual(json.loads(output[2])["frames_per_segment"], [141, 136])
+        self.assertEqual(lengths, [188000, 181333])
+
     def mock_pipeline(self, seen, image_refs=None, full_refs=None, refs=None, interrupt_after=None):
         image_refs, full_refs = image_refs if image_refs is not None else [], full_refs if full_refs is not None else []
         refs = refs or {}
@@ -163,8 +295,9 @@ class TestLongVideo(unittest.TestCase):
             image_refs.append(weakref.ref(images))
             return (images,)
         def audio(vae, latent):
-            frames = package._av_streams(latent, "sampled")[2]
-            return io.NodeOutput({"waveform": torch.zeros(1, 2, round(frames / 24 * 48000)), "sample_rate": 48000})
+            # Match the real H3 VAE's 40 Hz latent grid and 32 kHz output.
+            samples = latent["samples"].tensors[-1].shape[-1] * 800
+            return io.NodeOutput({"waveform": torch.zeros(1, 2, samples), "sample_rate": 32000})
         self.stack.enter_context(patch.object(module.MiniMaxH3ReferenceToVideo, "execute", new=condition))
         self.stack.enter_context(patch.object(module.BasicGuider, "execute",
             new=lambda model, positive: io.NodeOutput(SimpleNamespace(positive=positive))))
@@ -250,6 +383,7 @@ class TestLongVideo(unittest.TestCase):
             self.assertEqual(combo["remote"]["route"], latent_io.LATENT_LIST_ROUTE)
             self.assertTrue(combo["remote"]["refresh_button"])
 
+
     def test_latent_dropdown_loads_and_legacy_manual_path_takes_priority(self):
         source = native_latent(124)
         latent_io.save_h3_latent(source, str(self.directory / "selected.h3latent"), {})
@@ -272,12 +406,14 @@ class TestLongVideo(unittest.TestCase):
                 valid, error, _, node_errors = asyncio.run(execution.validate_prompt("latent-dropdown", prompt, None))
                 self.assertTrue(valid, (error, node_errors))
 
+
     def test_latent_refresh_route_is_registered_on_extension_load(self):
         routes = latent_io.web.RouteTableDef()
         with patch.object(package.PromptServer, "instance", SimpleNamespace(routes=routes), create=True):
             asyncio.run(package.H3LatentGuideExtension().on_load())
         self.assertEqual([(route.method, route.path) for route in routes],
                          [("GET", latent_io.LATENT_LIST_ROUTE)])
+
 
     def test_streaming_save_retains_only_tail_and_blocked_merge_skips_native_save(self):
         seen, images, full = [], [], []
