@@ -55,7 +55,11 @@ class TestLongVideo(unittest.TestCase):
         self.stack = ExitStack()
         self.addCleanup(self.stack.close)
         self.directory = Path(self.stack.enter_context(tempfile.TemporaryDirectory()))
+        self.cache_directory = Path(self.stack.enter_context(tempfile.TemporaryDirectory()))
         self.stack.enter_context(patch.object(folder_paths, "get_output_directory", return_value=str(self.directory)))
+        self.stack.enter_context(patch.object(folder_paths, "get_temp_directory", return_value=str(self.cache_directory)))
+        self.stack.enter_context(patch.object(folder_paths, "get_directory_by_type", new=lambda kind:
+            str(self.cache_directory if kind == "temp" else self.directory)))
         self.stack.enter_context(patch.object(module.ResolutionSelector, "execute", return_value=io.NodeOutput(32, 32)))
         self.stack.enter_context(patch.object(LongVideo, "hidden", SimpleNamespace(
             prompt={"test": True}, extra_pnginfo={"workflow": {"nodes": []}})))
@@ -280,7 +284,7 @@ class TestLongVideo(unittest.TestCase):
             self.assertTrue(all(ref() is None for ref in image_refs), "decoded images accumulated")
             self.assertTrue(all(ref() is None for ref in full_refs), "full intermediate LATENT accumulated")
             # Previous files must already exist before the next segment's conditioning starts.
-            self.assertEqual(len(list(self.directory.rglob("segment_*.mp4"))), len(seen))
+            self.assertEqual(len(list(self.cache_directory.rglob("segment_*.mp4"))), len(seen))
             if interrupt_after is not None and len(seen) == interrupt_after:
                 raise RuntimeError("test interrupted")
             seen.append(kwargs)
@@ -352,7 +356,7 @@ class TestLongVideo(unittest.TestCase):
             render.assert_not_called()
         self.assertEqual(list(self.directory.rglob("segment_*")), [])
         with self.assertRaisesRegex(Exception, "outside the output"):
-            self.run_node(1, filename_prefix="../escape/H3")
+                self.run_node(1, save_latents=True, filename_prefix="../escape/H3")
 
     def test_latent_list_scans_nested_directories_and_refreshes_newest_first(self):
         roots = {kind: self.directory / kind for kind in ("output", "input", "temp")}
@@ -415,7 +419,7 @@ class TestLongVideo(unittest.TestCase):
                          [("GET", latent_io.LATENT_LIST_ROUTE)])
 
 
-    def test_streaming_save_retains_only_tail_and_blocked_merge_skips_native_save(self):
+    def test_temp_cache_retains_only_tail_and_blocked_merge_skips_native_save(self):
         seen, images, full = [], [], []
         self.mock_pipeline(seen, images, full)
         with patch.object(module.InputImpl, "VideoFromList", side_effect=AssertionError("merged while disabled")):
@@ -425,9 +429,12 @@ class TestLongVideo(unittest.TestCase):
         self.assertEqual(info["frames_per_segment"], [124, 119, 119, 119])
         self.assertEqual(info["context_cache_peak_bytes"], (24 * 12 * 2 * 2 + 32 * 2 * 65) * 4)
         self.assertIsInstance(output[0], ExecutionBlocker)
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 4)
+        self.assertEqual(len(list(self.cache_directory.rglob("*.mp4"))), 4)
+        self.assertEqual(list(self.directory.iterdir()), [])
         self.assertEqual(list(self.directory.rglob("*.h3latent")), [])
-        self.assertEqual(len(output.ui["images"]), 1)
+        self.assertEqual(output.ui, {})
+        self.assertEqual(info["video_storage"], "temp")
+        self.assertIsNone(info["manifest"])
         self.assertTrue(all(ref() is None for ref in full[:-2]))
         for ref, stream in zip(full[-2:], output[1]["samples"].tensors):
             self.assertIs(ref(), stream)
@@ -436,7 +443,23 @@ class TestLongVideo(unittest.TestCase):
             _, previews, _, _ = asyncio.run(execution.get_output_data("test", "merged", SaveVideo,
                 {"video": cached[0], "filename_prefix": ["combined"], "format": ["auto"]}))
         self.assertEqual(previews, {})
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 4)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
+
+    def test_external_saver_writes_each_segment_once_without_internal_output_video(self):
+        self.mock_pipeline([])
+        output = self.run_node(count=2)
+        self.assertEqual(list(self.directory.iterdir()), [])
+        cached, _, _ = execution.get_output_from_returns([output], LongVideo)
+        _, previews, graph, pending = asyncio.run(execution.get_output_data("test", "parts", SaveVideo,
+            {"video": cached[3], "filename_prefix": ["parts/H3"], "format": ["auto"]}))
+        self.assertFalse(graph or pending)
+        self.assertEqual(len(previews["images"]), 2)
+        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 2)
+        self.assertEqual(len(list(self.cache_directory.rglob("*.mp4"))), 2)
+        for item, frames in zip(previews["images"], [124, 119]):
+            with av.open(str(self.directory / item["subfolder"] / item["filename"])) as container:
+                self.assertEqual(container.streams.video[0].frames, frames)
+                self.assertEqual(len(container.streams.audio), 1)
 
     def test_merge_and_latent_save_export_packets_audio_metadata_and_paths(self):
         seen, images, full = [], [], []
@@ -448,6 +471,8 @@ class TestLongVideo(unittest.TestCase):
         self.assertEqual(info["total_frames"], 481)
         self.assertEqual(len(output[4]), 4)
         self.assertEqual(len(output.ui["latents"]), 1)
+        self.assertNotIn("images", output.ui)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
         cached, _, _ = execution.get_output_from_returns([output], LongVideo)
         self.assertEqual(len(cached[4]), 4)
         _, previews, has_graph, pending = asyncio.run(execution.get_output_data("test", "merged", SaveVideo,
@@ -456,7 +481,7 @@ class TestLongVideo(unittest.TestCase):
                                      io.Hidden.extra_pnginfo: {"workflow": {"nodes": []}}}}))
         self.assertFalse(has_graph or pending)
         merged = previews["images"][0]
-        paths = [self.directory / path for path in info["video_paths"]]
+        paths = [Path(folder_paths.get_annotated_filepath(path)) for path in info["video_paths"]]
         paths.append(self.directory / merged["subfolder"] / merged["filename"])
         packets = []
         for path, frames in zip(paths, [124, 119, 119, 119, 481]):
@@ -474,14 +499,16 @@ class TestLongVideo(unittest.TestCase):
         manifest = self.directory / info["manifest"]
         records = [json.loads(line) for line in manifest.read_text("utf-8").splitlines()]
         self.assertEqual([record["seed"] for record in records], [100, 101, 102, 103])
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 5)
+        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 1)
+        self.assertEqual(len(list(self.cache_directory.rglob("*.mp4"))), 4)
         self.assertTrue(all(ref() is None for ref in images))
 
-    def test_interrupt_keeps_completed_video_latent_and_seed_record(self):
+    def test_interrupt_cleans_video_cache_and_keeps_completed_latent_and_seed_record(self):
         self.mock_pipeline([], interrupt_after=1)
         with self.assertRaisesRegex(RuntimeError, "interrupted"):
             self.run_node(save_latents=True)
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 1)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
+        self.assertEqual(list(self.cache_directory.iterdir()), [])
         self.assertEqual(len(list(self.directory.rglob("*.h3latent"))), 1)
         records = list(self.directory.rglob("segments.jsonl"))[0].read_text("utf-8").splitlines()
         self.assertEqual(len(records), 1)
@@ -499,11 +526,12 @@ class TestLongVideo(unittest.TestCase):
             v3_data={"hidden_inputs": {io.Hidden.prompt: {"native_execution": True},
                                      io.Hidden.extra_pnginfo: {"workflow": {"nodes": []}}}}))
         self.assertFalse(graph or pending)
-        self.assertEqual(len(previews["images"]), 1)
+        self.assertEqual(previews, {})
+        self.assertEqual(list(self.directory.iterdir()), [])
         self.assertIsInstance(cached[0][0], ExecutionBlocker)
         self.assertEqual(len(cached[3]), 1)
         info = json.loads(cached[2][0])
-        with av.open(str(self.directory / info["video_paths"][0])) as container:
+        with av.open(folder_paths.get_annotated_filepath(info["video_paths"][0])) as container:
             self.assertEqual(json.loads(container.metadata["prompt"]), {"native_execution": True})
 
     def test_dynamic_enabled_single_fresh_segment_uses_normal_path(self):
@@ -560,7 +588,8 @@ class TestLongVideo(unittest.TestCase):
         self.assertEqual(json.loads(result[2])["frames_per_segment"], [124, 119, 119, 119])
         self.assertNotIn("denoise_mask_function", patcher.model_options)
         self.assertEqual(set(patcher.wrappers[WrappersMP.APPLY_MODEL]), {"existing_acceleration"})
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 4)
+        self.assertEqual(len(list(self.cache_directory.rglob("*.mp4"))), 4)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
         self.assertTrue(all(state.current_mask is None for state in states), "loaded model may retain old GPU masks")
 
     def test_dynamic_sampler_failure_releases_live_mask(self):
@@ -589,7 +618,8 @@ class TestLongVideo(unittest.TestCase):
                 self.run_node(model=patcher, dynamic_mask=True)
         self.assertEqual(len(states), 1)
         self.assertIsNone(states[0].current_mask)
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 1)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
+        self.assertEqual(list(self.cache_directory.iterdir()), [])
 
     def test_partial_save_failure_removes_temporary_files(self):
         self.mock_pipeline([])
@@ -602,6 +632,7 @@ class TestLongVideo(unittest.TestCase):
                 self.run_node(1)
         self.assertEqual(list(self.directory.rglob("*.mp4")), [])
         self.assertEqual(list(self.directory.rglob("*.tmp")), [])
+        self.assertEqual(list(self.cache_directory.iterdir()), [])
         def fail_latent(tensors, path, **kwargs):
             Path(path).write_bytes(b"incomplete")
             raise RuntimeError("latent save failed")
