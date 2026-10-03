@@ -25,6 +25,19 @@ from .dynamic_mask import check_dynamic_mask_support, prepare_dynamic_mask
 H3Prompts = io.Custom("H3_PROMPTS")
 
 
+def _trim_audio(audio, trim_frames, frame_count):
+    """Match the exported video duration, including H3's 40 Hz rounding gaps."""
+    sample_rate = audio["sample_rate"]
+    start = round(trim_frames / 24 * sample_rate)
+    length = round(frame_count / 24 * sample_rate)
+    waveform = audio["waveform"][..., start:start + length]
+    if waveform.shape[-1] < length:
+        padded = waveform.new_zeros((*waveform.shape[:-1], length))
+        padded[..., :waveform.shape[-1]] = waveform
+        waveform = padded
+    return {**audio, "waveform": waveform}
+
+
 class H3VideoPromptPlan(io.ComfyNode):
     @classmethod
     def define_schema(cls):
@@ -89,7 +102,7 @@ class H3LongVideo(io.ComfyNode):
                              advanced=True, tooltip="直接读取上一段音视频 latent 的尾部。续段导出时自动删去重叠部分。"),
                 io.Combo.Input("seed_mode", display_name="各段种子", options=io.ControlAfterGenerate,
                                default="increment", advanced=True,
-                               tooltip="首段使用上方种子，后续段按fixed固定、increment递增、decrement递减或randomize随机。生成信息记录每段实际种子；生成后控制影响下一次任务的起始种子。"),
+                               tooltip="首段使用上方种子，后续段按fixed固定、increment递增、decrement递减或randomize随机。randomize且生成多段时，每次排队都会重新随机后续段，即使首段种子固定。生成信息记录实际种子。"),
                 io.Float.Input("denoise", display_name="降噪", default=1.0, min=0.01, max=1.0, step=0.01, advanced=True,
                                tooltip="只用于内部调度器；连接自定义 sigmas 时直接使用输入序列。"),
                 io.Combo.Input("ref_image_size", display_name="参考图尺寸", options=["match", "max"],
@@ -132,6 +145,13 @@ class H3LongVideo(io.ComfyNode):
         )
 
     @classmethod
+    def fingerprint_inputs(cls, segments=4, seed_mode="increment", **kwargs):
+        # Linked values are unavailable during fingerprinting; invalidate conservatively.
+        may_randomize = seed_mode is None or seed_mode == "randomize"
+        may_continue = segments is None or segments > 1
+        return float("nan") if may_randomize and may_continue else None
+
+    @classmethod
     def _render_segment(cls, model, clip, vae, audio_vae, prompt, width, height, base_frames, previous,
                         context_frames, seed, sampler, sigmas, ref_images, ref_image_size,
                         video_path, metadata, ref_videos=None, ref_video_audios=None, ref_audios=None,
@@ -163,10 +183,7 @@ class H3LongVideo(io.ComfyNode):
         images = nodes.VAEDecode().decode(vae, sampled)[0]
         audio = VAEDecodeAudio.execute(audio_vae, sampled)[0]
         images = images[overlap:]
-        sample_rate = audio["sample_rate"]
-        start = round(overlap / 24 * sample_rate)
-        end = start + round(images.shape[0] / 24 * sample_rate)
-        audio = {"waveform": audio["waveform"][..., start:end], "sample_rate": sample_rate}
+        audio = _trim_audio(audio, overlap, images.shape[0])
         video = CreateVideo.execute(images, 24, audio, bit_depth=8, color_space="sRGB")[0]
         temporary = video_path + ".tmp"
         try:

@@ -26,8 +26,8 @@
 必接 `model`、`clip`、视频 `vae`、`audio_vae`、`prompts`。提示词使用配套 `H3 长视频提示词`：固定描述加入每一段，各段剧情用独占一行的 `---` 分隔。`start_segment` 从1开始；提示词不足默认在采样前报错，`repeat_last=true` 可复用最后一段。
 
 - `segments` 是本次新生成总段数，1→1段、2→2段，默认4。上一段 LATENT 不计数，也不加入本次导出。
-- 尺寸和时长沿用官方：24fps、17k+5帧网格、尺寸对齐32。5.0/0.4/16:9 对应864×480；四段为124+119+119+119帧，约20.04秒。首段完整保留，续段自动裁掉重叠和同步音频。
-- `seed_mode` 使用官方 fixed/increment/decrement/randomize。首段使用面板种子；后续按模式变化，递增/递减在范围边界停止。`control_after_generate` 控制下一次任务的起始种子。
+- 尺寸和时长沿用官方：24fps、17k+5帧网格、尺寸对齐32。5.0/0.4/16:9 对应864×480；四段为124+119+119+119帧，约20.04秒。首段完整保留，续段自动裁掉重叠和同步音频。音轨按导出帧数截齐，H3 音频 token 取整造成的尾部不足会补零。
+- `seed_mode` 使用官方 fixed/increment/decrement/randomize。首段使用面板种子；后续按模式变化，递增/递减在范围边界停止。`control_after_generate` 控制下一次任务的起始种子。多段 `randomize` 每次排队重新随机后续段，即使面板首段种子固定；固定/递增/递减及单段模式仍可复用缓存。段数或种子模式通过连线提供且无法提前判定时，会保守重新执行。
 - `sigmas` 可接 Manual Sigmas，接入后直接用于所有片段，覆盖内部 steps/scheduler/denoise；采样器仍生效。未连接则使用面板调度。
 - `ref_images`、`ref_videos`、`ref_video_audios`、`ref_audios` 使用官方可扩展接口，各段共用素材。参考视频接24fps IMAGE批次（至少5帧）；视频音轨按相同编号配对。标签编号沿用官方 `<Picture j>`、`<Video j>`、`<Audio j>`。
 - 模型和加速在外部调节；内部使用 BasicGuider，无负向 CFG。
@@ -99,14 +99,16 @@ RunningHub/Linux 尚未实机测试。节点使用原生 ComfyUI，不依赖自�
 
 ## 保留的独立引导与循环工具
 
-`MiniMax H3 潜空间续接引导` 接下一段 positive、空联合 LATENT、上一段完整采样 LATENT、context_frames，输出 positive 和 trim_frames。下一段仍采样新的空 LATENT；正常解码后删掉前 trim_frames 帧和 trim_frames/24 秒音频再拼接。两段须同分辨率、batch=1。
+`MiniMax H3 潜空间续接引导` 接下一段 positive、空联合 LATENT、上一段完整采样 LATENT、context_frames，输出 positive 和 trim_frames。下一段仍采样新的空 LATENT；正常解码后删掉前 trim_frames 帧和 trim_frames/24 秒音频再拼接。两段须同分辨率、batch=1。对齐后的上下文必须小于本段总帧数，否则提前报错，避免裁剪后没有新画面。
 
 `H3 循环分段提示词` 保留旧循环用法：首段在循环外，Start Loop的initial_iteration_value接首段 LATENT，current_iteration_value接引导previous_latent，续段采样结果接End Loop的next_iteration_value。旧工具的循环次数仍按续接次数计算，不改变新主节点的总段数语义。
 
 ## 验证
 
-15项原生引导、21项集成和5项动态掩码测试通过，共41项。集成检查包括四种种子/边界、提示词顺序与重抽段选择、参考传递、自定义sigmas、四段实际PyAV保存、合并及视频包一致性、音轨/元数据、跨段大张量释放、合并阻断SaveVideo、主节点原生执行、三种dtype的LATENT逐值恢复、路径限制、中止后保留已完成文件和临时文件清理。动态掩码测试覆盖原生H3掩码映射与inpaint路径、音视频上下文对齐、输入张量不变、实际SIGMAS不变、首段/续段切换、版本/钩子冲突以及成功/失败时工作掩码释放。新增检查覆盖递归文件列表、最新文件排序、刷新接口、下拉读取及旧路径优先级。两个配套工作流及动态掩码/合并/LATENT保存开关组合、单段LATENT续接通过原生校验。
+16项原生引导、31项集成和5项动态掩码测试通过，共52项；另有11项不依赖ComfyUI的标准库边界测试通过。集成检查包括四种种子/边界、提示词顺序与重抽段选择、参考传递、自定义sigmas、四段实际PyAV保存、合并及视频包一致性、音轨/元数据、跨段大张量释放、合并阻断SaveVideo、主节点原生执行、三种dtype的LATENT逐值恢复、路径限制、中止后保留已完成文件和临时文件清理。动态掩码测试覆盖原生H3掩码映射与inpaint路径、音视频上下文对齐、输入张量不变、实际SIGMAS不变、首段/续段切换、版本/钩子冲突以及成功/失败时工作掩码释放。新增检查覆盖递归文件列表、最新文件排序、刷新接口、下拉读取及旧路径优先级；音轨补零/裁剪、真实H3音频长度取整、空轨、dtype/device保留；官方缓存键下重复排队、确定模式复用、连线模式失效；上下文全覆盖提前拒绝。两个配套工作流及动态掩码/合并/LATENT保存开关组合、单段LATENT续接通过原生校验。
 
 这次使用小尺寸CPU模拟模型预测，实际调用原生H3掩码/inpaint、视频编码、保存/读取和执行器；未重新运行H3模型、测量长片资源峰值或验证RunningHub。此前模型生成记录不代表本次版本资源峰值；动态掩码对真实长链画质的影响尚未实测。
 
 可用 ComfyUI 的 Python 运行 `tests/test_latent_guide.py`、`tests/test_long_video.py`、`tests/test_dynamic_mask.py`，无需新测试依赖。实现基于官方 H3 keyframe 接口，参考 [H3 Continuation](https://github.com/ttulttul/ComfyUI-Minimax-H3-Continuation)、[H3 Motion Context](https://github.com/NikoDemon80/ComfyUI-H3-Motion-Context)，不依赖这两个第三方节点包。
+
+标准库边界测试可执行 `python -B -X utf8 tests/test_boundary_regressions.py`。2026-10-03 合入已审查的音轨长度、独立引导上下文和随机模式缓存修复，保留 LATENT 下拉加载与示例工作流。

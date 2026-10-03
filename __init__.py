@@ -71,6 +71,8 @@ class MiniMaxH3LatentContinuationGuide(io.ComfyNode):
 
         frames = min(context_frames, previous_frames, target_frames)
         frames = (frames - 5) // 17 * 17 + 5
+        if frames >= target_frames:
+            raise ValueError(f"上下文 {frames} 帧已覆盖本段全部 {target_frames} 帧，裁剪后没有新画面；请减小上下文帧数或增加本段长度。")
         video_t = (frames - 5) // 17 * 5 + 2
         video_guide = {"resolved_frame_index": 0, "latent": video[:, :, -video_t:].clone()}
 
