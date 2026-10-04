@@ -8,7 +8,7 @@
 
 ## 示例工作流
 
-- [普通调度器版：20 秒战斗](examples/H3_长视频_一体节点_20秒战斗.json)：4 段 × 5 秒，使用节点内置调度器。
+- [自定义步数版](examples/H3_长视频_一体节点_自定义步数.json)：4 段 × 5 秒，使用节点内置调度器，可在节点面板自定义采样步数。
 - [自定义 Sigmas 版](examples/H3_长视频_一体节点_自定义Sigmas.json)：通过 Manual Sigmas 输入采样序列。
 
 下载 JSON 后拖入 ComfyUI，或使用「工作流 → 打开」导入。两个模板都包含参数说明 Note。
@@ -116,3 +116,4 @@ RunningHub/Linux 尚未实机测试。节点使用原生 ComfyUI，不依赖自�
 可用 ComfyUI 的 Python 运行 `tests/test_latent_guide.py`、`tests/test_long_video.py`、`tests/test_dynamic_mask.py`，无需新测试依赖。实现基于官方 H3 keyframe 接口，参考 [H3 Continuation](https://github.com/ttulttul/ComfyUI-Minimax-H3-Continuation)、[H3 Motion Context](https://github.com/NikoDemon80/ComfyUI-H3-Motion-Context)，不依赖这两个第三方节点包。
 
 标准库边界测试可执行 `python -B -X utf8 tests/test_boundary_regressions.py`。2026-10-03 合入已审查的音轨长度、独立引导上下文和随机模式缓存修复，保留 LATENT 下拉加载与示例工作流。
+
