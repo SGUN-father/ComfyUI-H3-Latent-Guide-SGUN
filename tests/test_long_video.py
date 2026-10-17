@@ -25,7 +25,6 @@ from comfy_api.latest import io
 from comfy_extras.nodes_video import SaveVideo
 from comfy_execution.caching import BasicCache, CacheKeySetInputSignature
 from comfy_execution.graph import DynamicPrompt
-from comfy_execution.graph_utils import ExecutionBlocker
 import execution
 import folder_paths
 import nodes
@@ -55,7 +54,11 @@ class TestLongVideo(unittest.TestCase):
         self.stack = ExitStack()
         self.addCleanup(self.stack.close)
         self.directory = Path(self.stack.enter_context(tempfile.TemporaryDirectory()))
+        self.cache_directory = Path(self.stack.enter_context(tempfile.TemporaryDirectory()))
         self.stack.enter_context(patch.object(folder_paths, "get_output_directory", return_value=str(self.directory)))
+        self.stack.enter_context(patch.object(folder_paths, "get_temp_directory", return_value=str(self.cache_directory)))
+        self.stack.enter_context(patch.object(folder_paths, "get_directory_by_type", new=lambda kind:
+            str(self.cache_directory if kind == "temp" else self.directory)))
         self.stack.enter_context(patch.object(module.ResolutionSelector, "execute", return_value=io.NodeOutput(32, 32)))
         self.stack.enter_context(patch.object(LongVideo, "hidden", SimpleNamespace(
             prompt={"test": True}, extra_pnginfo={"workflow": {"nodes": []}})))
@@ -66,6 +69,10 @@ class TestLongVideo(unittest.TestCase):
                                  count, kwargs.pop("duration", 5.0), "16:9 (Widescreen)", 0.4, kwargs.pop("seed", 100),
                                  8, "res_multistep", "simple", sigmas=kwargs.pop("sigmas", torch.tensor([1.0, 0.0])),
                                  **kwargs)
+
+    def placeholder_video(self):
+        # Prompt/seed unit tests do not render media; an ordinary file handle keeps concatenation lazy.
+        return module.InputImpl.VideoFromFile(str(self.cache_directory / "unused.mp4"))
 
     def test_prompt_order_shared_prompt_and_empty_section(self):
         plan = PromptPlan.execute("identity", "first\r\n---\r\nsecond", False)[0]
@@ -86,7 +93,7 @@ class TestLongVideo(unittest.TestCase):
         for start, count, repeat, expected in [(2, 2, False, ["two", "three"]),
                                                (3, 3, True, ["three"] * 3)]:
             with self.subTest(start=start), patch.object(LongVideo, "_render_segment",
-                    return_value=(native_latent(), object(), 119)) as render:
+                    return_value=(native_latent(), self.placeholder_video(), 119)) as render:
                 plan = PromptPlan.execute("identity", "one\n---\ntwo\n---\nthree", repeat, start)[0]
                 output = self.run_node(count, plan)
                 self.assertEqual(json.loads(output[2])["segments"], count)
@@ -101,7 +108,7 @@ class TestLongVideo(unittest.TestCase):
     def test_custom_sigmas_skip_scheduler_with_previous_latent(self):
         custom = torch.tensor([1., .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0.])
         with patch.object(module.BasicScheduler, "execute", side_effect=AssertionError("scheduler ran")) as scheduler, \
-             patch.object(LongVideo, "_render_segment", return_value=(native_latent(), object(), 119)) as render:
+             patch.object(LongVideo, "_render_segment", return_value=(native_latent(), self.placeholder_video(), 119)) as render:
             self.run_node(sigmas=custom, denoise=0.5, previous_latent=native_latent())
             scheduler.assert_not_called()
             self.assertEqual(render.call_count, 4)
@@ -120,11 +127,118 @@ class TestLongVideo(unittest.TestCase):
         self.assertTrue(inputs["previous_latent"].optional)
         self.assertEqual(inputs["previous_latent"].io_type, "LATENT")
         self.assertNotIn("previous_video", inputs)
-        self.assertFalse(inputs["merge_video"].default)
+        self.assertNotIn("merge_video", inputs)
         self.assertFalse(inputs["save_latents"].default)
         self.assertFalse(inputs["dynamic_mask"].default)
+        self.assertFalse(inputs["drift_correction"].default)
+        self.assertTrue(inputs["drift_correction"].optional)
+        self.assertEqual(schema.inputs[-1].id, "drift_correction")
         self.assertTrue(schema.is_output_node)
         self.assertEqual([item.is_output_list for item in schema.outputs], [False, False, False, True, True])
+
+    def test_drift_correction_reduces_shift_preserves_context_audio_and_inputs(self):
+        for dtype in (torch.float32, torch.float16, torch.bfloat16):
+            with self.subTest(dtype=dtype):
+                reference = native_latent(dtype=dtype)
+                video, audio = reference["samples"].tensors
+                video.copy_(torch.randn(video.shape, generator=torch.Generator().manual_seed(7)).to(dtype))
+                shifted = {"samples": NestedTensor((video * 1.4 + 0.4, audio.clone())), "_h3_audio_overhang": -1 / 3}
+                original_video, original_audio = (stream.clone() for stream in shifted["samples"].tensors)
+                stats = module.drift_reference(reference, 22)
+                corrected = module.correct_video_drift(shifted, stats, 22, 22)
+                result_video, result_audio = corrected["samples"].tensors
+                self.assertEqual(result_video.dtype, dtype)
+                self.assertEqual(result_video.device, video.device)
+                self.assertIs(result_audio, shifted["samples"].tensors[1])
+                self.assertTrue(torch.equal(result_audio, original_audio))
+                self.assertTrue(torch.equal(shifted["samples"].tensors[0], original_video))
+                self.assertTrue(torch.equal(result_video[:, :, :8], original_video[:, :, :8]))
+                self.assertTrue(torch.equal(result_video[:, :, -8:], original_video[:, :, -8:]))
+                self.assertEqual(corrected["_h3_audio_overhang"], -1 / 3)
+                before = module.drift_reference(shifted, 22)
+                after = module.drift_reference(corrected, 22)
+                for target, old, new in zip(stats, before, after):
+                    self.assertTrue(torch.all((new - target).abs() < (old - target).abs()))
+                self.assertEqual(sum(stat.numel() for stat in stats), 48)
+                self.assertTrue(all(stat.device.type == "cpu" and stat.dtype == torch.float32 for stat in stats))
+
+    def test_drift_constant_and_short_clips_remain_finite_and_unchanged(self):
+        stats = module.drift_reference(native_latent(value=0.5), 22)
+        for frames, context in ((22, 22), (141, 22), (141, 3600)):
+            with self.subTest(frames=frames, context=context):
+                source = native_latent(frames, value=0.2)
+                corrected = module.correct_video_drift(source, stats, 22, context)
+                for original, result in zip(source["samples"].tensors, corrected["samples"].tensors):
+                    self.assertTrue(torch.isfinite(result).all())
+                    self.assertTrue(torch.equal(original, result))
+
+    def test_drift_disabled_and_fresh_single_segment_skip_correction(self):
+        self.mock_pipeline([])
+        with patch.object(module, "drift_reference", side_effect=AssertionError("disabled statistics")), \
+             patch.object(module, "correct_video_drift", side_effect=AssertionError("disabled correction")):
+            output = self.run_node(2, previous_latent=native_latent())
+        self.assertFalse(json.loads(output[2])["drift_correction"])
+        del output
+        with patch.object(module, "correct_video_drift", side_effect=AssertionError("first clip changed")):
+            fresh = self.run_node(1, drift_correction=True)
+        self.assertTrue(torch.equal(fresh[1]["samples"].tensors[0], native_latent(124, value=0.3)["samples"].tensors[0]))
+
+    def test_drift_enabled_uses_fixed_small_reference_before_decode_and_save(self):
+        images, full = [], []
+        self.mock_pipeline([], images, full)
+        reference_calls, correction_calls = [], []
+        measure, correct = module.drift_reference, module.correct_video_drift
+        def reference(latent, context):
+            stats = measure(latent, context)
+            reference_calls.append(stats)
+            return stats
+        def correction(latent, stats, trim, context):
+            correction_calls.append((stats, trim, context))
+            return correct(latent, stats, trim, context)
+        with patch.object(module, "correct_video_drift", new=correction), \
+             patch.object(module, "drift_reference", new=reference):
+            output = self.run_node(4, drift_correction=True, save_latents=True)
+        self.assertEqual(len(reference_calls), 1)
+        self.assertEqual(len(correction_calls), 3)
+        self.assertTrue(all(call[0] is reference_calls[0] for call in correction_calls))
+        self.assertTrue(all(call[1:] == (22, 22) for call in correction_calls))
+        self.assertEqual(json.loads(output[2])["frames_per_segment"], [124, 119, 119, 119])
+        self.assertEqual(len(output[4]), 4)
+        loaded = LoadLatent.execute(output[4][-1])[0]
+        for original, restored in zip(output[1]["samples"].tensors, loaded["samples"].tensors):
+            self.assertTrue(torch.equal(original, restored))
+
+    def test_drift_resume_measures_full_input_before_context_copy(self):
+        source = native_latent(value=0.7)
+        self.mock_pipeline([])
+        with patch.object(module, "drift_reference", wraps=module.drift_reference) as reference, \
+             patch.object(module, "correct_video_drift", wraps=module.correct_video_drift) as correct:
+            self.run_node(1, drift_correction=True, previous_latent=source)
+        reference.assert_called_once_with(source, 22)
+        self.assertEqual(correct.call_count, 1)
+        self.assertTrue(torch.equal(source["samples"].tensors[0], native_latent(value=0.7)["samples"].tensors[0]))
+
+    def test_corrected_latent_is_used_for_decode_output_and_archive_without_resampling(self):
+        self.mock_pipeline([])
+        source = native_latent()
+        video, audio = source["samples"].tensors
+        video.copy_(torch.randn(video.shape, generator=torch.Generator().manual_seed(8)))
+        sampled = {"samples": NestedTensor((video * 1.4 + 0.4, audio))}
+        expected = module.correct_video_drift(sampled, module.drift_reference(source, 22), 22, 22)
+        self.assertFalse(torch.equal(expected["samples"].tensors[0], sampled["samples"].tensors[0]))
+        def decode(vae, latent):
+            self.assertTrue(torch.equal(latent["samples"].tensors[0], expected["samples"].tensors[0]))
+            self.assertIs(latent["samples"].tensors[1], audio)
+            return (torch.zeros(141, 32, 32, 3),)
+        with patch.object(module.SamplerCustomAdvanced, "execute", return_value=io.NodeOutput(sampled, sampled)) as sampler, \
+             patch.object(module.nodes.VAEDecode, "decode", new=staticmethod(decode)):
+            output = self.run_node(1, previous_latent=source, drift_correction=True, save_latents=True)
+        self.assertEqual(sampler.call_count, 1)
+        loaded = LoadLatent.execute(output[4][0])[0]
+        for original, restored, returned in zip(expected["samples"].tensors, loaded["samples"].tensors,
+                                                output[1]["samples"].tensors):
+            self.assertTrue(torch.equal(original, restored))
+            self.assertTrue(torch.equal(original, returned))
 
     def test_official_seed_modes_and_boundaries(self):
         self.assertEqual(LongVideo.GET_NODE_INFO_V1()["input"]["required"]["seed_mode"][1]["options"],
@@ -136,7 +250,7 @@ class TestLongVideo(unittest.TestCase):
                  ("decrement", 1, [1, 0, 0, 0]), ("randomize", 100, [100, 0, maximum, 17])]
         for mode, start, expected in cases:
             with self.subTest(mode=mode, start=start), \
-                 patch.object(LongVideo, "_render_segment", return_value=(native_latent(), object(), 119)) as render, \
+                 patch.object(LongVideo, "_render_segment", return_value=(native_latent(), self.placeholder_video(), 119)) as render, \
                  patch.object(module.random, "randint", side_effect=[0, maximum, 17]) as randomized:
                 output = self.run_node(seed=start, seed_mode=mode)
                 self.assertEqual([call.args[10] for call in render.call_args_list], expected)
@@ -144,7 +258,7 @@ class TestLongVideo(unittest.TestCase):
                 self.assertEqual(randomized.call_count, 3 if mode == "randomize" else 0)
 
     def test_randomize_redraws_only_later_segments_on_each_run(self):
-        with patch.object(LongVideo, "_render_segment", return_value=(native_latent(), object(), 119)) as render, \
+        with patch.object(LongVideo, "_render_segment", return_value=(native_latent(), self.placeholder_video(), 119)) as render, \
              patch.object(module.random, "randint", side_effect=[11, 12, 21, 22]) as randomized:
             first = self.run_node(count=3, seed=100, seed_mode="randomize")
             second = self.run_node(count=3, seed=100, seed_mode="randomize")
@@ -280,7 +394,7 @@ class TestLongVideo(unittest.TestCase):
             self.assertTrue(all(ref() is None for ref in image_refs), "decoded images accumulated")
             self.assertTrue(all(ref() is None for ref in full_refs), "full intermediate LATENT accumulated")
             # Previous files must already exist before the next segment's conditioning starts.
-            self.assertEqual(len(list(self.directory.rglob("segment_*.mp4"))), len(seen))
+            self.assertEqual(len(list(self.cache_directory.rglob("segment_*.mp4"))), len(seen))
             if interrupt_after is not None and len(seen) == interrupt_after:
                 raise RuntimeError("test interrupted")
             seen.append(kwargs)
@@ -352,7 +466,7 @@ class TestLongVideo(unittest.TestCase):
             render.assert_not_called()
         self.assertEqual(list(self.directory.rglob("segment_*")), [])
         with self.assertRaisesRegex(Exception, "outside the output"):
-            self.run_node(1, filename_prefix="../escape/H3")
+                self.run_node(1, save_latents=True, filename_prefix="../escape/H3")
 
     def test_latent_list_scans_nested_directories_and_refreshes_newest_first(self):
         roots = {kind: self.directory / kind for kind in ("output", "input", "temp")}
@@ -415,39 +529,121 @@ class TestLongVideo(unittest.TestCase):
                          [("GET", latent_io.LATENT_LIST_ROUTE)])
 
 
-    def test_streaming_save_retains_only_tail_and_blocked_merge_skips_native_save(self):
+    def test_temp_cache_retains_only_tail_and_default_combined_output_is_lazy(self):
         seen, images, full = [], [], []
         self.mock_pipeline(seen, images, full)
-        with patch.object(module.InputImpl, "VideoFromList", side_effect=AssertionError("merged while disabled")):
+        combined = module.InputImpl.VideoFromList
+        with patch.object(combined, "save_to", side_effect=AssertionError("merged output saved internally")), \
+             patch.object(combined, "get_stream_source", side_effect=AssertionError("merged output materialized internally")):
             output = self.run_node()
         self.assertEqual([item["length"] for item in seen], [124, 141, 141, 141])
         info = json.loads(output[2])
         self.assertEqual(info["frames_per_segment"], [124, 119, 119, 119])
         self.assertEqual(info["context_cache_peak_bytes"], (24 * 12 * 2 * 2 + 32 * 2 * 65) * 4)
-        self.assertIsInstance(output[0], ExecutionBlocker)
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 4)
+        self.assertIsInstance(output[0], combined)
+        self.assertEqual(output[0].get_frame_count(), 481)
+        self.assertEqual(output[0].videos, output[3])
+        self.assertEqual(len(list(self.cache_directory.rglob("*.mp4"))), 4)
+        self.assertEqual(list(self.directory.iterdir()), [])
         self.assertEqual(list(self.directory.rglob("*.h3latent")), [])
-        self.assertEqual(len(output.ui["images"]), 1)
+        self.assertEqual(output.ui, {})
+        self.assertEqual(info["video_storage"], "temp")
+        self.assertIsNone(info["manifest"])
         self.assertTrue(all(ref() is None for ref in full[:-2]))
         for ref, stream in zip(full[-2:], output[1]["samples"].tensors):
             self.assertIs(ref(), stream)
         cached, _, _ = execution.get_output_from_returns([output], LongVideo)
-        with patch.object(SaveVideo, "execute", side_effect=AssertionError("blocked SaveVideo executed")):
-            _, previews, _, _ = asyncio.run(execution.get_output_data("test", "merged", SaveVideo,
-                {"video": cached[0], "filename_prefix": ["combined"], "format": ["auto"]}))
-        self.assertEqual(previews, {})
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 4)
+        _, previews, graph, pending = asyncio.run(execution.get_output_data("test", "merged", SaveVideo,
+            {"video": cached[0], "filename_prefix": ["combined"], "format": ["auto"]}))
+        self.assertFalse(graph or pending)
+        self.assertEqual(len(previews["images"]), 1)
+        paths = list(self.directory.rglob("*.mp4"))
+        self.assertEqual(len(paths), 1)
+        with av.open(str(paths[0])) as container:
+            self.assertEqual(container.streams.video[0].frames, 481)
+            self.assertEqual(len(container.streams.audio), 1)
+
+    def test_external_saver_writes_each_segment_once_without_internal_output_video(self):
+        self.mock_pipeline([])
+        output = self.run_node(count=2)
+        self.assertEqual(list(self.directory.iterdir()), [])
+        cached, _, _ = execution.get_output_from_returns([output], LongVideo)
+        _, previews, graph, pending = asyncio.run(execution.get_output_data("test", "parts", SaveVideo,
+            {"video": cached[3], "filename_prefix": ["parts/H3"], "format": ["auto"]}))
+        self.assertFalse(graph or pending)
+        self.assertEqual(len(previews["images"]), 2)
+        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 2)
+        self.assertEqual(len(list(self.cache_directory.rglob("*.mp4"))), 2)
+        for item, frames in zip(previews["images"], [124, 119]):
+            with av.open(str(self.directory / item["subfolder"] / item["filename"])) as container:
+                self.assertEqual(container.streams.video[0].frames, frames)
+                self.assertEqual(len(container.streams.audio), 1)
+
+    def test_native_executor_reuses_fixed_seed_cache_when_full_saver_is_added_after_parts(self):
+        seen = []
+        self.mock_pipeline(seen)
+
+        class TestInputs:
+            RETURN_TYPES = ("MODEL", "CLIP", "VAE", "VAE", "SIGMAS", "H3_PROMPTS")
+            FUNCTION = "load"
+
+            @classmethod
+            def INPUT_TYPES(cls):
+                return {"required": {}}
+
+            @classmethod
+            def load(cls):
+                return (None, None, None, None, torch.tensor([1.0, 0.0]),
+                        {"prompts": ["one"], "repeat_last": True})
+
+        prompt = {
+            "inputs": {"class_type": "H3LongVideoTestInputs", "inputs": {}},
+            "long": {"class_type": "H3LongVideo", "inputs": {
+                "model": ["inputs", 0], "clip": ["inputs", 1], "vae": ["inputs", 2],
+                "audio_vae": ["inputs", 3], "sigmas": ["inputs", 4], "prompts": ["inputs", 5],
+                "segments": 2, "duration": 5.0, "aspect_ratio": "16:9 (Widescreen)",
+                "megapixels": 0.4, "seed": 100, "seed_mode": "fixed", "steps": 8,
+                "sampler_name": "res_multistep", "scheduler": "simple"}},
+            "parts": {"class_type": "SaveVideo", "inputs": {
+                "video": ["long", 3], "filename_prefix": "native/part", "format": "mp4", "codec": "h264"}},
+        }
+        server = SimpleNamespace(client_id=None, last_node_id=None, send_sync=lambda *args, **kwargs: None)
+        executor = execution.PromptExecutor(server, cache_args={"ram": 0, "ram_inactive": 0})
+        with patch.dict(nodes.NODE_CLASS_MAPPINGS, {
+                "H3LongVideoTestInputs": TestInputs, "H3LongVideo": LongVideo, "SaveVideo": SaveVideo}):
+            executor.execute(copy.deepcopy(prompt), "h3-long-parts", execute_outputs=["long", "parts"])
+            self.assertTrue(executor.success, executor.status_messages)
+            parts = set(self.directory.rglob("*.mp4"))
+            self.assertEqual(len(parts), 2)
+            self.assertEqual(len(seen), 2)
+            cache_paths = set(self.cache_directory.rglob("*.mp4"))
+            self.assertEqual(len(cache_paths), 2)
+            prompt["full"] = {"class_type": "SaveVideo", "inputs": {
+                "video": ["long", 0], "filename_prefix": "native/full", "format": "mp4", "codec": "h264"}}
+            executor.execute(copy.deepcopy(prompt), "h3-long-full", execute_outputs=["long", "parts", "full"])
+        self.assertTrue(executor.success, executor.status_messages)
+        self.assertEqual(len(seen), 2, "adding the full saver generated the fixed-seed segments again")
+        self.assertEqual(set(self.cache_directory.rglob("*.mp4")), cache_paths)
+        files = set(self.directory.rglob("*.mp4"))
+        self.assertEqual(len(files), 3, "cached part saver wrote duplicate segment files")
+        complete = files - parts
+        self.assertEqual(len(complete), 1)
+        with av.open(str(complete.pop())) as container:
+            self.assertEqual(container.streams.video[0].frames, 243)
+            self.assertEqual(len(container.streams.audio), 1)
 
     def test_merge_and_latent_save_export_packets_audio_metadata_and_paths(self):
         seen, images, full = [], [], []
         refs = {"ref_images": {"ref_image_0": object()}, "ref_videos": {"ref_video_0": object()},
                 "ref_video_audios": {"ref_video_audio_0": object()}, "ref_audios": {"ref_audio_0": object()}}
         self.mock_pipeline(seen, images, full, refs)
-        output = self.run_node(merge_video=True, save_latents=True, **refs)
+        output = self.run_node(save_latents=True, **refs)
         info = json.loads(output[2])
         self.assertEqual(info["total_frames"], 481)
         self.assertEqual(len(output[4]), 4)
         self.assertEqual(len(output.ui["latents"]), 1)
+        self.assertNotIn("images", output.ui)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
         cached, _, _ = execution.get_output_from_returns([output], LongVideo)
         self.assertEqual(len(cached[4]), 4)
         _, previews, has_graph, pending = asyncio.run(execution.get_output_data("test", "merged", SaveVideo,
@@ -456,7 +652,7 @@ class TestLongVideo(unittest.TestCase):
                                      io.Hidden.extra_pnginfo: {"workflow": {"nodes": []}}}}))
         self.assertFalse(has_graph or pending)
         merged = previews["images"][0]
-        paths = [self.directory / path for path in info["video_paths"]]
+        paths = [Path(folder_paths.get_annotated_filepath(path)) for path in info["video_paths"]]
         paths.append(self.directory / merged["subfolder"] / merged["filename"])
         packets = []
         for path, frames in zip(paths, [124, 119, 119, 119, 481]):
@@ -474,14 +670,16 @@ class TestLongVideo(unittest.TestCase):
         manifest = self.directory / info["manifest"]
         records = [json.loads(line) for line in manifest.read_text("utf-8").splitlines()]
         self.assertEqual([record["seed"] for record in records], [100, 101, 102, 103])
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 5)
+        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 1)
+        self.assertEqual(len(list(self.cache_directory.rglob("*.mp4"))), 4)
         self.assertTrue(all(ref() is None for ref in images))
 
-    def test_interrupt_keeps_completed_video_latent_and_seed_record(self):
+    def test_interrupt_cleans_video_cache_and_keeps_completed_latent_and_seed_record(self):
         self.mock_pipeline([], interrupt_after=1)
         with self.assertRaisesRegex(RuntimeError, "interrupted"):
             self.run_node(save_latents=True)
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 1)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
+        self.assertEqual(list(self.cache_directory.iterdir()), [])
         self.assertEqual(len(list(self.directory.rglob("*.h3latent"))), 1)
         records = list(self.directory.rglob("segments.jsonl"))[0].read_text("utf-8").splitlines()
         self.assertEqual(len(records), 1)
@@ -499,11 +697,13 @@ class TestLongVideo(unittest.TestCase):
             v3_data={"hidden_inputs": {io.Hidden.prompt: {"native_execution": True},
                                      io.Hidden.extra_pnginfo: {"workflow": {"nodes": []}}}}))
         self.assertFalse(graph or pending)
-        self.assertEqual(len(previews["images"]), 1)
-        self.assertIsInstance(cached[0][0], ExecutionBlocker)
+        self.assertEqual(previews, {})
+        self.assertEqual(list(self.directory.iterdir()), [])
+        self.assertIsInstance(cached[0][0], module.InputImpl.VideoFromList)
+        self.assertEqual(cached[0][0].get_frame_count(), 124)
         self.assertEqual(len(cached[3]), 1)
         info = json.loads(cached[2][0])
-        with av.open(str(self.directory / info["video_paths"][0])) as container:
+        with av.open(folder_paths.get_annotated_filepath(info["video_paths"][0])) as container:
             self.assertEqual(json.loads(container.metadata["prompt"]), {"native_execution": True})
 
     def test_dynamic_enabled_single_fresh_segment_uses_normal_path(self):
@@ -554,13 +754,15 @@ class TestLongVideo(unittest.TestCase):
         with patch.object(module.BasicGuider, "execute",
                 new=lambda model, positive: io.NodeOutput(SimpleNamespace(model=model, positive=positive))), \
              patch.object(module.SamplerCustomAdvanced, "execute", new=sample):
-            result = self.run_node(model=patcher, dynamic_mask=True, sigmas=torch.tensor([1., .8, .3, 0.]))
+            result = self.run_node(model=patcher, dynamic_mask=True, drift_correction=True,
+                                   sigmas=torch.tensor([1., .8, .3, 0.]))
         self.assertEqual(modes, [False, True, True, True])
         self.assertEqual(json.loads(result[2])["continuation_methods"], ["none", "dynamic_mask", "dynamic_mask", "dynamic_mask"])
         self.assertEqual(json.loads(result[2])["frames_per_segment"], [124, 119, 119, 119])
         self.assertNotIn("denoise_mask_function", patcher.model_options)
         self.assertEqual(set(patcher.wrappers[WrappersMP.APPLY_MODEL]), {"existing_acceleration"})
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 4)
+        self.assertEqual(len(list(self.cache_directory.rglob("*.mp4"))), 4)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
         self.assertTrue(all(state.current_mask is None for state in states), "loaded model may retain old GPU masks")
 
     def test_dynamic_sampler_failure_releases_live_mask(self):
@@ -589,7 +791,8 @@ class TestLongVideo(unittest.TestCase):
                 self.run_node(model=patcher, dynamic_mask=True)
         self.assertEqual(len(states), 1)
         self.assertIsNone(states[0].current_mask)
-        self.assertEqual(len(list(self.directory.rglob("*.mp4"))), 1)
+        self.assertEqual(list(self.directory.rglob("*.mp4")), [])
+        self.assertEqual(list(self.cache_directory.iterdir()), [])
 
     def test_partial_save_failure_removes_temporary_files(self):
         self.mock_pipeline([])
@@ -602,6 +805,7 @@ class TestLongVideo(unittest.TestCase):
                 self.run_node(1)
         self.assertEqual(list(self.directory.rglob("*.mp4")), [])
         self.assertEqual(list(self.directory.rglob("*.tmp")), [])
+        self.assertEqual(list(self.cache_directory.iterdir()), [])
         def fail_latent(tensors, path, **kwargs):
             Path(path).write_bytes(b"incomplete")
             raise RuntimeError("latent save failed")

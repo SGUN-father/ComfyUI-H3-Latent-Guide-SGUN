@@ -3,6 +3,8 @@ import logging
 import os
 import random
 import re
+import shutil
+import tempfile
 
 import comfy.model_management
 import comfy.samplers
@@ -10,7 +12,6 @@ import folder_paths
 import nodes
 from comfy.cli_args import args
 from comfy_api.latest import InputImpl, Types, io, ui
-from comfy_execution.graph_utils import ExecutionBlocker
 from comfy_extras.nodes_audio import VAEDecodeAudio
 from comfy_extras.nodes_custom_sampler import BasicGuider, BasicScheduler, Noise_RandomNoise, SamplerCustomAdvanced
 from comfy_extras.nodes_minimax_h3 import MiniMaxH3ReferenceToVideo, align_frame_count
@@ -20,6 +21,7 @@ from comfy_extras.nodes_video import CreateVideo
 from . import MiniMaxH3LatentContinuationGuide, _av_streams, _copy_context_tail
 from .latent_io import save_h3_latent
 from .dynamic_mask import check_dynamic_mask_support, prepare_dynamic_mask
+from .drift_correction import correct_video_drift, drift_reference
 
 
 H3Prompts = io.Custom("H3_PROMPTS")
@@ -76,7 +78,7 @@ class H3LongVideo(io.ComfyNode):
             display_name="H3 长视频：分段生成 + 合并 by神棍",
             category="video/minimax",
             search_aliases=["H3 一体", "H3 long video", "潜空间长视频"],
-            description="逐段生成并即时保存视频，可选保存完整音视频LATENT。片段从磁盘读取，不在内存累积；开启合并后连接外部Save Video保存整片。",
+            description="逐段生成并使用临时磁盘缓存，可选保存完整音视频LATENT。合并视频连接外部Save Video时才实际合并、保存，无需开关；分段视频也由外部保存。",
             inputs=[
                 io.Model.Input("model"),
                 io.Clip.Input("clip"),
@@ -107,12 +109,10 @@ class H3LongVideo(io.ComfyNode):
                                tooltip="只用于内部调度器；连接自定义 sigmas 时直接使用输入序列。"),
                 io.Combo.Input("ref_image_size", display_name="参考图尺寸", options=["match", "max"],
                                default="match", advanced=True),
-                io.Boolean.Input("merge_video", display_name="合并视频", default=False,
-                                 tooltip="关闭时只即时保存各片段，并自动跳过合并视频输出下游的Save Video；开启后提供合并VIDEO。两种模式均从磁盘读取片段。"),
                 io.Boolean.Input("save_latents", display_name="保存每段 LATENT", default=False,
                                  tooltip="每段完成后保存完整音视频.h3latent，可用本插件的H3读取音视频LATENT节点恢复续接。增加磁盘占用，不在内存累积各段LATENT。"),
-                io.String.Input("filename_prefix", display_name="分段保存前缀", default="video/H3-SGUN/H3",
-                                tooltip="在ComfyUI output内为每次运行建立独立目录，视频和可选LATENT按段号配对保存。"),
+                io.String.Input("filename_prefix", display_name="LATENT 保存前缀", default="video/H3-SGUN/H3",
+                                tooltip="仅开启LATENT保存时生效，在output建立独立目录保存LATENT和生成清单；视频文件名由外部Save Video控制。"),
                 io.Boolean.Input("dynamic_mask", display_name="动态掩码", default=False,
                                  tooltip="仅续接时生效。按实际sigma动态重绘上下文，保护接缝及音频前缀；用于对照漂移控制，不保证恢复丢失细节。需原生H3音视频掩码支持，不能叠加其他动态掩码。"),
                 io.Autogrow.Input("ref_images", display_name="参考图", optional=True,
@@ -133,13 +133,18 @@ class H3LongVideo(io.ComfyNode):
                         prefix="ref_audio_", min=0, max=100)),
                 io.Latent.Input("previous_latent", display_name="上一段 LATENT", optional=True,
                                 tooltip="连接H3读取音视频LATENT或上一生成节点的最后一段LATENT。必须包含完整音视频且分辨率相同；生成段数设1可单独重抽下一段。"),
+                io.Boolean.Input("drift_correction", display_name="防偏色与亮度漂移", default=False,
+                                 optional=True, advanced=True,
+                                 tooltip="轻量校正续段视频LATENT的颜色与对比度统计，首段不改；音频、头部重叠和尾部续接上下文保持原样，不增加采样。适合同场景连续镜头，主动换光或换场景时建议关闭。"),
             ],
             hidden=[io.Hidden.prompt, io.Hidden.extra_pnginfo],
             is_output_node=True,
-            outputs=[io.Video.Output(display_name="合并视频"), io.Latent.Output(display_name="最后一段 latent"),
+            outputs=[io.Video.Output(display_name="合并视频",
+                                     tooltip="外接Save Video时才实际合并并保存完整视频，无需开关。"),
+                     io.Latent.Output(display_name="最后一段 latent"),
                      io.String.Output(display_name="生成信息"),
                      io.Video.Output(display_name="分段视频", is_output_list=True,
-                                     tooltip="已即时保存的VIDEO文件列表；无需再接Save Video保存，可用于后续编辑。"),
+                                     tooltip="临时缓存的VIDEO列表，连接外部Save Video逐段正式保存，也可用于后续编辑。"),
                      io.String.Output(display_name="LATENT 文件路径", is_output_list=True,
                                      tooltip="开启保存每段LATENT后，输出按段号排序的.h3latent路径；关闭时为空列表。")],
         )
@@ -155,7 +160,7 @@ class H3LongVideo(io.ComfyNode):
     def _render_segment(cls, model, clip, vae, audio_vae, prompt, width, height, base_frames, previous,
                         context_frames, seed, sampler, sigmas, ref_images, ref_image_size,
                         video_path, metadata, ref_videos=None, ref_video_audios=None, ref_audios=None,
-                        dynamic_mask=False):
+                        dynamic_mask=False, drift_stats=None):
         overlap = 0
         length = base_frames
         if previous is not None:
@@ -180,6 +185,8 @@ class H3LongVideo(io.ComfyNode):
                 model.model_options["denoise_mask_function"].__self__.current_mask = None
         del guider, positive, latent, previous, model
         comfy.model_management.throw_exception_if_processing_interrupted()
+        if drift_stats is not None:
+            sampled = correct_video_drift(sampled, drift_stats, overlap, context_frames)
         images = nodes.VAEDecode().decode(vae, sampled)[0]
         audio = VAEDecodeAudio.execute(audio_vae, sampled)[0]
         images = images[overlap:]
@@ -199,8 +206,8 @@ class H3LongVideo(io.ComfyNode):
                 seed, steps, sampler_name, scheduler, context_frames=22, seed_mode="increment",
                 denoise=1.0, ref_image_size="match", ref_images=None, ref_videos=None,
                 ref_video_audios=None, ref_audios=None, sigmas=None,
-                previous_latent=None, merge_video=False, save_latents=False, filename_prefix="video/H3-SGUN/H3",
-                dynamic_mask=False):
+                previous_latent=None, save_latents=False, filename_prefix="video/H3-SGUN/H3",
+                dynamic_mask=False, drift_correction=False):
         count = segments
         texts = prompts["prompts"]
         if len(texts) < count and not prompts["repeat_last"]:
@@ -217,83 +224,92 @@ class H3LongVideo(io.ComfyNode):
         sampler = comfy.samplers.sampler_object(sampler_name)
         if sigmas is None:
             sigmas = BasicScheduler.execute(model, scheduler, steps, denoise)[0]
-        folder, basename, counter, _, _ = folder_paths.get_save_image_path(
-            filename_prefix, folder_paths.get_output_directory(), width, height)
-        while True:
-            run_folder = os.path.join(folder, f"{basename}_{counter:05}")
-            try:
-                os.mkdir(run_folder)
-                break
-            except FileExistsError:
-                counter += 1
-        subfolder = os.path.relpath(run_folder, folder_paths.get_output_directory()).replace(os.sep, "/")
+        run_folder, subfolder = None, None
+        if save_latents:
+            folder, basename, counter, _, _ = folder_paths.get_save_image_path(
+                filename_prefix, folder_paths.get_output_directory(), width, height)
+            while True:
+                run_folder = os.path.join(folder, f"{basename}_{counter:05}")
+                try:
+                    os.mkdir(run_folder)
+                    break
+                except FileExistsError:
+                    counter += 1
+            subfolder = os.path.relpath(run_folder, folder_paths.get_output_directory()).replace(os.sep, "/")
+        cache_root = folder_paths.get_temp_directory()
+        os.makedirs(cache_root, exist_ok=True)
+        cache_folder = tempfile.mkdtemp(prefix="h3_sgun_", dir=cache_root)
+        cache_subfolder = os.path.relpath(cache_folder, cache_root).replace(os.sep, "/")
         metadata = None
         if not args.disable_metadata:
             metadata = dict(cls.hidden.extra_pnginfo or {})
             if cls.hidden.prompt is not None:
                 metadata["prompt"] = cls.hidden.prompt
+        drift_stats = drift_reference(previous_latent, context_frames) if drift_correction and previous_latent is not None else None
         previous = _copy_context_tail(previous_latent, context_frames) if previous_latent is not None else None
         videos, frame_counts, segment_seeds, continuation_methods = [], [], [], []
-        video_results, latent_results, latent_paths = [], [], []
+        video_paths, latent_results, latent_paths = [], [], []
         context_cache_peak_bytes = 0
-        for index in range(count):
+        try:
+            for index in range(count):
+                comfy.model_management.throw_exception_if_processing_interrupted()
+                logging.info("H3 长视频：第 %s/%s 段，%s×%s", index + 1, count, width, height)
+                if seed_mode == "increment":
+                    segment_seed = min(0xffffffffffffffff, seed + index)
+                elif seed_mode == "decrement":
+                    segment_seed = max(0, seed - index)
+                elif seed_mode == "randomize" and index > 0:
+                    segment_seed = random.randint(0, 0xffffffffffffffff)
+                else:
+                    segment_seed = seed
+                video_filename = f"segment_{index + 1:04}.mp4"
+                video_path = os.path.join(cache_folder, video_filename)
+                method = ("dynamic_mask" if dynamic_mask else "guide") if previous is not None else "none"
+                previous, video, frames = cls._render_segment(
+                    model, clip, vae, audio_vae, texts[min(index, len(texts) - 1)], width, height, base_frames,
+                    previous, context_frames, segment_seed, sampler, sigmas, ref_images, ref_image_size,
+                    video_path=video_path, metadata=metadata,
+                    ref_videos=ref_videos, ref_video_audios=ref_video_audios, ref_audios=ref_audios,
+                    dynamic_mask=dynamic_mask, drift_stats=drift_stats)
+                if drift_correction and drift_stats is None:
+                    drift_stats = drift_reference(previous, context_frames)
+                videos.append(video)
+                video_paths.append(f"{cache_subfolder}/{video_filename} [temp]")
+                frame_counts.append(frames)
+                segment_seeds.append(segment_seed)
+                continuation_methods.append(method)
+                if save_latents:
+                    latent_filename = f"segment_{index + 1:04}.h3latent"
+                    record = {"segment": index + 1, "seed": segment_seed, "width": width, "height": height,
+                              "fps": 24, "frames": frames, "continuation_method": method}
+                    save_h3_latent(previous, os.path.join(run_folder, latent_filename), record)
+                    latent_results.append(ui.SavedResult(latent_filename, subfolder, io.FolderType.output))
+                    latent_paths.append(f"{subfolder}/{latent_filename} [output]")
+                    record["latent"] = latent_paths[-1]
+                    with open(os.path.join(run_folder, "segments.jsonl"), "a", encoding="utf-8") as manifest:
+                        manifest.write(json.dumps(record, ensure_ascii=False) + "\n")
+                if index < count - 1:
+                    previous = _copy_context_tail(previous, context_frames)
+                    context_cache_peak_bytes = max(context_cache_peak_bytes,
+                        sum(stream.numel() * stream.element_size() for stream in previous["samples"].tensors))
             comfy.model_management.throw_exception_if_processing_interrupted()
-            logging.info("H3 长视频：第 %s/%s 段，%s×%s", index + 1, count, width, height)
-            if seed_mode == "increment":
-                segment_seed = min(0xffffffffffffffff, seed + index)
-            elif seed_mode == "decrement":
-                segment_seed = max(0, seed - index)
-            elif seed_mode == "randomize" and index > 0:
-                segment_seed = random.randint(0, 0xffffffffffffffff)
-            else:
-                segment_seed = seed
-            video_filename = f"segment_{index + 1:04}.mp4"
-            video_path = os.path.join(run_folder, video_filename)
-            method = ("dynamic_mask" if dynamic_mask else "guide") if previous is not None else "none"
-            previous, video, frames = cls._render_segment(
-                model, clip, vae, audio_vae, texts[min(index, len(texts) - 1)], width, height, base_frames,
-                previous, context_frames, segment_seed, sampler, sigmas, ref_images, ref_image_size,
-                video_path=video_path, metadata=metadata,
-                ref_videos=ref_videos, ref_video_audios=ref_video_audios, ref_audios=ref_audios,
-                dynamic_mask=dynamic_mask)
-            videos.append(video)
-            video_results.append(ui.SavedResult(video_filename, subfolder, io.FolderType.output))
-            frame_counts.append(frames)
-            segment_seeds.append(segment_seed)
-            continuation_methods.append(method)
-            record = {"segment": index + 1, "seed": segment_seed, "width": width, "height": height,
-                      "fps": 24, "frames": frames, "video": f"{subfolder}/{video_filename}",
-                      "continuation_method": method}
-            if save_latents:
-                latent_filename = f"segment_{index + 1:04}.h3latent"
-                save_h3_latent(previous, os.path.join(run_folder, latent_filename), record)
-                latent_results.append(ui.SavedResult(latent_filename, subfolder, io.FolderType.output))
-                latent_paths.append(f"{subfolder}/{latent_filename} [output]")
-                record["latent"] = latent_paths[-1]
-            with open(os.path.join(run_folder, "segments.jsonl"), "a", encoding="utf-8") as manifest:
-                manifest.write(json.dumps(record, ensure_ascii=False) + "\n")
-            if index < count - 1:
-                previous = _copy_context_tail(previous, context_frames)
-                context_cache_peak_bytes = max(context_cache_peak_bytes,
-                    sum(stream.numel() * stream.element_size() for stream in previous["samples"].tensors))
-        comfy.model_management.throw_exception_if_processing_interrupted()
-        combined = ExecutionBlocker(None)
-        if merge_video:
-            logging.info("H3 长视频：合并 %s 个已保存片段", count)
             combined = InputImpl.VideoFromList(videos, codec=Types.VideoCodec("h264"))
-        info = json.dumps({"width": width, "height": height, "fps": 24, "segments": count,
-                           "seed_mode": seed_mode, "seeds": segment_seeds,
-                           "continued_from_latent": previous_latent is not None,
-                           "merge_video": merge_video, "save_latents": save_latents,
-                           "dynamic_mask": dynamic_mask, "continuation_methods": continuation_methods,
-                           "video_storage": "disk", "output_subfolder": subfolder,
-                           "video_paths": [item["subfolder"] + "/" + item["filename"] for item in video_results],
-                           "latent_paths": latent_paths, "manifest": f"{subfolder}/segments.jsonl",
-                           "frames_per_segment": frame_counts, "total_frames": sum(frame_counts),
-                           "duration_seconds": sum(frame_counts) / 24,
-                           "context_cache_device": "cpu", "context_cache_peak_bytes": context_cache_peak_bytes},
-                          ensure_ascii=False, indent=2)
-        preview = ui.PreviewVideo(video_results[-1:]).as_dict()
-        if latent_results:
-            preview["latents"] = latent_results[-1:]
-        return io.NodeOutput(combined, previous, info, videos, latent_paths, ui=preview)
+            info = json.dumps({"width": width, "height": height, "fps": 24, "segments": count,
+                               "seed_mode": seed_mode, "seeds": segment_seeds,
+                               "continued_from_latent": previous_latent is not None,
+                               "save_latents": save_latents,
+                               "dynamic_mask": dynamic_mask, "continuation_methods": continuation_methods,
+                               "drift_correction": drift_correction,
+                               "video_storage": "temp", "output_subfolder": subfolder,
+                               "video_paths": video_paths, "latent_paths": latent_paths,
+                               "manifest": f"{subfolder}/segments.jsonl" if save_latents else None,
+                               "frames_per_segment": frame_counts, "total_frames": sum(frame_counts),
+                               "duration_seconds": sum(frame_counts) / 24,
+                               "context_cache_device": "cpu", "context_cache_peak_bytes": context_cache_peak_bytes},
+                              ensure_ascii=False, indent=2)
+            preview = {"latents": latent_results[-1:]} if latent_results else {}
+            return io.NodeOutput(combined, previous, info, videos, latent_paths, ui=preview)
+        except Exception:
+            if folder_paths.is_within_directory(cache_root, cache_folder):
+                shutil.rmtree(cache_folder)
+            raise

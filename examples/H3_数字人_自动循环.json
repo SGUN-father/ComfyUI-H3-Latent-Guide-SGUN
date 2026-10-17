@@ -1,0 +1,798 @@
+{
+  "id": "59605e57-2341-4a48-86de-2f381dc353d7",
+  "revision": 0,
+  "last_node_id": 215,
+  "last_link_id": 10,
+  "nodes": [
+    {
+      "id": 127,
+      "type": "UNETLoader",
+      "pos": [
+        0,
+        0
+      ],
+      "size": [
+        640,
+        90
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "模型",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            1
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "UNETLoader"
+      },
+      "widgets_values": [
+        "Cobijada_H3_Hybrid_Uncensored_pruned_hybrid_int8_convrot_pruned.safetensors",
+        "default"
+      ],
+      "widgets_values_named": {
+        "unet_name": "Cobijada_H3_Hybrid_Uncensored_pruned_hybrid_int8_convrot_pruned.safetensors",
+        "weight_dtype": "default"
+      }
+    },
+    {
+      "id": 145,
+      "type": "LoraLoaderModelOnly",
+      "pos": [
+        400,
+        0
+      ],
+      "size": [
+        640,
+        90
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "模型",
+          "name": "model",
+          "type": "MODEL",
+          "link": 1
+        }
+      ],
+      "outputs": [
+        {
+          "label": "模型",
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            2
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "LoraLoaderModelOnly"
+      },
+      "widgets_values": [
+        "minimax_h3_DMAD_4step_full_lora_avg_rank_39_bf16.safetensors",
+        1
+      ],
+      "widgets_values_named": {
+        "lora_name": "minimax_h3_DMAD_4step_full_lora_avg_rank_39_bf16.safetensors",
+        "strength_model": 1
+      }
+    },
+    {
+      "id": 128,
+      "type": "CLIPLoader",
+      "pos": [
+        0,
+        190
+      ],
+      "size": [
+        640,
+        120
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "CLIP",
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            3
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "CLIPLoader"
+      },
+      "widgets_values": [
+        "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+        "minimax",
+        "default"
+      ],
+      "widgets_values_named": {
+        "clip_name": "qwen3vl_32b_minimax_h3_int8_convrot.safetensors",
+        "type": "minimax",
+        "device": "default"
+      }
+    },
+    {
+      "id": 119,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        390
+      ],
+      "size": [
+        640,
+        70
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            4
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "minimax_h3_video_vae_fp16.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_video_vae_fp16.safetensors"
+      }
+    },
+    {
+      "id": 120,
+      "type": "VAELoader",
+      "pos": [
+        0,
+        540
+      ],
+      "size": [
+        640,
+        70
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            5
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "VAELoader"
+      },
+      "widgets_values": [
+        "minimax_h3_audio_vae_fp32.safetensors"
+      ],
+      "widgets_values_named": {
+        "vae_name": "minimax_h3_audio_vae_fp32.safetensors"
+      }
+    },
+    {
+      "id": 137,
+      "type": "LoadImage",
+      "pos": [
+        0,
+        740
+      ],
+      "size": [
+        290,
+        330
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "图像",
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            6
+          ]
+        },
+        {
+          "label": "遮罩",
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "c8a4d7dd-4b28-48ae-9c8e-131466fe97da.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "c8a4d7dd-4b28-48ae-9c8e-131466fe97da.png",
+        "upload": "image"
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 174,
+      "type": "LoadAudio",
+      "pos": [
+        400,
+        740
+      ],
+      "size": [
+        340,
+        160
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "label": "音频",
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            7
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "123.flac",
+        null
+      ],
+      "widgets_values_named": {
+        "audio": "123.flac",
+        "upload": null
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 201,
+      "type": "H3VideoPromptPlan",
+      "pos": [
+        850,
+        0
+      ],
+      "size": [
+        600,
+        1020
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "提示词",
+          "type": "H3_PROMPTS",
+          "links": [
+            8
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "H3-Latent-Guide-SGUN",
+        "Node name for S&R": "H3VideoPromptPlan"
+      },
+      "widgets_values": [
+        "subject_definitions:\n<Subject 1> (S1) is the single woman in <Picture 1>. Preserve her face, short dark bob and bangs, pale yellow bucket hat, white T-shirt with black script and yellow stars, cream striped trousers and polka-dot crossbody bag.\n\nsummary:\n[reference generation] A continuous vertical music-video portrait of <Subject 1> performing the supplied source recording in a quiet mountain-village courtyard overlooking tea terraces.\n\nretention_analysis:\n<Subject 1>: fully_preserved - maintain her facial proportions, hairstyle, hat, clothing and accessories throughout.",
+        "detailed_description:\n[Shot 1] Natural photographic footage. Establish an eye-level chest-up frontal portrait of <Subject 1> beside an old timber doorway, with green tea terraces softly behind her in gentle evening light. She follows the actual lead vocal with natural singing or speech movements. Her mouth relaxes during real vocal pauses. Her shoulders stay comfortable, with subtle breaths and occasional blinking. A very slow, short dolly-in stops before the shot becomes an extreme close-up. One visible performer. Keep her mouth clear and the image free of added captions and logos.\n\noverall_soundscape:\nThe actual original source-audio window determines all visible vocal timing, including breaths, sustained notes and pauses. Match the supplied recording; do not replace or re-sing it. No added dialogue or environmental sound effects.\n\nnon_diegetic_music:\nRetain only accompaniment already present in the unchanged source recording.\n\n---\n\ndetailed_description:\n[Shot 1] Continue the incoming pose, framing, camera direction, expression and evening light through the opening 1.625-second video context. <Subject 1> continues the actual vocal phrase already in progress rather than restarting a performance. After the inherited movement settles, her eyes briefly soften toward the familiar doorway and return to the lens with only a small head movement. Her hands remain below the chest-up frame. The camera makes a barely perceptible sideways drift while retaining a nearly frontal view and clear mouth. Maintain the established courtyard and wardrobe.\n\noverall_soundscape:\nThe actual original source-audio window determines all visible vocal timing, including breaths, sustained notes and pauses. Match the supplied recording; do not replace or re-sing it. No added dialogue or environmental sound effects.\n\nnon_diegetic_music:\nRetain only accompaniment already present in the unchanged source recording.\n\n---\n\ndetailed_description:\n[Shot 1] Begin within the incoming performance and preserve its current pose, composition, camera motion and light during the opening 1.625-second video context. Continue lip shapes, jaw movement and breathing according to the actual song window, including real rests. Then settle into a steady, nearly frontal chest-up portrait of <Subject 1>, with a warm attentive gaze, small natural blinks and restrained shoulder movement. Keep the timber doorway and tea terraces softly recognizable. One performer in the established outfit; no new scene, large gestures, added captions or logos.\n\noverall_soundscape:\nThe actual original source-audio window determines all visible vocal timing, including breaths, sustained notes and pauses. Match the supplied recording; do not replace or re-sing it. No added dialogue or environmental sound effects.\n\nnon_diegetic_music:\nRetain only accompaniment already present in the unchanged source recording.",
+        true,
+        1
+      ]
+    },
+    {
+      "id": 200,
+      "type": "H3DigitalHuman",
+      "pos": [
+        1500,
+        0
+      ],
+      "size": [
+        620,
+        780
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 2
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 3
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 4
+        },
+        {
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 5
+        },
+        {
+          "name": "ref_images.ref_image_0",
+          "type": "IMAGE",
+          "link": 6,
+          "shape": 7
+        },
+        {
+          "name": "ref_images.ref_image_1",
+          "type": "IMAGE",
+          "link": null,
+          "shape": 7
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "link": 7
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "link": null
+        },
+        {
+          "name": "prompts",
+          "type": "H3_PROMPTS",
+          "link": 8
+        }
+      ],
+      "outputs": [
+        {
+          "name": "完整视频",
+          "type": "VIDEO",
+          "links": [
+            9
+          ]
+        },
+        {
+          "name": "生成信息",
+          "type": "STRING",
+          "links": []
+        },
+        {
+          "name": "分段视频",
+          "type": "VIDEO",
+          "links": [
+            10
+          ],
+          "shape": 6
+        }
+      ],
+      "properties": {
+        "cnr_id": "H3-Latent-Guide-SGUN",
+        "Node name for S&R": "H3DigitalHuman"
+      },
+      "widgets_values": [
+        "subject_definitions:\n<Subject 1> (S1) is the single woman in <Picture 1>. Preserve her face, short dark bob and bangs, pale yellow bucket hat, white T-shirt with black script and yellow stars, cream striped trousers and polka-dot crossbody bag.\n\nsummary:\n[reference generation] A continuous vertical music-video portrait of <Subject 1> performing the supplied source recording in a quiet mountain-village courtyard overlooking tea terraces.\n\nretention_analysis:\n<Subject 1>: fully_preserved - maintain her facial proportions, hairstyle, hat, clothing and accessories throughout.\n\ndetailed_description:\n[Shot 1] Natural photographic footage. An eye-level chest-up composition clearly shows <Subject 1>'s face and mouth beside an old timber doorway. Green tea terraces and distant mountains appear softly behind her in gentle evening light. She follows the actual lead vocal with natural singing or speech movements, restrained expressions, subtle breathing and occasional blinking. During vocal pauses her lips relax naturally. Maintain the incoming pose, framing, lighting and ongoing motion throughout the continuous performance. Keep the camera steady. One visible performer, with clean framing free of captions and logos.\n\noverall_soundscape:\nThe supplied original recording determines the performance, wording and timing, including its pauses and breaths. Keep the original soundtrack unchanged.\n\nnon_diegetic_music:\nRetain only accompaniment already present in the source recording.",
+        8.0,
+        "9:16 (Portrait Widescreen)",
+        0.4,
+        636223407140008,
+        "fixed",
+        8,
+        "er_sde",
+        "beta",
+        "match",
+        true,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "id": 202,
+      "type": "SaveVideo",
+      "pos": [
+        2200,
+        0
+      ],
+      "size": [
+        480,
+        500
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 9
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "H3_DigitalHuman/Finished/DigitalHuman",
+        "mp4",
+        "h264",
+        "auto"
+      ]
+    },
+    {
+      "id": 203,
+      "type": "SaveVideo",
+      "pos": [
+        2200,
+        600
+      ],
+      "size": [
+        480,
+        500
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "link": 10
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video",
+          "type": "VIDEO",
+          "links": []
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "SaveVideo"
+      },
+      "widgets_values": [
+        "H3_DigitalHuman/Parts/DigitalHuman",
+        "mp4",
+        "h264",
+        "auto"
+      ]
+    },
+    {
+      "id": 210,
+      "type": "MarkdownNote",
+      "pos": [
+        0,
+        1400
+      ],
+      "size": [
+        840,
+        760
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "01｜快速开始",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# H3 原音驱动数字人\n\n## 使用顺序\n1. 在模型、CLIP、视频 VAE、音频 VAE 加载器中选择自己已安装的 **H3 配套文件**。模型文件名是作者本机示例，不会随工作流附送。\n2. 在 **加载图像** 中选择人物参考图，在 **加载音频** 中选择口播或歌曲。单张、脸部清楚、接近视频构图的参考图适合先做测试。\n3. 在 **H3 长视频提示词** 中编辑全片固定描述和分段剧情。\n4. 选择每段时长、宽高比和百万像素，运行一次即可按选定音频长度循环生成。\n\n## 本示例连接\n- 左侧：模型、两个 VAE、人物与音频。\n- 中间：分段提示词与数字人生成。\n- 右侧上方：**完整视频 → 保存视频**。\n- 右侧下方：**分段视频 → 保存视频**。\n\n两路保存都已连接，运行后会得到一份整片和全部分段。只需要一种时，删除或禁用另一个保存节点。仅断开保存节点的输入会留下缺少输入的节点，应一并移除或禁用。\n\n**标准加载和保存节点保留原名。** 工作流不会替你下载模型，也不会自动读取 SRT 或编写 MV 剧情。"
+      ],
+      "color": "#263443",
+      "bgcolor": "#1f2933"
+    },
+    {
+      "id": 211,
+      "type": "MarkdownNote",
+      "pos": [
+        900,
+        1400
+      ],
+      "size": [
+        840,
+        760
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "02｜参考图与分段提示词",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# 参考图与提示词\n\n## 参考图\n使用官方同款可扩展接口，接入一张后会出现下一接口，最多 9 张。接口从 `ref_image_0` 开始，提示词依次引用 `<Picture 1>`、`<Picture 2>`……。\n\n多人物时在全片固定描述中明确主唱、剧情人物和场景各对应哪张图，分段剧情再写谁出镜、谁演唱、其他人的动作。参考图用于约束外观，不保证任何镜头都完全一致。\n\n## 提示词计划\n| 控件 | 用法 |\n| --- | --- |\n| 全片固定描述 | 人物身份、参考图分工、服装、全片视觉与声音约定，加入每一段 |\n| 分段剧情 | 用独占一行的 `---` 分隔，每块对应一次实际采样循环 |\n| 不足时复用最后一段 | 示例为开启，超出已写块数后继续用最后一块 |\n| 起始提示词段号 | 正常全片用 1；只调整选用的文本，不跳过歌曲时间 |\n\n接入“分段提示词”后，数字人节点自己的兼容单一提示词不参与本次生成。未接计划时才整片复用单一提示词。\n\n循环段数由音频决定，**提示词块数不会决定视频总长**。关闭复用后若块数不足，采样前报错。改变每段时长后，应重新核对分段描述对应的歌曲时间。镜头、运镜、表情和 MV 叙事均由你写入这些描述。"
+      ],
+      "color": "#263443",
+      "bgcolor": "#1f2933"
+    },
+    {
+      "id": 212,
+      "type": "MarkdownNote",
+      "pos": [
+        1800,
+        1400
+      ],
+      "size": [
+        840,
+        760
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "03｜循环时间与连续音频",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# 时间窗口与原音\n\n## 每段时长包含上下文\n固定 **24fps**。时长自动选择最接近的合法窗口：5.875、8、10.125、12.25、14.375 秒。续段开头的 **39 帧＝1.625 秒**用于承接前一段，导出时删除重复部分。\n\n| 设置 | 首段最多新增 | 后续每段最多新增 |\n| --- | --- | --- |\n| 每段时长 8 秒 | 8 秒（192 帧） | 6.375 秒（153 帧） |\n| 每段时长 10 秒 | 10.125 秒（243 帧） | 8.5 秒（204 帧） |\n\n最后一段自动选择足够的窗口，并裁到目标终点。因此不能用“总长 ÷ 面板每段时长”简单计算提示词块数。\n\n## 音频选段\n- **音频开始秒数**：从原音的哪个位置开始，默认 0。\n- **生成时长**：0 表示生成从起点到音频结束的全部内容；大于 0 则取对应时长。\n- 输入为单条单声道或立体声音频。\n\n每个循环按原曲的绝对时间取音频，含上下文的部分也按原位置重读；音频潜变量冻结，模型生成画面。分段输出带各自对应的原音。整片保存时以完整选段原音重新编码合成一次，**不会拼接每段 AAC 音轨**。这里保留的是原音内容与时间，不是复制原 MP3 的压缩数据，也不保证所有画面的口型自动完美。"
+      ],
+      "color": "#263443",
+      "bgcolor": "#1f2933"
+    },
+    {
+      "id": 213,
+      "type": "MarkdownNote",
+      "pos": [
+        0,
+        2220
+      ],
+      "size": [
+        840,
+        760
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "04｜参数与低显存设置",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# 参数说明\n\n| 控件 | 节点默认值与含义 |\n| --- | --- |\n| 每段时长 | 8 秒，包含续接上下文；合法窗口见前一说明 |\n| 宽高比 | 9:16；可按需要改横屏 |\n| 百万像素 | 0.4；1.0 约为 100 万像素，具体宽高按模型要求对齐，不是固定 1080p |\n| 种子 | 节点默认 0；本模板保存了固定示例种子，续段内部依次递增 |\n| 生成后控制 | 官方附加控件，控制下次排队使用的起始种子 |\n| 采样步数 | 8；须与实际模型、加速 LoRA 的用法配套 |\n| 采样器 / 调度器 | `er_sde` / `beta` |\n| 参考图尺寸 | `match` 按目标尺寸处理；`max` 沿用官方参考尺寸方式 |\n| 分块解码 | 默认开启，使用官方 VAE 分块解码降低峰值 |\n\n## 可选 SIGMAS\n连接 `sigmas` 后使用外部完整采样序列，覆盖内部步数和调度器；采样器仍生效，序列末尾需为 0。模板中的步数不是所有模型的通用推荐值。\n\n## 低显存测试\n先用较短音频、8 秒窗口、0.4 百万像素测试。显存不足时降低窗口或百万像素。模型权重仍需要相应的显存和系统内存，降低窗口不能保证任意低配都可运行。"
+      ],
+      "color": "#263443",
+      "bgcolor": "#1f2933"
+    },
+    {
+      "id": 214,
+      "type": "MarkdownNote",
+      "pos": [
+        900,
+        2220
+      ],
+      "size": [
+        840,
+        760
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "05｜外部保存与三个输出",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# 保存由外部节点决定\n\n| 数字人输出 | 外接用途 |\n| --- | --- |\n| 完整视频 | 接官方 **保存视频**，此时才实际合并并写入一份完整成片 |\n| 生成信息 | JSON 文本，含实际宽高、帧数、循环段数和各段交付时间；可选接文本查看节点 |\n| 分段视频 | VIDEO 列表，接另一个官方 **保存视频**，执行器会按段依次保存 |\n\n**没有合并开关。** 两路各自连接保存节点即可；两路都接就同时保存整片与分段。没有通往保存、预览等有效输出终端的下游时，数字人节点不会单独空跑。\n\n两只保存节点使用不同前缀：\n- 整片：`H3_DigitalHuman/Finished/DigitalHuman`\n- 分段：`H3_DigitalHuman/Parts/DigitalHuman`\n\n## 保存发生在什么时候\n外部保存节点要等**整个循环成功返回后**才执行。分段列表也不是边生成边触发正式保存。内部临时缓存只为降低画面内存占用，不是断点恢复方案。\n\n文件名、格式、编码设置和视频预览都在各自的保存节点上。数字人节点本身不放视频播放器。已生成结果的缓存仍有效、输入和种子不变时，后来补接另一种保存节点可复用结果，不必再次采样。"
+      ],
+      "color": "#263443",
+      "bgcolor": "#1f2933"
+    },
+    {
+      "id": 215,
+      "type": "MarkdownNote",
+      "pos": [
+        1800,
+        2220
+      ],
+      "size": [
+        840,
+        760
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "06｜临时缓存与使用边界",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.40.0",
+        "Node name for S&R": "MarkdownNote"
+      },
+      "widgets_values": [
+        "# 临时缓存与长片使用\n\n## 节点内部\n- 每段画面完成后写入 ComfyUI **temp** 下的独立临时目录，返回 VIDEO 文件引用，不在内存累积全片 IMAGE。\n- 连续循环只保留下一段需要的独立 CPU 视频 LATENT 尾部。\n- 原音选段及驱动音频仍在 CPU 内存中，音频长度和磁盘缓存会随总时长增长。\n\n## 正式输出\n数字人节点不自动向 output 保存 MP4、任务目录、JSON 清单或备份，也不保存 LATENT；正式文件只由你外接的保存节点生成。\n\n该节点**没有断点恢复**。生成失败或取消时清理本次临时片段，不恢复上一轮进度。保存完成前不要手动清理 ComfyUI temp，否则 VIDEO 输出引用会失效。\n\n能生成一个短窗口，并不等于任意长音频都能运行。长片仍受磁盘空间、音频内存、运行时间以及多段人物/画质漂移影响。\n\n## MV 使用\n演唱镜头与叙事镜头可在分段描述中交替安排，机位、运镜和动作也在对应块中写明。工作流没有自动分镜、自动读 SRT 或逐段人工抽卡步骤；需要的叙事资产请接入参考图，并在提示词中标明角色与场景分工。"
+      ],
+      "color": "#263443",
+      "bgcolor": "#1f2933"
+    }
+  ],
+  "links": [
+    [
+      1,
+      127,
+      0,
+      145,
+      0,
+      "MODEL"
+    ],
+    [
+      2,
+      145,
+      0,
+      200,
+      0,
+      "MODEL"
+    ],
+    [
+      3,
+      128,
+      0,
+      200,
+      1,
+      "CLIP"
+    ],
+    [
+      4,
+      119,
+      0,
+      200,
+      2,
+      "VAE"
+    ],
+    [
+      5,
+      120,
+      0,
+      200,
+      3,
+      "VAE"
+    ],
+    [
+      6,
+      137,
+      0,
+      200,
+      4,
+      "IMAGE"
+    ],
+    [
+      7,
+      174,
+      0,
+      200,
+      6,
+      "AUDIO"
+    ],
+    [
+      8,
+      201,
+      0,
+      200,
+      8,
+      "H3_PROMPTS"
+    ],
+    [
+      9,
+      200,
+      0,
+      202,
+      0,
+      "VIDEO"
+    ],
+    [
+      10,
+      200,
+      2,
+      203,
+      0,
+      "VIDEO"
+    ]
+  ],
+  "groups": [
+    {
+      "title": "生成与外部保存",
+      "bounding": [
+        -40,
+        -80,
+        2780,
+        1280
+      ],
+      "color": "#50797a",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "title": "使用说明（Markdown）",
+      "bounding": [
+        -40,
+        1340,
+        2720,
+        1700
+      ],
+      "color": "#50797a",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.55.17",
+    "ds": {
+      "scale": 0.65,
+      "offset": [
+        80,
+        100
+      ]
+    }
+  },
+  "version": 0.4
+}

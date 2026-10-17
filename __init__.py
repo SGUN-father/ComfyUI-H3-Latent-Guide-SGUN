@@ -8,6 +8,8 @@ from comfy.ldm.minimax.model import FRAME_RESCALE
 from comfy_api.latest import ComfyExtension, io
 from .prompt_schedule import H3LoopPromptSchedule
 
+WEB_DIRECTORY = "./web"
+
 
 def _av_streams(latent, name):
     samples = latent.get("samples")
@@ -105,6 +107,7 @@ class MiniMaxH3LatentContinuationGuide(io.ComfyNode):
 
 from .long_video import H3LongVideo, H3VideoPromptPlan
 from .latent_io import H3LoadLatent, LATENT_LIST_ROUTE, get_h3_latents
+from .digital_human import H3DigitalHuman
 
 
 class H3LatentGuideExtension(ComfyExtension):
@@ -112,7 +115,7 @@ class H3LatentGuideExtension(ComfyExtension):
         PromptServer.instance.routes.get(LATENT_LIST_ROUTE)(get_h3_latents)
 
     async def get_node_list(self):
-        return [MiniMaxH3LatentContinuationGuide, H3LoopPromptSchedule, H3LongVideo, H3VideoPromptPlan, H3LoadLatent]
+        return [MiniMaxH3LatentContinuationGuide, H3LoopPromptSchedule, H3LongVideo, H3VideoPromptPlan, H3LoadLatent, H3DigitalHuman]
 
 
 async def comfy_entrypoint():

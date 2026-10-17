@@ -38,7 +38,8 @@ def conditioning(metadata=None):
 def check_registered_nodes_and_guide_sockets():
     extension = asyncio.run(package.comfy_entrypoint())
     assert asyncio.run(extension.get_node_list()) == [Guide, package.H3LoopPromptSchedule,
-                                                    package.H3LongVideo, package.H3VideoPromptPlan, package.H3LoadLatent]
+                                                    package.H3LongVideo, package.H3VideoPromptPlan, package.H3LoadLatent,
+                                                    package.H3DigitalHuman]
     schema = Guide.define_schema()
     assert [i.id for i in schema.inputs] == ["positive", "latent", "previous_latent", "context_frames"]
     assert [o.io_type for o in schema.outputs] == ["CONDITIONING", "INT"]
