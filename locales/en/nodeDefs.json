@@ -1,0 +1,375 @@
+{
+  "MiniMaxH3LatentContinuationGuide": {
+    "display_name": "MiniMax H3 Latent Continuation Guide",
+    "description": "Guide the next segment directly with the tail of the previous audio/video latent, without VAE decoding or re-encoding. Keep the existing sampler; remove trim_frames and the corresponding audio from the beginning of the new segment when joining.",
+    "inputs": {
+      "positive": {
+        "name": "positive",
+        "tooltip": "Positive conditioning for the next segment. Connect the output to BasicGuider, CFGGuider, or KSampler."
+      },
+      "latent": {
+        "name": "Current latent",
+        "tooltip": "Empty H3 audio/video latent for the next segment. Also connect it directly to the next sampler."
+      },
+      "previous_latent": {
+        "name": "Previous latent",
+        "tooltip": "Complete audio/video latent from the previous sampler, not an empty latent. Both segments must have the same resolution."
+      },
+      "context_frames": {
+        "name": "Context frames",
+        "tooltip": "Read the last 5, 22, 39, 56, ... frames from the previous segment. Default: 22. Shortened automatically when needed. The new segment length includes this overlap."
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "positive"
+      },
+      "1": {
+        "name": "trim_frames",
+        "tooltip": "Frames to remove from the beginning of the new segment when joining. Also remove trim_frames / 24 seconds from its audio."
+      }
+    }
+  },
+  "H3LoopPromptSchedule": {
+    "display_name": "H3 Loop Segment Prompts",
+    "description": "Combine shared descriptions with segment actions. Separate segments with --- on its own line. The first segment starts the video; the remaining segments drive the continuation loop.",
+    "inputs": {
+      "common": {
+        "name": "Shared description"
+      },
+      "segments": {
+        "name": "Segment actions (separate with ---)",
+        "tooltip": "The first block is the opening segment; each following block is one continuation. N continuations require at least N + 1 blocks."
+      },
+      "continuations": {
+        "name": "Continuations"
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "First segment prompt"
+      },
+      "1": {
+        "name": "Continuation prompt list"
+      }
+    }
+  },
+  "H3VideoPromptPlan": {
+    "display_name": "H3 Long Video Prompts",
+    "description": "Combine shared descriptions with segment actions. Separate segments with --- on its own line. Choose the starting segment or repeat the final prompt when needed.",
+    "inputs": {
+      "common": {
+        "name": "Shared description"
+      },
+      "segments": {
+        "name": "Segment actions (separate with ---)"
+      },
+      "repeat_last": {
+        "name": "Repeat the final prompt",
+        "tooltip": "Enable to use one prompt for every segment, or repeat the final prompt when there are fewer prompts than segments."
+      },
+      "start_segment": {
+        "name": "Starting prompt segment",
+        "tooltip": "Segment numbering starts at 1. Use 1 for the complete video. To retry segment 3, choose 3 and set the generator to one segment. Multiple segments use subsequent prompts in order."
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "Prompts"
+      }
+    }
+  },
+  "H3LongVideo": {
+    "display_name": "H3 Long Video: Generate + Merge by SGUN",
+    "description": "Save each segment to output as soon as it finishes, with optional complete audio/video LATENT files. The merged video is assembled and saved only by a connected external Save Video node. Without it, generation and segment saving still work.",
+    "inputs": {
+      "model": {
+        "name": "model"
+      },
+      "clip": {
+        "name": "clip"
+      },
+      "vae": {
+        "name": "Video VAE"
+      },
+      "audio_vae": {
+        "name": "Audio VAE"
+      },
+      "prompts": {
+        "name": "Prompts"
+      },
+      "segments": {
+        "name": "Segments to generate",
+        "tooltip": "Number of new segments to generate in this run. A connected previous LATENT supplies continuation context; it is excluded from this count and from the exported video."
+      },
+      "duration": {
+        "name": "Segment duration",
+        "tooltip": "Uses the official 24 fps and 17k + 5 frame grid. The actual duration may differ slightly."
+      },
+      "aspect_ratio": {
+        "name": "Aspect ratio"
+      },
+      "megapixels": {
+        "name": "Megapixels"
+      },
+      "seed": {
+        "name": "Seed"
+      },
+      "steps": {
+        "name": "Sampling steps",
+        "tooltip": "Used when custom sigmas are not connected. With custom sigmas, the sequence determines the actual number of sampling steps."
+      },
+      "sampler_name": {
+        "name": "Sampler"
+      },
+      "scheduler": {
+        "name": "Scheduler",
+        "tooltip": "Skipped when custom sigmas are connected."
+      },
+      "context_frames": {
+        "name": "Context frames",
+        "tooltip": "Read the tail of the previous audio/video latent directly. Remove the overlap automatically when exporting continuation segments."
+      },
+      "seed_mode": {
+        "name": "Segment seeds",
+        "tooltip": "The first segment uses the seed above. Later segments use fixed, increment, decrement, or randomize. Randomize chooses new later seeds each time a multi-segment run is queued, even if the first seed is fixed. Generation info records the actual seeds.",
+        "options": {
+          "fixed": "Fixed",
+          "increment": "Increment",
+          "decrement": "Decrement",
+          "randomize": "Randomize"
+        }
+      },
+      "denoise": {
+        "name": "Denoise",
+        "tooltip": "Used only by the internal scheduler. Connected custom sigmas are used directly."
+      },
+      "ref_image_size": {
+        "name": "Reference image size",
+        "options": {
+          "match": "Match output",
+          "max": "Maximum"
+        }
+      },
+      "save_latents": {
+        "name": "Save each LATENT",
+        "tooltip": "Save a complete audio/video .h3latent and manifest in the batch _data directory after each segment. Use H3 Load Audio/Video LATENT to resume. Uses more disk space without retaining all segment latents in memory."
+      },
+      "filename_prefix": {
+        "name": "Save prefix",
+        "tooltip": "Normal generation saves final MP4 files in a numbered directory such as output/H3_00001, with auxiliary files in _data. Retrying a segment in output uses its original batch and ignores this prefix; filenames retain the logical segment number and increment the retry count. The external Save Video node controls the merged filename."
+      },
+      "dynamic_mask": {
+        "name": "Dynamic mask",
+        "tooltip": "Applies only to continuations. Dynamically denoise the context according to sigma while protecting the seam and audio prefix. Intended for drift comparisons; lost details may not recover. Requires native H3 audio/video mask support and cannot be combined with another dynamic mask."
+      },
+      "ref_images": {
+        "name": "Reference images"
+      },
+      "sigmas": {
+        "name": "sigmas",
+        "tooltip": "Connect Manual Sigmas or another SIGMAS source to use the exact sequence for every segment, overriding the internal scheduler, steps, and denoise."
+      },
+      "ref_videos": {
+        "name": "Reference videos"
+      },
+      "ref_video_audios": {
+        "name": "Reference video audio"
+      },
+      "ref_audios": {
+        "name": "Independent reference audio"
+      },
+      "previous_latent": {
+        "name": "Previous LATENT",
+        "tooltip": "Connect H3 Load Audio/Video LATENT or the last LATENT from another generator. Requires complete audio/video data at the same resolution. Set segments to 1 to regenerate the next segment separately."
+      },
+      "drift_correction": {
+        "name": "Color and brightness drift correction",
+        "tooltip": "Lightly correct color and contrast statistics in continuation video latents. Preserve the first segment, audio, leading overlap, and trailing continuation context without extra sampling. Recommended for continuous shots; disable for intentional lighting or scene changes."
+      },
+      "retry_segment": {
+        "name": "Retry segment record (optional)",
+        "tooltip": "Filled automatically by the segment panel below. Restore the continuation context and retry into the original output batch, for example segment_0002_retry_001.mp4. Retrying a retry retains its logical segment number and increments the retry count without overwriting. Clear to return to normal generation."
+      },
+      "retry_prompt": {
+        "name": "Retry prompt (blank uses record)",
+        "tooltip": "Edit after selecting a segment and restoring its settings. Used only in retry mode; leaves the shared prompt node unchanged."
+      },
+      "retry_seed": {
+        "name": "Custom retry seed",
+        "tooltip": "Used only when retry seed mode is custom. Enter the complete integer from 0 to 18446744073709551615. Restoring a segment preserves its exact recorded seed without browser rounding."
+      },
+      "live_preview": {
+        "name": "Preview sampling (adds time)",
+        "tooltip": "Decode sampling frames in sequence with the local taeh3_temporal.safetensors and play them over the settings panel. When off, no preview model is loaded and no sampling thumbnails are generated."
+      },
+      "preview_interval": {
+        "name": "Preview interval (steps)",
+        "tooltip": "Update after this many sampling steps. The first and final steps still update. Larger values reduce decoding work."
+      },
+      "preview_frames": {
+        "name": "Preview frames (automatic)",
+        "tooltip": "Hidden legacy input. Preview frame count follows the segment's actual exported frame count, excluding continuation overlap. Saved values are ignored."
+      },
+      "preview_max_resolution": {
+        "name": "Preview longest edge",
+        "tooltip": "Limit only the sampling preview decoding size. The final video resolution stays the same."
+      },
+      "preview_fps": {
+        "name": "Preview frame rate",
+        "tooltip": "Default 10. 24 fps matches the final video speed; lower values play slower and higher values play faster. Changes only preview playback; exported video stays at 24 fps."
+      },
+      "control_after_generate": {
+        "name": "Seed after generation",
+        "options": {
+          "fixed": "Fixed",
+          "increment": "Increment",
+          "decrement": "Decrement",
+          "randomize": "Randomize"
+        }
+      },
+      "retry_seed_mode": {
+        "name": "Retry seed mode",
+        "tooltip": "Used only for retries. randomize picks a new seed on every run; original uses the actual seed in the segment record; custom uses the custom retry seed.",
+        "options": {
+          "randomize": "Random Seed",
+          "original": "Original Seed",
+          "custom": "Custom Seed"
+        }
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "Merged video",
+        "tooltip": "Merge and save the complete video only when connected to an external Save Video node. No switch is needed."
+      },
+      "1": {
+        "name": "Last segment latent"
+      },
+      "2": {
+        "name": "Generation info"
+      },
+      "3": {
+        "name": "LATENT file paths",
+        "tooltip": "Paths to .h3latent files in segment order when Save each LATENT is enabled; otherwise an empty list."
+      }
+    }
+  },
+  "H3LoadLatent": {
+    "display_name": "H3 Load Audio/Video LATENT by SGUN",
+    "description": "Load .h3latent files saved by this extension, preserving the original audio/video tensor values and dtype. Paths must be inside the ComfyUI input, output, or temp directories.",
+    "inputs": {
+      "latent_path": {
+        "name": "Manual path (optional)",
+        "tooltip": "Usually leave blank and use the file list below. A supplied or connected path takes priority, preserving existing workflows."
+      },
+      "latent_file": {
+        "name": "Saved LATENT",
+        "tooltip": "Scan output, input, temp, and their subdirectories. Newest files appear first. Refresh the list after saving a new segment."
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "Audio/video LATENT"
+      }
+    }
+  },
+  "H3DigitalHuman": {
+    "display_name": "H3 Digital Human: Audio-Driven Long Video by SGUN",
+    "description": "Generate video from the source audio duration and segment prompts. Connected outputs determine whether to produce a complete video or individual segments. Merge the complete video only for external saving; keep internal files temporary.",
+    "inputs": {
+      "model": {
+        "name": "model"
+      },
+      "clip": {
+        "name": "clip"
+      },
+      "vae": {
+        "name": "Video VAE"
+      },
+      "audio_vae": {
+        "name": "Audio VAE"
+      },
+      "ref_images": {
+        "name": "Reference images"
+      },
+      "audio": {
+        "name": "Source audio",
+        "tooltip": "Speech or a song. The original audio is assembled continuously once; the model generates only the visuals."
+      },
+      "prompt": {
+        "name": "Single prompt (legacy)",
+        "tooltip": "Describe the character, scene, and ongoing performance for the entire video. Do not add an <Audio 1> tag unless that reference is connected."
+      },
+      "segment_seconds": {
+        "name": "Segment duration",
+        "tooltip": "Includes continuation context. Choose the nearest 5.875, 8, 10.125, 12.25, or 14.375 seconds automatically. Shorter segments can reduce peak VRAM use."
+      },
+      "aspect_ratio": {
+        "name": "Aspect ratio"
+      },
+      "megapixels": {
+        "name": "Megapixels"
+      },
+      "seed": {
+        "name": "Seed"
+      },
+      "steps": {
+        "name": "Sampling steps"
+      },
+      "sampler_name": {
+        "name": "Sampler"
+      },
+      "scheduler": {
+        "name": "Scheduler"
+      },
+      "sigmas": {
+        "name": "sigmas",
+        "tooltip": "Optional. Use an existing SIGMAS sequence directly, overriding internal sampling steps and the scheduler."
+      },
+      "ref_image_size": {
+        "name": "Reference image size",
+        "options": {
+          "match": "Match output",
+          "max": "Maximum"
+        }
+      },
+      "tiled_decode": {
+        "name": "Tiled decoding",
+        "tooltip": "Use official tiled VAE decoding by default to reduce peak VRAM use."
+      },
+      "start_time": {
+        "name": "Audio start (seconds)"
+      },
+      "duration": {
+        "name": "Duration (0 = all remaining)"
+      },
+      "prompts": {
+        "name": "Segment prompts",
+        "tooltip": "Connect H3 Long Video Prompts to override the legacy single prompt and use one prompt per actual segment. Report missing prompts before generation."
+      },
+      "control_after_generate": {
+        "name": "Seed after generation",
+        "options": {
+          "fixed": "Fixed",
+          "increment": "Increment",
+          "decrement": "Decrement",
+          "randomize": "Randomize"
+        }
+      }
+    },
+    "outputs": {
+      "0": {
+        "name": "Complete video",
+        "tooltip": "Merge and save the complete video with the original audio only when connected to an external Save Video node. No switch is needed."
+      },
+      "1": {
+        "name": "Generation info"
+      },
+      "2": {
+        "name": "Segment videos",
+        "tooltip": "VIDEO list in segment order, each with the matching source audio. Connect another Save Video node to save segments for editing."
+      }
+    }
+  }
+}

@@ -1,0 +1,2 @@
+Send2Trash>=2.1.0
+pywin32>=305; sys_platform == "win32"

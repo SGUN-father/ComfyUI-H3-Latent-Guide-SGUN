@@ -1,8 +1,8 @@
 {
   "id": "b9e072cc-c907-4b0f-9b58-76d22c8cf0d7",
-  "revision": 15,
-  "last_node_id": 201,
-  "last_link_id": 14,
+  "revision": 17,
+  "last_node_id": 204,
+  "last_link_id": 26,
   "nodes": [
     {
       "id": 127,
@@ -61,7 +61,7 @@
         90
       ],
       "flags": {},
-      "order": 1,
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
@@ -92,12 +92,12 @@
         ]
       },
       "widgets_values": [
-        "minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
-        0.75
+        "minimax_h3_DMAD_4step_full_lora_avg_rank_39_bf16.safetensors",
+        1
       ],
       "widgets_values_named": {
-        "lora_name": "minimax_h3_ref2v_turbo_8step_v1.0_768p_comfyui_bf16.safetensors",
-        "strength_model": 0.75
+        "lora_name": "minimax_h3_DMAD_4step_full_lora_avg_rank_39_bf16.safetensors",
+        "strength_model": 1
       }
     },
     {
@@ -112,7 +112,7 @@
         80
       ],
       "flags": {},
-      "order": 2,
+      "order": 20,
       "mode": 0,
       "inputs": [
         {
@@ -154,7 +154,7 @@
         250
       ],
       "flags": {},
-      "order": 3,
+      "order": 21,
       "mode": 0,
       "inputs": [
         {
@@ -168,7 +168,7 @@
           "name": "model",
           "type": "MODEL",
           "links": [
-            4
+            17
           ]
         }
       ],
@@ -212,7 +212,7 @@
         120
       ],
       "flags": {},
-      "order": 4,
+      "order": 1,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -220,7 +220,7 @@
           "name": "CLIP",
           "type": "CLIP",
           "links": [
-            5
+            18
           ]
         }
       ],
@@ -259,7 +259,7 @@
         70
       ],
       "flags": {},
-      "order": 5,
+      "order": 2,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -267,7 +267,7 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            6
+            19
           ]
         }
       ],
@@ -302,7 +302,7 @@
         70
       ],
       "flags": {},
-      "order": 6,
+      "order": 3,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -310,7 +310,7 @@
           "name": "VAE",
           "type": "VAE",
           "links": [
-            7
+            20
           ]
         }
       ],
@@ -345,7 +345,7 @@
         330
       ],
       "flags": {},
-      "order": 7,
+      "order": 4,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -353,7 +353,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            9
+            22
           ]
         },
         {
@@ -362,17 +362,18 @@
           "links": []
         }
       ],
+      "title": "<Picture 1>｜林知夏·四视图",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.33.0",
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "red_superboy_on_city_roof.png",
+        "H3_examples/blind_date_30s/lin_zhixia_four_views.png",
         "image"
       ],
       "widgets_values_named": {
-        "image": "red_superboy_on_city_roof.png",
+        "image": "H3_examples/blind_date_30s/lin_zhixia_four_views.png",
         "upload": "image"
       }
     },
@@ -388,7 +389,7 @@
         330
       ],
       "flags": {},
-      "order": 8,
+      "order": 5,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -396,7 +397,7 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            10
+            23
           ]
         },
         {
@@ -405,17 +406,62 @@
           "links": []
         }
       ],
+      "title": "<Picture 2>｜陈屿·四视图",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.33.0",
         "Node name for S&R": "LoadImage"
       },
       "widgets_values": [
-        "mecha_dragon_lightning.png",
+        "H3_examples/blind_date_30s/chen_yu_four_views.png",
         "image"
       ],
       "widgets_values_named": {
-        "image": "mecha_dragon_lightning.png",
+        "image": "H3_examples/blind_date_30s/chen_yu_four_views.png",
+        "upload": "image"
+      }
+    },
+    {
+      "id": 202,
+      "type": "LoadImage",
+      "pos": [
+        1410,
+        10
+      ],
+      "size": [
+        310,
+        330
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            24
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": []
+        }
+      ],
+      "title": "<Picture 3>｜相亲咖啡馆·场景",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.33.0",
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "H3_examples/blind_date_30s/cafe.png",
+        "image"
+      ],
+      "widgets_values_named": {
+        "image": "H3_examples/blind_date_30s/cafe.png",
         "upload": "image"
       }
     },
@@ -423,7 +469,7 @@
       "id": 177,
       "type": "H3VideoPromptPlan",
       "pos": [
-        1570,
+        1790,
         20
       ],
       "size": [
@@ -431,7 +477,7 @@
         900
       ],
       "flags": {},
-      "order": 9,
+      "order": 7,
       "mode": 0,
       "inputs": [],
       "outputs": [
@@ -439,200 +485,36 @@
           "name": "提示词",
           "type": "H3_PROMPTS",
           "links": [
-            8
+            21
           ]
         }
       ],
-      "title": "提示词：共用描述 + 各段剧情",
+      "title": "30秒相亲｜共用描述 + 三段剧情",
       "properties": {
+        "aux_id": "SGUN-father/ComfyUI-H3-Latent-Guide-SGUN",
+        "ver": "7b8224ec1c05e934ba0362b545390275a7d54c68",
         "Node name for S&R": "H3VideoPromptPlan"
       },
-      "widgets_values_named": {
-        "common": "subject_definitions:\n<Subject 1> is the freckled red-haired boy superhero from <Picture 1>, with the black eye mask, black suit, large white chest star, red gloves, red boots and flowing red cape. Preserve his face, costume, small human scale and athletic silhouette. His power is a white-gold star-shaped energy shield and a white-gold pulse emitted through his hands.\n<Subject 2> is the colossal black armored mech-kaiju from <Picture 2>, with red glowing eyes, the red chest core, jagged mechanical jaws, angular black armor and thin blue lightning above its head. Preserve its much larger scale and heavy mechanical silhouette. It attacks using a red beam emitted from its chest core.\n<Subject 3> is the wet rooftop and blue-black night city from <Picture 1>, with a concrete parapet, rain puddles, red window reflections and bold comic ink shading.\n\nsummary:\n[reference generation] A continuous comic-book battle between <Subject 1> and <Subject 2> above <Subject 3>. The boy blocks the mech's beam, evades it, launches a flying counterattack and lands back on the roof. Reference images define the two fighters and setting; all action is newly generated.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - retain the referenced face, red hair, eye mask, black suit, white star, red boots and cape.\n<Subject 2> (appears in [Shot 1]): fully_preserved - retain the referenced black armored mech, red eyes and core, jagged jaws and blue lightning; keep it colossal compared with the boy.\n<Subject 3> (appears in [Shot 1]): fully_preserved - reuse the wet rooftop, parapet, city reflections and night comic style.\n\ndetailed_description:\nBold moving comic-book ink illustration, heavy black outlines, red accents and blue-black night shadows. Exactly the boy and the colossal mech are the visible combatants. A clear three-quarter viewpoint shows the boy in the near foreground and the mech beyond the rooftop, with readable spacing. The camera follows their ongoing motion as one continuous take; contact, evasion and recoil remain visible. The boy's white-gold energy is visually distinct from the mech's red beam and blue electricity. Preserve identity, relative scale, lighting and the geography of the roof throughout the battle.\n",
-        "segments": "[Shot 1] Begin with <Subject 1> standing on the left side of the wet rooftop, facing <Subject 2>, whose towering torso rises behind the nearby skyline on the right. The boy bends his knees, plants his left boot ahead of his right boot and raises his forearms. His red cape streams backward in the wind. The mech leans its heavy upper body toward him; its red chest core condenses into a bright point. Show the energy originate at that core, then shoot across the visible gap toward the boy. The boy opens a white-gold star-shaped shield in front of his raised hands before the red beam reaches him. The beam strikes the center of the shield with a sharp electrical crack. Its force pushes his upper body backward and slides his rear boot a short distance through a puddle; his forward heel stays planted, his elbows flex and he recovers a firm brace. Water splashes from the boot rather than from an unrelated explosion. Keep both the source core and the shield contact in the same view. The camera makes a brisk, smooth lateral track to the right to reveal the diagonal beam and the boy's strained posture, maintaining continuous motion. End with the red beam still pressing against the white-gold shield, the boy braced low and the cape moving; carry this active contact into the next segment.\n\noverall_soundscape:\nContinuous rooftop wind and cape flapping, a rising mechanical core whine, the red beam's hiss, the sharp shield impact and boots scraping through water. The beam contact continues through the end. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the opening motion context: <Subject 1> is braced behind his white-gold shield and <Subject 2>'s red chest beam is still hitting it. Maintain their current spacing, body direction, red cape motion and the camera's rightward tracking speed. The boy first presses his forward foot into the wet roof, then makes one quick sideways step out of the beam's line. His shield tilts with his hands and leaves the beam path. The red beam passes behind his shoulder and strikes the now-empty patch of roof he just vacated. Show that miss clearly: a narrow scorched stripe and a small burst of concrete fragments appear at the roof contact, while the boy remains intact. The mech pivots its torso to follow him, with heavy shoulder movement and delayed inertia. Before the beam can sweep back, the boy crouches, loads both legs and pushes off the roof. Show both boots leave the surface, a splash from the takeoff point and his cape trailing behind him. He accelerates upward and forward through the visible gap toward the mech's chest, propelled by a brief white-gold glow from his star emblem. The camera tracks the takeoff and tilts upward smoothly, keeping the roof edge below and the mech ahead to prove the flight path. End with the boy clearly airborne and advancing toward the red core, his hands coming forward; maintain this flight through the final frame.\n\noverall_soundscape:\nContinue the wind and beam hiss from the opening context. A concrete impact and falling fragments mark the missed beam; boot splash, cape snap and an accelerating air rush accompany the takeoff. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the boy's existing upward-forward flight from the opening context, preserving his pose, cape direction and the mech's position. The roof remains below, visibly separated from the boy. <Subject 1> brings both palms toward the red core of <Subject 2> and concentrates his white-gold star energy between them. The much larger mech begins drawing its armored forearms inward to protect the core, but its heavy arms have visible inertia. The boy releases one compact white-gold pulse before the forearms close. Show the pulse originate between his palms, cross the short remaining gap and visibly strike the black armor immediately around the red core. A brief ring of white sparks expands only from that impact. The mech's upper torso jolts backward immediately from the strike, its jaw lifting and its shoulders recoiling before its forearms close over the core. Small armor sparks and thin smoke remain at the struck panel; its red light flickers. The discharge gives the boy a smaller, opposite recoil: his arms spread to balance and his cape swings forward as his upward flight slows and turns into a backward descent toward the same rooftop. The camera follows the impact and then tilts slightly down to keep both fighters and the roof below in view. End with the boy descending toward the roof and the mech still recovering behind its crossed forearms, with the scorched roof stripe remaining below.\n\noverall_soundscape:\nContinuous rushing air and cape movement. One rising energy tone leads to one sharp pulse release, one heavy metallic impact and armor creaking during the immediate recoil. Electrical crackles and a lowering core hum persist afterward. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the opening context with <Subject 1> descending backward toward the same wet rooftop, his red cape moving forward from the recoil. <Subject 2> remains beyond the roof with its forearms guarding its flickering red chest core; preserve the thin smoke and the scorched stripe on the roof. The camera smoothly follows the boy's descent without changing the scene or resetting the viewpoint. Show his red boots meet the roof together, his knees bend deeply to absorb the landing and his hands briefly open for balance. A ring of rainwater splashes from the actual landing point. He takes one short recovery step, turns his torso toward the mech and raises a compact white-gold shield in a ready guard. The mech tries to charge its core once more, but the red light sputters; one weak blue arc crawls across its armored shoulder and dies out. Its heavy forearms lower slowly as it takes a small backward stabilizing step between the buildings, still huge relative to the boy. This retreat ends the exchange. The boy holds his recovered stance while his cape continues fluttering and the puddle ripples spread. The camera eases into a wider view that keeps the boy, damaged roof patch and retreating mech together. End with ongoing wind, thinning smoke and both fighters clearly separated, rather than a freeze frame or a new attack.\n\noverall_soundscape:\nCarry the previous air rush into boot landing, puddle splash, cloth movement and a short metallic electrical sputter. The mech's retreat produces one heavy distant step, then its core hum diminishes beneath continuous rooftop wind. No speech.\n\nnon_diegetic_music:\nN/A",
-        "repeat_last": false,
-        "start_segment": 1
-      },
       "widgets_values": [
-        "subject_definitions:\n<Subject 1> is the freckled red-haired boy superhero from <Picture 1>, with the black eye mask, black suit, large white chest star, red gloves, red boots and flowing red cape. Preserve his face, costume, small human scale and athletic silhouette. His power is a white-gold star-shaped energy shield and a white-gold pulse emitted through his hands.\n<Subject 2> is the colossal black armored mech-kaiju from <Picture 2>, with red glowing eyes, the red chest core, jagged mechanical jaws, angular black armor and thin blue lightning above its head. Preserve its much larger scale and heavy mechanical silhouette. It attacks using a red beam emitted from its chest core.\n<Subject 3> is the wet rooftop and blue-black night city from <Picture 1>, with a concrete parapet, rain puddles, red window reflections and bold comic ink shading.\n\nsummary:\n[reference generation] A continuous comic-book battle between <Subject 1> and <Subject 2> above <Subject 3>. The boy blocks the mech's beam, evades it, launches a flying counterattack and lands back on the roof. Reference images define the two fighters and setting; all action is newly generated.\n\nretention_analysis:\n<Subject 1> (appears in [Shot 1]): fully_preserved - retain the referenced face, red hair, eye mask, black suit, white star, red boots and cape.\n<Subject 2> (appears in [Shot 1]): fully_preserved - retain the referenced black armored mech, red eyes and core, jagged jaws and blue lightning; keep it colossal compared with the boy.\n<Subject 3> (appears in [Shot 1]): fully_preserved - reuse the wet rooftop, parapet, city reflections and night comic style.\n\ndetailed_description:\nBold moving comic-book ink illustration, heavy black outlines, red accents and blue-black night shadows. Exactly the boy and the colossal mech are the visible combatants. A clear three-quarter viewpoint shows the boy in the near foreground and the mech beyond the rooftop, with readable spacing. The camera follows their ongoing motion as one continuous take; contact, evasion and recoil remain visible. The boy's white-gold energy is visually distinct from the mech's red beam and blue electricity. Preserve identity, relative scale, lighting and the geography of the roof throughout the battle.\n",
-        "[Shot 1] Begin with <Subject 1> standing on the left side of the wet rooftop, facing <Subject 2>, whose towering torso rises behind the nearby skyline on the right. The boy bends his knees, plants his left boot ahead of his right boot and raises his forearms. His red cape streams backward in the wind. The mech leans its heavy upper body toward him; its red chest core condenses into a bright point. Show the energy originate at that core, then shoot across the visible gap toward the boy. The boy opens a white-gold star-shaped shield in front of his raised hands before the red beam reaches him. The beam strikes the center of the shield with a sharp electrical crack. Its force pushes his upper body backward and slides his rear boot a short distance through a puddle; his forward heel stays planted, his elbows flex and he recovers a firm brace. Water splashes from the boot rather than from an unrelated explosion. Keep both the source core and the shield contact in the same view. The camera makes a brisk, smooth lateral track to the right to reveal the diagonal beam and the boy's strained posture, maintaining continuous motion. End with the red beam still pressing against the white-gold shield, the boy braced low and the cape moving; carry this active contact into the next segment.\n\noverall_soundscape:\nContinuous rooftop wind and cape flapping, a rising mechanical core whine, the red beam's hiss, the sharp shield impact and boots scraping through water. The beam contact continues through the end. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the opening motion context: <Subject 1> is braced behind his white-gold shield and <Subject 2>'s red chest beam is still hitting it. Maintain their current spacing, body direction, red cape motion and the camera's rightward tracking speed. The boy first presses his forward foot into the wet roof, then makes one quick sideways step out of the beam's line. His shield tilts with his hands and leaves the beam path. The red beam passes behind his shoulder and strikes the now-empty patch of roof he just vacated. Show that miss clearly: a narrow scorched stripe and a small burst of concrete fragments appear at the roof contact, while the boy remains intact. The mech pivots its torso to follow him, with heavy shoulder movement and delayed inertia. Before the beam can sweep back, the boy crouches, loads both legs and pushes off the roof. Show both boots leave the surface, a splash from the takeoff point and his cape trailing behind him. He accelerates upward and forward through the visible gap toward the mech's chest, propelled by a brief white-gold glow from his star emblem. The camera tracks the takeoff and tilts upward smoothly, keeping the roof edge below and the mech ahead to prove the flight path. End with the boy clearly airborne and advancing toward the red core, his hands coming forward; maintain this flight through the final frame.\n\noverall_soundscape:\nContinue the wind and beam hiss from the opening context. A concrete impact and falling fragments mark the missed beam; boot splash, cape snap and an accelerating air rush accompany the takeoff. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the boy's existing upward-forward flight from the opening context, preserving his pose, cape direction and the mech's position. The roof remains below, visibly separated from the boy. <Subject 1> brings both palms toward the red core of <Subject 2> and concentrates his white-gold star energy between them. The much larger mech begins drawing its armored forearms inward to protect the core, but its heavy arms have visible inertia. The boy releases one compact white-gold pulse before the forearms close. Show the pulse originate between his palms, cross the short remaining gap and visibly strike the black armor immediately around the red core. A brief ring of white sparks expands only from that impact. The mech's upper torso jolts backward immediately from the strike, its jaw lifting and its shoulders recoiling before its forearms close over the core. Small armor sparks and thin smoke remain at the struck panel; its red light flickers. The discharge gives the boy a smaller, opposite recoil: his arms spread to balance and his cape swings forward as his upward flight slows and turns into a backward descent toward the same rooftop. The camera follows the impact and then tilts slightly down to keep both fighters and the roof below in view. End with the boy descending toward the roof and the mech still recovering behind its crossed forearms, with the scorched roof stripe remaining below.\n\noverall_soundscape:\nContinuous rushing air and cape movement. One rising energy tone leads to one sharp pulse release, one heavy metallic impact and armor creaking during the immediate recoil. Electrical crackles and a lowering core hum persist afterward. No speech.\n\nnon_diegetic_music:\nN/A\n\n---\n\n[Shot 1] Continue the opening context with <Subject 1> descending backward toward the same wet rooftop, his red cape moving forward from the recoil. <Subject 2> remains beyond the roof with its forearms guarding its flickering red chest core; preserve the thin smoke and the scorched stripe on the roof. The camera smoothly follows the boy's descent without changing the scene or resetting the viewpoint. Show his red boots meet the roof together, his knees bend deeply to absorb the landing and his hands briefly open for balance. A ring of rainwater splashes from the actual landing point. He takes one short recovery step, turns his torso toward the mech and raises a compact white-gold shield in a ready guard. The mech tries to charge its core once more, but the red light sputters; one weak blue arc crawls across its armored shoulder and dies out. Its heavy forearms lower slowly as it takes a small backward stabilizing step between the buildings, still huge relative to the boy. This retreat ends the exchange. The boy holds his recovered stance while his cape continues fluttering and the puddle ripples spread. The camera eases into a wider view that keeps the boy, damaged roof patch and retreating mech together. End with ongoing wind, thinning smoke and both fighters clearly separated, rather than a freeze frame or a new attack.\n\noverall_soundscape:\nCarry the previous air rush into boot landing, puddle splash, cloth movement and a short metallic electrical sputter. The mech's retreat produces one heavy distant step, then its core hum diminishes beneath continuous rooftop wind. No speech.\n\nnon_diegetic_music:\nN/A",
+        "subject_definitions:\n<Subject 1> is Lin Zhixia, the 28-year-old adult Chinese woman in <Picture 1>. Preserve her face, shoulder-length center-parted straight black hair, small gold stud earrings, ivory knitted cardigan over a white top, rust-red pleated skirt below the knees, and brown flat loafers. The four views depict one person and provide identity and wardrobe reference only.\n<Subject 2> is Chen Yu, the 30-year-old adult Chinese man in <Picture 2>. Preserve his face, short black hair, open olive-green casual overshirt, white crew-neck T-shirt, charcoal straight-leg trousers, and clean white sneakers. The four views depict one person and provide identity and wardrobe reference only.\n<Subject 3> is the unoccupied modern street-corner cafe interior in <Picture 3>: a small square walnut table, two deep teal-gray chairs, soft morning window light, two white porcelain coffee cups with saucers, a plain dark-blue pocket notebook and pen beside the man's seat on his right, and a blank menu. The image provides environment and prop reference, not an obligatory opening frame.\n\nsummary: [reference generation] A restrained live-action blind-date comedy follows <Subject 1> and <Subject 2> seated opposite each other in <Subject 3>. A guarded introduction gradually becomes an invitation to meet again. Exactly one woman and one man appear. Their reference images provide appearance and wardrobe; the cafe image provides the continuous setting.\n\nretention_analysis:\n<Subject 1> (appears throughout the conversation): fully_preserved - Her referenced adult identity, hairstyle, clothing, earrings, and footwear remain consistent as her posture relaxes.\n<Subject 2> (appears throughout the conversation): fully_preserved - His referenced adult identity, hair, clothing, and footwear remain consistent as he listens and handles his notebook.\n<Subject 3> (the setting of every shot): fully_preserved - Preserve the cafe's light, furniture, materials, and specified props. The woman stays on screen left and the man on screen right in shared views; his notebook stays on his side.\n\ndetailed_description: Naturalistic live-action photography with recognizable faces, natural skin texture, soft morning light, and quiet conversational pacing. Frame one woman and one man, never the reference-sheet layouts. Keep camera positions on the same side of the table axis: she looks toward screen right, he toward screen left. Use steady eye-level framing and understated reactions. All speech is natural, quiet Mandarin from the specified visible speaker with matching mouth movement; listeners remain silent. Keep the screen free of subtitles, captions, logos, and legible writing.",
+        "[Shot 1] A steady eye-level medium two-shot establishes <Subject 1> seated on the left and <Subject 2> seated on the right, opposite each other at the walnut table in <Subject 3>. The window light catches their faces without a beauty-filter appearance. The two cups, their saucers, the blank menu, and the closed dark-blue notebook beside the man are naturally arranged. Over the first second, she lowers her white cup onto its saucer with one soft porcelain clink. She keeps her shoulders upright and meets his gaze. At about 00:01.400, <Subject 1> (S1), an adult woman with a clear, medium-pitched Mandarin voice and an unhurried, matter-of-fact delivery, says: <d>[Chinese] 先说好，我不接受查户口。</d> Her delivery is firm but conversational, not a challenge for an argument. She finishes by approximately 00:04.600 and lets the statement sit. He listens without interrupting; his mouth stays relaxed and closed.\n[Shot 2] At 00:05.200, the camera cuts to a steady medium close-up of <Subject 2> on the right side of the established axis, looking toward the woman just off the left edge. His hands rest naturally near the table edge; the notebook is still closed and untouched. After a brief acknowledging pause, at about 00:05.550, <Subject 2> (S2), an adult man with a warm, lightly textured lower Mandarin voice, says gently: <d>[Chinese] 放心，我只问一个问题。</d> He finishes by approximately 00:08.800. He does not lean in theatrically or gesture at her. Hold his open, attentive expression through the end as he waits for her response, allowing a small breath and ordinary blinking.\n\noverall_soundscape: Low, continuous cafe room tone and faint muffled street ambience under clear, close conversational voices. A single cup-and-saucer clink occurs as the woman sets down her cup. No other intelligible voices or attention-seeking sound effects.\n\nnon_diegetic_music: N/A\n\n---\n\n[Shot 1] Continue the previous ending in the same steady medium close-up of <Subject 2>, looking toward the woman on screen left. During the first approximately 00:00.917, he simply maintains the attentive posture and natural breathing from the preceding clip; there is no repeated dialogue or new gesture. His notebook is still closed on the table to his right, with the pen beside it. The established cafe room tone continues without a restart.\n[Shot 2] At 00:01.050, the camera cuts to a medium close-up of <Subject 1>, keeping her screen-left position and rightward eyeline. Her cup remains on its saucer. At about 00:01.200, <Subject 1> (S1) asks with a small, curious lift of the brows: <d>[Chinese] 什么问题？</d> She finishes by approximately 00:02.150, then listens. Her expression is attentive rather than exaggeratedly suspicious.\n[Shot 3] At 00:02.650, the camera cuts to a steady medium two-shot of <Subject 1> on the left and <Subject 2> on the right, both faces and their near-table hands visible. At about 00:03.000, <Subject 2> (S2) asks in the same warm, practical Mandarin voice: <d>[Chinese] 你有什么忌口？我来点菜。</d> He finishes by approximately 00:06.350. She pauses long enough to register the unexpectedly ordinary question; her shoulders ease and the corners of her mouth lift slightly. At about 00:07.000, <Subject 1> (S1) answers simply: <d>[Chinese] 香菜。</d> He acknowledges this with a small nod. From approximately 00:08.050, his left hand opens the notebook on his side of the table while his right hand picks up the adjacent pen. By approximately 00:10.000 he begins making a few short, indistinct pen strokes. Keep both people in the shared composition rather than inserting a readable view of the page. End around 00:10.800 with his pen still moving and her quietly amused gaze on him, ready for the continuation.\n\noverall_soundscape: Preserve the same low cafe room tone and faint street ambience throughout. Voices take turns with real pauses. Near the end, add soft paper movement and the light scratch of the pen, synchronized to the man's hands.\n\nnon_diegetic_music: N/A\n\n---\n\n[Shot 1] Continue the preceding medium two-shot: <Subject 1> remains on the left with her cup on its saucer, and <Subject 2> remains on the right, his left hand steadying the open dark-blue notebook while his right hand makes the same small pen strokes. The first approximately 00:00.917 only carries forward this established motion and cafe ambience, with no repeated dialogue. At about 00:01.200, <Subject 1> (S1), now speaking with an easy smile in the same clear Mandarin voice, says: <d>[Chinese] 还有，下次别带本子了。</d> Allow the line to finish by approximately 00:04.000. He registers the implication: his pen stops touching the page, then his gaze rises to meet hers. Let that recognition happen visibly before he speaks. The notebook remains open on his side of the table.\n[Shot 2] At 00:04.550, the camera cuts to a steady medium close-up of <Subject 2> with the same leftward eyeline. His smile grows gradually as he realizes she has mentioned another date. At about 00:05.000, <Subject 2> (S2) answers in the same warm, low Mandarin voice: <d>[Chinese] 好。那下次，晚饭？</d> Give the first word a brief, natural pause, then make the invitation tentative and pleased rather than smug. He completes the question by approximately 00:07.600 and waits, still holding the pen lightly without resuming his writing.\n[Shot 3] At 00:08.050, the camera cuts back to the established medium two-shot, with <Subject 1> left and <Subject 2> right. She meets his eyes, gives one small nod, and at about 00:08.550 <Subject 1> (S1) softly answers: <d>[Chinese] 嗯。</d> They share a modest, unforced smile. Let at least the final second through approximately 00:10.800 breathe in the same shot: small natural blinks, a relaxed exhale, hands resting, and no additional dialogue. Finish on ongoing life rather than a freeze frame, title card, or comedic zoom.\n\noverall_soundscape: The same quiet cafe room tone and faint street ambience remain continuous. Pen scratches end when the man stops writing, followed by clear alternating dialogue and a soft shared breath during the final pause. No laugh track, sting, or additional intelligible voices.\n\nnon_diegetic_music: N/A",
         false,
         1
       ],
+      "widgets_values_named": {
+        "common": "subject_definitions:\n<Subject 1> is Lin Zhixia, the 28-year-old adult Chinese woman in <Picture 1>. Preserve her face, shoulder-length center-parted straight black hair, small gold stud earrings, ivory knitted cardigan over a white top, rust-red pleated skirt below the knees, and brown flat loafers. The four views depict one person and provide identity and wardrobe reference only.\n<Subject 2> is Chen Yu, the 30-year-old adult Chinese man in <Picture 2>. Preserve his face, short black hair, open olive-green casual overshirt, white crew-neck T-shirt, charcoal straight-leg trousers, and clean white sneakers. The four views depict one person and provide identity and wardrobe reference only.\n<Subject 3> is the unoccupied modern street-corner cafe interior in <Picture 3>: a small square walnut table, two deep teal-gray chairs, soft morning window light, two white porcelain coffee cups with saucers, a plain dark-blue pocket notebook and pen beside the man's seat on his right, and a blank menu. The image provides environment and prop reference, not an obligatory opening frame.\n\nsummary: [reference generation] A restrained live-action blind-date comedy follows <Subject 1> and <Subject 2> seated opposite each other in <Subject 3>. A guarded introduction gradually becomes an invitation to meet again. Exactly one woman and one man appear. Their reference images provide appearance and wardrobe; the cafe image provides the continuous setting.\n\nretention_analysis:\n<Subject 1> (appears throughout the conversation): fully_preserved - Her referenced adult identity, hairstyle, clothing, earrings, and footwear remain consistent as her posture relaxes.\n<Subject 2> (appears throughout the conversation): fully_preserved - His referenced adult identity, hair, clothing, and footwear remain consistent as he listens and handles his notebook.\n<Subject 3> (the setting of every shot): fully_preserved - Preserve the cafe's light, furniture, materials, and specified props. The woman stays on screen left and the man on screen right in shared views; his notebook stays on his side.\n\ndetailed_description: Naturalistic live-action photography with recognizable faces, natural skin texture, soft morning light, and quiet conversational pacing. Frame one woman and one man, never the reference-sheet layouts. Keep camera positions on the same side of the table axis: she looks toward screen right, he toward screen left. Use steady eye-level framing and understated reactions. All speech is natural, quiet Mandarin from the specified visible speaker with matching mouth movement; listeners remain silent. Keep the screen free of subtitles, captions, logos, and legible writing.",
+        "segments": "[Shot 1] A steady eye-level medium two-shot establishes <Subject 1> seated on the left and <Subject 2> seated on the right, opposite each other at the walnut table in <Subject 3>. The window light catches their faces without a beauty-filter appearance. The two cups, their saucers, the blank menu, and the closed dark-blue notebook beside the man are naturally arranged. Over the first second, she lowers her white cup onto its saucer with one soft porcelain clink. She keeps her shoulders upright and meets his gaze. At about 00:01.400, <Subject 1> (S1), an adult woman with a clear, medium-pitched Mandarin voice and an unhurried, matter-of-fact delivery, says: <d>[Chinese] 先说好，我不接受查户口。</d> Her delivery is firm but conversational, not a challenge for an argument. She finishes by approximately 00:04.600 and lets the statement sit. He listens without interrupting; his mouth stays relaxed and closed.\n[Shot 2] At 00:05.200, the camera cuts to a steady medium close-up of <Subject 2> on the right side of the established axis, looking toward the woman just off the left edge. His hands rest naturally near the table edge; the notebook is still closed and untouched. After a brief acknowledging pause, at about 00:05.550, <Subject 2> (S2), an adult man with a warm, lightly textured lower Mandarin voice, says gently: <d>[Chinese] 放心，我只问一个问题。</d> He finishes by approximately 00:08.800. He does not lean in theatrically or gesture at her. Hold his open, attentive expression through the end as he waits for her response, allowing a small breath and ordinary blinking.\n\noverall_soundscape: Low, continuous cafe room tone and faint muffled street ambience under clear, close conversational voices. A single cup-and-saucer clink occurs as the woman sets down her cup. No other intelligible voices or attention-seeking sound effects.\n\nnon_diegetic_music: N/A\n\n---\n\n[Shot 1] Continue the previous ending in the same steady medium close-up of <Subject 2>, looking toward the woman on screen left. During the first approximately 00:00.917, he simply maintains the attentive posture and natural breathing from the preceding clip; there is no repeated dialogue or new gesture. His notebook is still closed on the table to his right, with the pen beside it. The established cafe room tone continues without a restart.\n[Shot 2] At 00:01.050, the camera cuts to a medium close-up of <Subject 1>, keeping her screen-left position and rightward eyeline. Her cup remains on its saucer. At about 00:01.200, <Subject 1> (S1) asks with a small, curious lift of the brows: <d>[Chinese] 什么问题？</d> She finishes by approximately 00:02.150, then listens. Her expression is attentive rather than exaggeratedly suspicious.\n[Shot 3] At 00:02.650, the camera cuts to a steady medium two-shot of <Subject 1> on the left and <Subject 2> on the right, both faces and their near-table hands visible. At about 00:03.000, <Subject 2> (S2) asks in the same warm, practical Mandarin voice: <d>[Chinese] 你有什么忌口？我来点菜。</d> He finishes by approximately 00:06.350. She pauses long enough to register the unexpectedly ordinary question; her shoulders ease and the corners of her mouth lift slightly. At about 00:07.000, <Subject 1> (S1) answers simply: <d>[Chinese] 香菜。</d> He acknowledges this with a small nod. From approximately 00:08.050, his left hand opens the notebook on his side of the table while his right hand picks up the adjacent pen. By approximately 00:10.000 he begins making a few short, indistinct pen strokes. Keep both people in the shared composition rather than inserting a readable view of the page. End around 00:10.800 with his pen still moving and her quietly amused gaze on him, ready for the continuation.\n\noverall_soundscape: Preserve the same low cafe room tone and faint street ambience throughout. Voices take turns with real pauses. Near the end, add soft paper movement and the light scratch of the pen, synchronized to the man's hands.\n\nnon_diegetic_music: N/A\n\n---\n\n[Shot 1] Continue the preceding medium two-shot: <Subject 1> remains on the left with her cup on its saucer, and <Subject 2> remains on the right, his left hand steadying the open dark-blue notebook while his right hand makes the same small pen strokes. The first approximately 00:00.917 only carries forward this established motion and cafe ambience, with no repeated dialogue. At about 00:01.200, <Subject 1> (S1), now speaking with an easy smile in the same clear Mandarin voice, says: <d>[Chinese] 还有，下次别带本子了。</d> Allow the line to finish by approximately 00:04.000. He registers the implication: his pen stops touching the page, then his gaze rises to meet hers. Let that recognition happen visibly before he speaks. The notebook remains open on his side of the table.\n[Shot 2] At 00:04.550, the camera cuts to a steady medium close-up of <Subject 2> with the same leftward eyeline. His smile grows gradually as he realizes she has mentioned another date. At about 00:05.000, <Subject 2> (S2) answers in the same warm, low Mandarin voice: <d>[Chinese] 好。那下次，晚饭？</d> Give the first word a brief, natural pause, then make the invitation tentative and pleased rather than smug. He completes the question by approximately 00:07.600 and waits, still holding the pen lightly without resuming his writing.\n[Shot 3] At 00:08.050, the camera cuts back to the established medium two-shot, with <Subject 1> left and <Subject 2> right. She meets his eyes, gives one small nod, and at about 00:08.550 <Subject 1> (S1) softly answers: <d>[Chinese] 嗯。</d> They share a modest, unforced smile. Let at least the final second through approximately 00:10.800 breathe in the same shot: small natural blinks, a relaxed exhale, hands resting, and no additional dialogue. Finish on ongoing life rather than a freeze frame, title card, or comedic zoom.\n\noverall_soundscape: The same quiet cafe room tone and faint street ambience remain continuous. Pen scratches end when the man stops writing, followed by clear alternating dialogue and a soft shared breath during the final pause. No laugh track, sting, or additional intelligible voices.\n\nnon_diegetic_music: N/A",
+        "repeat_last": false,
+        "start_segment": 1
+      },
       "color": "#322",
       "bgcolor": "#533"
-    },
-    {
-      "id": 178,
-      "type": "H3LongVideo",
-      "pos": [
-        870,
-        440
-      ],
-      "size": [
-        570,
-        1115
-      ],
-      "flags": {},
-      "order": 10,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "model",
-          "type": "MODEL",
-          "link": 4
-        },
-        {
-          "name": "clip",
-          "type": "CLIP",
-          "link": 5
-        },
-        {
-          "name": "vae",
-          "type": "VAE",
-          "link": 6
-        },
-        {
-          "name": "audio_vae",
-          "type": "VAE",
-          "link": 7
-        },
-        {
-          "name": "prompts",
-          "type": "H3_PROMPTS",
-          "link": 8
-        },
-        {
-          "name": "ref_images.ref_image_0",
-          "type": "IMAGE",
-          "shape": 7,
-          "link": 9
-        },
-        {
-          "name": "ref_images.ref_image_1",
-          "type": "IMAGE",
-          "shape": 7,
-          "link": 10
-        },
-        {
-          "name": "ref_images.ref_image_2",
-          "type": "IMAGE",
-          "shape": 7,
-          "link": null
-        },
-        {
-          "name": "sigmas",
-          "type": "SIGMAS",
-          "shape": 7,
-          "link": 13
-        },
-        {
-          "name": "ref_videos.ref_video_0",
-          "type": "IMAGE",
-          "shape": 7,
-          "link": null
-        },
-        {
-          "name": "ref_video_audios.ref_video_audio_0",
-          "type": "AUDIO",
-          "shape": 7,
-          "link": null
-        },
-        {
-          "name": "ref_audios.ref_audio_0",
-          "type": "AUDIO",
-          "shape": 7,
-          "link": null
-        },
-        {
-          "name": "previous_latent",
-          "type": "LATENT",
-          "shape": 7,
-          "link": null,
-          "label": "上一段 LATENT"
-        }
-      ],
-      "outputs": [
-        {
-          "name": "合并视频",
-          "type": "VIDEO",
-          "links": [
-            12
-          ]
-        },
-        {
-          "name": "最后一段 latent",
-          "type": "LATENT",
-          "links": []
-        },
-        {
-          "name": "生成信息",
-          "type": "STRING",
-          "links": []
-        },
-        {
-          "name": "分段视频",
-          "type": "VIDEO",
-          "shape": 6,
-          "links": [
-            14
-          ]
-        },
-        {
-          "name": "LATENT 文件路径",
-          "type": "STRING",
-          "shape": 6,
-          "links": []
-        }
-      ],
-      "title": "H3 长视频：分段生成 + 合并 by神棍",
-      "properties": {
-        "Node name for S&R": "H3LongVideo"
-      },
-      "widgets_values_named": {
-        "segments": 4,
-        "duration": 5.0,
-        "aspect_ratio": "16:9 (Widescreen)",
-        "megapixels": 0.4,
-        "seed": 261662374822964,
-        "steps": 8,
-        "sampler_name": "res_multistep",
-        "scheduler": "simple",
-        "context_frames": 22,
-        "seed_mode": "increment",
-        "denoise": 1.0,
-        "ref_image_size": "match",
-        "control_after_generate": "fixed",
-        "save_latents": false,
-        "filename_prefix": "video/H3_CustomSigmas/H3_parts",
-        "dynamic_mask": false
-      },
-      "widgets_values": [
-        4,
-        5.0,
-        "16:9 (Widescreen)",
-        0.4,
-        261662374822964,
-        "fixed",
-        8,
-        "res_multistep",
-        "simple",
-        22,
-        "increment",
-        1.0,
-        "match",
-        false,
-        "video/H3_CustomSigmas/H3_parts",
-        false
-      ],
-      "color": "#233",
-      "bgcolor": "#355"
     },
     {
       "id": 180,
       "type": "SaveVideo",
       "pos": [
-        2440,
+        2660,
         60
       ],
       "size": [
@@ -640,13 +522,13 @@
         540
       ],
       "flags": {},
-      "order": 12,
+      "order": 23,
       "mode": 0,
       "inputs": [
         {
           "name": "video",
           "type": "VIDEO",
-          "link": 12
+          "link": 26
         }
       ],
       "outputs": [
@@ -656,20 +538,20 @@
           "links": []
         }
       ],
-      "title": "保存合并视频（外接时保存整片）",
+      "title": "保存合并视频（可选，外接时保存整片）",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.33.0",
         "Node name for S&R": "SaveVideo"
       },
       "widgets_values": [
-        "video/H3_CustomSigmas/H3_combined",
+        "H3_combined",
         "auto",
         "auto",
         "auto"
       ],
       "widgets_values_named": {
-        "filename_prefix": "video/H3_CustomSigmas/H3_combined",
+        "filename_prefix": "H3_combined",
         "format": "auto",
         "format.codec": "auto",
         "codec": "auto"
@@ -679,73 +561,36 @@
       "id": 181,
       "type": "ManualSigmas",
       "pos": [
-        1570,
-        1000
+        -30,
+        1490
       ],
       "size": [
         800,
         100
       ],
       "flags": {},
-      "order": 13,
+      "order": 8,
       "mode": 0,
       "inputs": [],
       "outputs": [
         {
           "name": "SIGMAS",
           "type": "SIGMAS",
-          "links": [
-            13
-          ]
+          "links": []
         }
       ],
+      "title": "自定义 Sigmas · 接入后覆盖内部调度器（10步）",
       "properties": {
         "cnr_id": "comfy-core",
+        "ver": "0.41.0",
         "Node name for S&R": "ManualSigmas"
       },
-      "title": "自定义 Sigmas · 接入后覆盖内部调度器（10步）",
       "widgets_values": [
         "1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0"
       ],
       "widgets_values_named": {
         "sigmas": "1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0"
       }
-    },
-    {
-      "id": 191,
-      "type": "H3LoadLatent",
-      "pos": [
-        1570,
-        1210
-      ],
-      "size": [
-        800,
-        180
-      ],
-      "flags": {},
-      "order": 22,
-      "mode": 0,
-      "inputs": [],
-      "outputs": [
-        {
-          "name": "音视频 LATENT",
-          "type": "LATENT",
-          "links": []
-        }
-      ],
-      "title": "可选：下拉选择上一段 H3 LATENT（重抽时连接）",
-      "properties": {
-        "Node name for S&R": "H3LoadLatent"
-      },
-      "widgets_values": [
-        "",
-        "未找到 .h3latent（请先开启保存每段 LATENT，再刷新）"
-      ],
-      "widgets_values_named": {
-        "latent_path": ""
-      },
-      "color": "#233",
-      "bgcolor": "#355"
     },
     {
       "id": 192,
@@ -759,7 +604,7 @@
         900
       ],
       "flags": {},
-      "order": 23,
+      "order": 9,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -771,8 +616,11 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 01｜段数、时长与分辨率\n\n**H3 长视频：分段生成 + 合并 by神棍**。下列默认值指新建节点；导入本例时使用工作流中保存的参数。\n\n- **生成段数 `segments`：默认 4，最小 1。** 填本次新生成的总段数，1 就生成一段。输入的上一段 LATENT 不计入段数，也不加入本次视频输出。\n- **每段时长 `duration`：默认 5.0 秒。** 是每段的目标时长。使用官方 24fps、`17k+5` 帧网格，实际时长略有对齐偏差。\n- 默认上下文下，5.0 秒的全新首段导出 **124 帧**，续段各导出 **119 帧**；四段共 481 帧，约 **20.04 秒**。首段完整保留，续段删除重复的上下文前缀。\n- **宽高比：默认 16:9；百万像素：默认 0.4。** 使用官方分辨率选择器，宽高对齐到 32 的倍数。本机此组合为 **864×480**，目标比例和像素数存在网格偏差。\n\n提高分辨率会增加采样、解码的资源占用。可从 4 段、每段 5.0 秒开始测试。\n\n**保存：**“合并视频”接外部 Save Video 保存整片；“分段视频”接另一个 Save Video 逐段保存。两路都可直接使用，实际合并发生在外部保存时。"
+        "# 01｜段数、时长与分辨率\n\n**H3 长视频：分段生成 + 合并 by神棍**。下列默认值指新建节点；导入工作流时使用其保存的参数。\n\n主节点分为 **生成设置 / 片段重抽 / 接缝预览 / 生成信息** 四个标签，内容在固定高度的面板内滚动。常用参数在“生成设置”；上下文、各段种子、降噪、参考图尺寸、动态掩码、防漂移及 LATENT 保存位于该页的“高级设置与 LATENT 保存”。切换标签不改变参数或连线。\n\n“预览采样（增加耗时）”默认关闭。开启后，采样画面覆盖显示在原有黑色面板内；点击“返回参数”可收起，任务结束自动恢复，不增加节点高度。预览参数和开销见第 05 节。\n\n- **生成段数 `segments`：默认 4，最小 1。** 填本次新生成的总段数，1 就生成一段。输入的上一段 LATENT 不计入段数，也不加入本次视频输出。\n- **每段时长 `duration`：默认 5.0 秒。** 是每段的目标时长。使用官方 24fps、`17k+5` 帧网格，实际时长略有对齐偏差。\n- 默认上下文下，5.0 秒的全新首段导出 **124 帧**，续段各导出 **119 帧**；四段共 481 帧，约 **20.04 秒**。首段完整保留，续段删除重复的上下文前缀。\n- **宽高比：默认 16:9；百万像素：默认 0.4。** 使用官方分辨率选择器，宽高对齐到 32 的倍数。本机此组合为 **864×480**，目标比例和像素数存在网格偏差。\n\n提高分辨率会增加采样、解码的资源占用。可从 4 段、每段 5.0 秒开始测试。\n\n**保存：**每段生成完成立即保存到 output，已完成片段在中止或报错后保留。“合并视频”可选连接外部 Save Video；不接也正常逐段生成和保存，不会因此报错，也不产生合并文件。分段输出接口已取消，详见第 08 节。\n\n## 本示例：30 秒相亲《下次晚饭》\n\n30 秒相亲轻喜剧《下次晚饭》，3 段各约 10 秒。女方先声明不接受查户口，男方却只问吃饭忌口。她被这份日常体贴打动，顺口说出‘下次’，他及时接住，约好了下一顿晚饭。续段前约 0.917 秒仅延续已有动作，新的对白都放在 1 秒以后。\n\n本工作流保存的参数为 **3 段 × 10.0 秒、16:9、0.2 MP**，本网格实际分辨率为 **608×352**；保留默认 22 帧上下文。首段导出 **243 帧**，后两段各 **238 帧**，合计 **719 帧，约 29.96 秒**（24fps）。这是本示例配置，不改变新建节点的默认 4 段 × 5.0 秒。三段提示词已写入旁边的计划节点，无需手动拆分或开启末段复用。\n\n本示例沿用作者保存的配置：采样器 `er_sde`、各段种子 `fixed`、生成后控制 `randomize`，动态掩码与防漂移开启，完整 LATENT 保存关闭。**预览采样已开启、10fps**，与新建节点默认关闭不同；需要本地时序 TAE 权重，资源不足可在高级设置关闭。当前连接的是 **5 步自定义 SIGMAS**，详见第 05 节。"
       ],
+      "widgets_values_named": {
+        "text": "# 01｜段数、时长与分辨率\n\n**H3 长视频：分段生成 + 合并 by神棍**。下列默认值指新建节点；导入工作流时使用其保存的参数。\n\n主节点分为 **生成设置 / 片段重抽 / 接缝预览 / 生成信息** 四个标签，内容在固定高度的面板内滚动。常用参数在“生成设置”；上下文、各段种子、降噪、参考图尺寸、动态掩码、防漂移及 LATENT 保存位于该页的“高级设置与 LATENT 保存”。切换标签不改变参数或连线。\n\n“预览采样（增加耗时）”默认关闭。开启后，采样画面覆盖显示在原有黑色面板内；点击“返回参数”可收起，任务结束自动恢复，不增加节点高度。预览参数和开销见第 05 节。\n\n- **生成段数 `segments`：默认 4，最小 1。** 填本次新生成的总段数，1 就生成一段。输入的上一段 LATENT 不计入段数，也不加入本次视频输出。\n- **每段时长 `duration`：默认 5.0 秒。** 是每段的目标时长。使用官方 24fps、`17k+5` 帧网格，实际时长略有对齐偏差。\n- 默认上下文下，5.0 秒的全新首段导出 **124 帧**，续段各导出 **119 帧**；四段共 481 帧，约 **20.04 秒**。首段完整保留，续段删除重复的上下文前缀。\n- **宽高比：默认 16:9；百万像素：默认 0.4。** 使用官方分辨率选择器，宽高对齐到 32 的倍数。本机此组合为 **864×480**，目标比例和像素数存在网格偏差。\n\n提高分辨率会增加采样、解码的资源占用。可从 4 段、每段 5.0 秒开始测试。\n\n**保存：**每段生成完成立即保存到 output，已完成片段在中止或报错后保留。“合并视频”可选连接外部 Save Video；不接也正常逐段生成和保存，不会因此报错，也不产生合并文件。分段输出接口已取消，详见第 08 节。\n\n## 本示例：30 秒相亲《下次晚饭》\n\n30 秒相亲轻喜剧《下次晚饭》，3 段各约 10 秒。女方先声明不接受查户口，男方却只问吃饭忌口。她被这份日常体贴打动，顺口说出‘下次’，他及时接住，约好了下一顿晚饭。续段前约 0.917 秒仅延续已有动作，新的对白都放在 1 秒以后。\n\n本工作流保存的参数为 **3 段 × 10.0 秒、16:9、0.2 MP**，本网格实际分辨率为 **608×352**；保留默认 22 帧上下文。首段导出 **243 帧**，后两段各 **238 帧**，合计 **719 帧，约 29.96 秒**（24fps）。这是本示例配置，不改变新建节点的默认 4 段 × 5.0 秒。三段提示词已写入旁边的计划节点，无需手动拆分或开启末段复用。\n\n本示例沿用作者保存的配置：采样器 `er_sde`、各段种子 `fixed`、生成后控制 `randomize`，动态掩码与防漂移开启，完整 LATENT 保存关闭。**预览采样已开启、10fps**，与新建节点默认关闭不同；需要本地时序 TAE 权重，资源不足可在高级设置关闭。当前连接的是 **5 步自定义 SIGMAS**，详见第 05 节。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
@@ -788,7 +636,7 @@
         900
       ],
       "flags": {},
-      "order": 24,
+      "order": 10,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -800,8 +648,11 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 02｜模型、VAE与参考图片\n\n## 必接接口\n\n- **`model`：** H3 Ref2VA 模型。LoRA、注意力等加速设置在外部接好后，再连接处理后的 MODEL。\n- **`clip`：** 与 H3 配套的文本编码器；内部按段编码提示词及参考素材标签。\n- **视频 VAE `vae`：** H3 视频 VAE，负责参考素材编码与生成视频解码；同任务的上一段 LATENT 直接续接，无需重编码。\n- **音频 VAE `audio_vae`：** H3 音频 VAE，负责参考音频编码和生成音频解码；没有外部音频参考时也要连接。\n- **`prompts`：** 接“H3 长视频提示词”的 `H3_PROMPTS` 输出。\n\n## 参考图片（可选）\n\n`ref_image_0`、`ref_image_1`…接 Load Image。同一组图片用于各段；提示词按实际接入顺序引用 **`<Picture 1>`、`<Picture 2>`…**，接口后缀从 0 开始，标签从 1 开始。先使用必要素材，扩展端口上限不代表参考越多越好。\n\n**参考图尺寸 `ref_image_size`：默认 `match`。**\n\n- `match`：保留比例，按生成画面的像素面积缩小参考图。\n- `max`：保留更多细节，超过短边 2048 像素时缩小；参考 token 可能更多，显存与耗时也会增加。\n\n两者均不主动放大小图，仍按官方网格对齐；不改变输出视频分辨率。"
+        "# 02｜模型、VAE与参考图片\n\n## 必接接口\n\n- **`model`：** H3 Ref2VA 模型。LoRA、注意力等加速设置在外部接好后，再连接处理后的 MODEL。\n- **`clip`：** 与 H3 配套的文本编码器；内部按段编码提示词及参考素材标签。\n- **视频 VAE `vae`：** H3 视频 VAE，负责参考素材编码与生成视频解码；同任务的上一段 LATENT 直接续接，无需重编码。\n- **音频 VAE `audio_vae`：** H3 音频 VAE，负责参考音频编码和生成音频解码；没有外部音频参考时也要连接。\n- **`prompts`：** 接“H3 长视频提示词”的 `H3_PROMPTS` 输出。\n\n## 参考图片（可选）\n\n`ref_image_0`、`ref_image_1`…接 Load Image。同一组图片用于各段；提示词按实际接入顺序引用 **`<Picture 1>`、`<Picture 2>`…**，接口后缀从 0 开始，标签从 1 开始。先使用必要素材，扩展端口上限不代表参考越多越好。\n\n**参考图尺寸 `ref_image_size`：默认 `match`。**\n\n- `match`：保留比例，按生成画面的像素面积缩小参考图。\n- `max`：保留更多细节，超过短边 2048 像素时缩小；参考 token 可能更多，显存与耗时也会增加。\n\n两者均不主动放大小图，仍按官方网格对齐；不改变输出视频分辨率。\n\n## 本示例素材\n\n素材随插件放在 `examples/assets/blind_date_30s/`。请将该目录中的三张 PNG 原样复制到 `ComfyUI/input/H3_examples/blind_date_30s/`，保留文件名，再导入本工作流。\n\n1. `<Picture 1>`：`lin_zhixia_four_views.png`，林知夏人物四视图。\n2. `<Picture 2>`：`chen_yu_four_views.png`，陈屿人物四视图。\n3. `<Picture 3>`：`cafe.png`，空咖啡馆场景。\n\n四视图仅用于同一个人物的外观参考，不把四个人或白色资产背景生成进剧情。场景图仅定义空间、光线与陈设，人物动作和对白以三段英文提示词为准，中文对白按原文生成。\n\n本例保留作者本机模型名及加速设置：H3 Hybrid 模型、`minimax_h3_DMAD_4step_full_lora_avg_rank_39_bf16.safetensors` LoRA，以及注意力后端和稀疏注意力节点。导入后按自己的安装情况重选权重；若环境不支持当前加速后端，可将 LoRA 的 MODEL 直接接主节点。文件名中的 `4step` 不决定采样步数，实际以连接的 SIGMAS 为准。"
       ],
+      "widgets_values_named": {
+        "text": "# 02｜模型、VAE与参考图片\n\n## 必接接口\n\n- **`model`：** H3 Ref2VA 模型。LoRA、注意力等加速设置在外部接好后，再连接处理后的 MODEL。\n- **`clip`：** 与 H3 配套的文本编码器；内部按段编码提示词及参考素材标签。\n- **视频 VAE `vae`：** H3 视频 VAE，负责参考素材编码与生成视频解码；同任务的上一段 LATENT 直接续接，无需重编码。\n- **音频 VAE `audio_vae`：** H3 音频 VAE，负责参考音频编码和生成音频解码；没有外部音频参考时也要连接。\n- **`prompts`：** 接“H3 长视频提示词”的 `H3_PROMPTS` 输出。\n\n## 参考图片（可选）\n\n`ref_image_0`、`ref_image_1`…接 Load Image。同一组图片用于各段；提示词按实际接入顺序引用 **`<Picture 1>`、`<Picture 2>`…**，接口后缀从 0 开始，标签从 1 开始。先使用必要素材，扩展端口上限不代表参考越多越好。\n\n**参考图尺寸 `ref_image_size`：默认 `match`。**\n\n- `match`：保留比例，按生成画面的像素面积缩小参考图。\n- `max`：保留更多细节，超过短边 2048 像素时缩小；参考 token 可能更多，显存与耗时也会增加。\n\n两者均不主动放大小图，仍按官方网格对齐；不改变输出视频分辨率。\n\n## 本示例素材\n\n素材随插件放在 `examples/assets/blind_date_30s/`。请将该目录中的三张 PNG 原样复制到 `ComfyUI/input/H3_examples/blind_date_30s/`，保留文件名，再导入本工作流。\n\n1. `<Picture 1>`：`lin_zhixia_four_views.png`，林知夏人物四视图。\n2. `<Picture 2>`：`chen_yu_four_views.png`，陈屿人物四视图。\n3. `<Picture 3>`：`cafe.png`，空咖啡馆场景。\n\n四视图仅用于同一个人物的外观参考，不把四个人或白色资产背景生成进剧情。场景图仅定义空间、光线与陈设，人物动作和对白以三段英文提示词为准，中文对白按原文生成。\n\n本例保留作者本机模型名及加速设置：H3 Hybrid 模型、`minimax_h3_DMAD_4step_full_lora_avg_rank_39_bf16.safetensors` LoRA，以及注意力后端和稀疏注意力节点。导入后按自己的安装情况重选权重；若环境不支持当前加速后端，可将 LoRA 的 MODEL 直接接主节点。文件名中的 `4step` 不决定采样步数，实际以连接的 SIGMAS 为准。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
@@ -817,7 +668,7 @@
         900
       ],
       "flags": {},
-      "order": 25,
+      "order": 11,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -829,8 +680,11 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 03｜视频/音频参考与上一段 LATENT\n\n以下接口均可选。\n\n- **参考视频 `ref_video_0`…：** 接 24fps 的 **IMAGE 帧批次**，至少 5 帧；可用 Load Video → Get Video Components → images。内部按 H3 网格截齐，提示词使用 `<Video 1>`…；同份参考在各段复用。\n- **配对视频音轨 `ref_video_audio_0`…：** 按相同后缀与视频配对，例如 `_0` 对应 `ref_video_0`。\n- **独立参考音频 `ref_audio_0`…：** 接 AUDIO。`<Audio j>` 先编号已接入的配对视频音轨，再编号独立音频；例如已有一条配对音轨，首条独立音频为 `<Audio 2>`。这些是声音参考，输出音频仍由 H3 生成。\n\n## 上一段 LATENT\n\n`previous_latent` 接上一生成节点的“最后一段 latent”，或“H3 读取音视频 LATENT by神棍”。必须是 **H3 原生完整音视频 LATENT、相同分辨率**。直接读取尾部上下文，不经过 MP4 或 VAE 再编码；该输入段不出现在本次分段/整片输出中。\n\n## 读取已保存 LATENT\n\n优先从“已保存的 LATENT”下拉列表选择，新增文件后点刷新；“手动路径”留空。手动填写时以该值为准，例如：\n\n`video/H3-SGUN/H3_00001/segment_0002.h3latent [output]`\n\n路径限定在 ComfyUI input/output/temp，文件保留完整视频、音频及原 dtype/数值。普通单流 Save/Load Latent 不适用。模板的读取节点默认未连接，不参与全新生成。"
+        "# 03｜视频/音频参考与上一段 LATENT\n\n以下接口均可选。\n\n- **参考视频 `ref_video_0`…：** 接 24fps 的 **IMAGE 帧批次**，至少 5 帧；可用 Load Video → Get Video Components → images。内部按 H3 网格截齐，提示词使用 `<Video 1>`…；同份参考在各段复用。\n- **配对视频音轨 `ref_video_audio_0`…：** 按相同后缀与视频配对，例如 `_0` 对应 `ref_video_0`。\n- **独立参考音频 `ref_audio_0`…：** 接 AUDIO。`<Audio j>` 先编号已接入的配对视频音轨，再编号独立音频；例如已有一条配对音轨，首条独立音频为 `<Audio 2>`。这些是声音参考，输出音频仍由 H3 生成。\n\n## 上一段 LATENT\n\n`previous_latent` 接上一生成节点的“最后一段 latent”，或“H3 读取音视频 LATENT by神棍”。必须是 **H3 原生完整音视频 LATENT、相同分辨率**。直接读取尾部上下文，不经过 MP4 或 VAE 再编码；该输入段不出现在本次分段/整片输出中。\n\n## 读取已保存 LATENT\n\n优先从“已保存的 LATENT”下拉列表选择，新增文件后点刷新；“手动路径”留空。手动填写时以该值为准，例如：\n\n`H3_00001/_data/segment_0002.h3latent [output]`\n\n路径限定在 ComfyUI input/output/temp，文件保留完整视频、音频及原 dtype/数值。普通单流 Save/Load Latent 不适用。本示例没有放置 LATENT 读取节点；手动续接时自行添加“H3 读取音视频 LATENT by神棍”，再接上一段 LATENT。"
       ],
+      "widgets_values_named": {
+        "text": "# 03｜视频/音频参考与上一段 LATENT\n\n以下接口均可选。\n\n- **参考视频 `ref_video_0`…：** 接 24fps 的 **IMAGE 帧批次**，至少 5 帧；可用 Load Video → Get Video Components → images。内部按 H3 网格截齐，提示词使用 `<Video 1>`…；同份参考在各段复用。\n- **配对视频音轨 `ref_video_audio_0`…：** 按相同后缀与视频配对，例如 `_0` 对应 `ref_video_0`。\n- **独立参考音频 `ref_audio_0`…：** 接 AUDIO。`<Audio j>` 先编号已接入的配对视频音轨，再编号独立音频；例如已有一条配对音轨，首条独立音频为 `<Audio 2>`。这些是声音参考，输出音频仍由 H3 生成。\n\n## 上一段 LATENT\n\n`previous_latent` 接上一生成节点的“最后一段 latent”，或“H3 读取音视频 LATENT by神棍”。必须是 **H3 原生完整音视频 LATENT、相同分辨率**。直接读取尾部上下文，不经过 MP4 或 VAE 再编码；该输入段不出现在本次分段/整片输出中。\n\n## 读取已保存 LATENT\n\n优先从“已保存的 LATENT”下拉列表选择，新增文件后点刷新；“手动路径”留空。手动填写时以该值为准，例如：\n\n`H3_00001/_data/segment_0002.h3latent [output]`\n\n路径限定在 ComfyUI input/output/temp，文件保留完整视频、音频及原 dtype/数值。普通单流 Save/Load Latent 不适用。本示例没有放置 LATENT 读取节点；手动续接时自行添加“H3 读取音视频 LATENT by神棍”，再接上一段 LATENT。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
@@ -846,7 +700,7 @@
         900
       ],
       "flags": {},
-      "order": 26,
+      "order": 12,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -858,8 +712,11 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 04｜种子与两种控制范围\n\n**种子 `seed`：默认 0。** 决定本次第一段的初始随机噪声。固定种子便于对照；同时改变其他参数时，不能据此保证画面相同。\n\n## 生成后控制\n\n`control_after_generate` 是官方前端附加控件，控制**下一次排队的起始种子**。支持 `fixed`、`increment`、`decrement`、`randomize`；本模板保存为 `fixed`。\n\n## 各段种子 `seed_mode`\n\n默认 `increment`，控制**当前这次任务内部**各段种子。设首段种子为 S：\n\n| 方式 | 当前各段实际种子 |\n| --- | --- |\n| `fixed` | S、S、S… |\n| `increment` | S、S+1、S+2…，到 uint64 上限后保持上限 |\n| `decrement` | S、S-1、S-2…，最低为 0 |\n| `randomize` | 首段 S，第二段起分别随机 |\n\n例如 seed=100、生成后控制=fixed、各段种子=increment：本次四段为 100/101/102/103，下次仍从 100 起。`randomize` 多段任务重复排队时，后续段会重新随机。\n\n**重抽：**“起始提示词段号”只选文本，不会推算原种子。需复现某段时，从生成信息 `seeds` 或 LATENT 清单 `segments.jsonl` 取该段实际种子。"
+        "# 04｜种子与两种控制范围\n\n**种子 `seed`：默认 0。** 决定本次第一段的初始随机噪声。固定种子便于对照；同时改变其他参数时，不能据此保证画面相同。\n\n## 生成后控制\n\n`control_after_generate` 默认 `randomize`（随机），是官方前端附加控件，控制**下一次排队的起始种子**。支持 `fixed`、`increment`、`decrement`、`randomize`，以当前控件选择为准。\n\n## 各段种子 `seed_mode`\n\n默认 `increment`，控制**当前这次任务内部**各段种子。设首段种子为 S：\n\n| 方式 | 当前各段实际种子 |\n| --- | --- |\n| `fixed` | S、S、S… |\n| `increment` | S、S+1、S+2…，到 uint64 上限后保持上限 |\n| `decrement` | S、S-1、S-2…，最低为 0 |\n| `randomize` | 首段 S，第二段起分别随机 |\n\n例如 seed=100、生成后控制=fixed、各段种子=increment：本次四段为 100/101/102/103，下次仍从 100 起。`randomize` 多段任务重复排队时，后续段会重新随机。\n\n**自动重抽：**在“片段重抽”中恢复记录，会保留该段完整实际种子，并将生成后控制和各段种子设为 `fixed`、生成段数设为 1。**重抽种子方式 `retry_seed_mode`** 默认“随机种子” `randomize`，每次运行重新随机并记录实际种子；选“原种子” `original` 才复用片段记录的实际种子；选“自定义种子” `custom` 才显示并读取相邻的“自定义重抽种子” `retry_seed`。自定义值必须为 0–18446744073709551615 的完整十进制整数，留空或非法值报错；字符串保留完整数值，避免浏览器舍入大整数。\n\n**手动重抽：**“起始提示词段号”只选文本，不推算原种子。实际种子可从“生成信息”、片段记录或 `segments.jsonl` 查看；同时改变其他输入仍可能改变结果。"
       ],
+      "widgets_values_named": {
+        "text": "# 04｜种子与两种控制范围\n\n**种子 `seed`：默认 0。** 决定本次第一段的初始随机噪声。固定种子便于对照；同时改变其他参数时，不能据此保证画面相同。\n\n## 生成后控制\n\n`control_after_generate` 默认 `randomize`（随机），是官方前端附加控件，控制**下一次排队的起始种子**。支持 `fixed`、`increment`、`decrement`、`randomize`，以当前控件选择为准。\n\n## 各段种子 `seed_mode`\n\n默认 `increment`，控制**当前这次任务内部**各段种子。设首段种子为 S：\n\n| 方式 | 当前各段实际种子 |\n| --- | --- |\n| `fixed` | S、S、S… |\n| `increment` | S、S+1、S+2…，到 uint64 上限后保持上限 |\n| `decrement` | S、S-1、S-2…，最低为 0 |\n| `randomize` | 首段 S，第二段起分别随机 |\n\n例如 seed=100、生成后控制=fixed、各段种子=increment：本次四段为 100/101/102/103，下次仍从 100 起。`randomize` 多段任务重复排队时，后续段会重新随机。\n\n**自动重抽：**在“片段重抽”中恢复记录，会保留该段完整实际种子，并将生成后控制和各段种子设为 `fixed`、生成段数设为 1。**重抽种子方式 `retry_seed_mode`** 默认“随机种子” `randomize`，每次运行重新随机并记录实际种子；选“原种子” `original` 才复用片段记录的实际种子；选“自定义种子” `custom` 才显示并读取相邻的“自定义重抽种子” `retry_seed`。自定义值必须为 0–18446744073709551615 的完整十进制整数，留空或非法值报错；字符串保留完整数值，避免浏览器舍入大整数。\n\n**手动重抽：**“起始提示词段号”只选文本，不推算原种子。实际种子可从“生成信息”、片段记录或 `segments.jsonl` 查看；同时改变其他输入仍可能改变结果。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
@@ -875,7 +732,7 @@
         900
       ],
       "flags": {},
-      "order": 27,
+      "order": 13,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -887,8 +744,11 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 05｜采样与自定义 Sigmas\n\n- **采样步数 `steps`：默认 8。** 未接 SIGMAS 时用于内部调度；需与模型和加速 LoRA 配套。\n- **采样器 `sampler_name`：默认 `res_multistep`。** 接自定义 SIGMAS 后仍然生效。\n- **调度器 `scheduler`：默认 `simple`。** 未接 SIGMAS 时，与步数、降噪共同生成序列。\n- **降噪 `denoise`：默认 1.0。** 只作用于内部调度器；不是上一段上下文的保留强度。\n\n## 本例已连接自定义 SIGMAS\n\n```text\n1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0\n```\n\n共 **11 个值、10 个采样步**。即使主节点面板显示 8 步，本例也按外部序列运行。\n\n接入 `sigmas` 后，内部 `steps` / `scheduler` / `denoise` 不再计算或截取序列；输入值原样用于各段，采样器仍由主节点选择。普通完整序列由高到低并以 0 结束，需与当前 H3 模型及加速方案匹配。\n\n断开 SIGMAS 连线即可恢复面板上的内部调度设置。"
+        "# 05｜采样与自定义 Sigmas\n\n- **采样步数 `steps`：默认 8。** 未接 SIGMAS 时用于内部调度；需与模型和加速 LoRA 配套。\n- **采样器 `sampler_name`：默认 `er_sde`。** 接自定义 SIGMAS 后仍然生效。\n- **调度器 `scheduler`：默认 `simple`。** 未接 SIGMAS 时，与步数、降噪共同生成序列。\n- **降噪 `denoise`：默认 1.0。** 只作用于内部调度器；不是上一段上下文的保留强度。\n\n## 当前接入的自定义 SIGMAS（5 步）\n\n```text\n1.0000, 0.9825, 0.9234, 0.7207, 0.3604, 0.0000\n```\n\n当前连线来自 **5 步**节点：共 6 个值，实际执行 **5 个采样步**；主节点保存的 8 步不参与内部调度计算。LoRA 文件名中的 `4step` 也不会覆盖这条序列。这里说明当前配置，不代表该 LoRA 与 5 步组合已经验证效果。\n\n旁边保留一个**未连接的 10 步备用节点**（11 个值），不会参与当前运行：\n\n```text\n1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0\n```\n\n改接这条备用序列才执行 10 步；修改后按实际输入序列长度减 1 计算。\n\n接入 `sigmas` 后，内部 `steps` / `scheduler` / `denoise` 不再计算或截取序列；输入值原样用于各段，采样器仍由主节点选择。普通完整序列由高到低并以 0 结束，需与当前 H3 模型及加速方案匹配。\n\n正常生成时，断开 SIGMAS 连线即可恢复面板上的内部调度设置。\n\n**恢复片段重抽时：**原片段使用外接 SIGMAS，就复用记录的原始序列及类型，当前 SIGMAS 连线不参与该次重抽；原片段使用内部调度器，就按恢复后可修改的步数、调度器和降噪重新计算。\n\n## 可选采样预览\n\n- **预览采样（增加耗时）`live_preview`：新建节点默认关闭，本示例保存为开启。** 关闭时不加载预览模型、不额外解码，官方低清缩略图也不再追加到节点下方。\n- 开启后，使用本地 `models/vae_approx/taeh3_temporal.safetensors`，通过 ComfyUI 原生 TAEHV 时序解码器生成连续画面，在现有黑色面板内覆盖循环播放，无音频。不依赖 KJNodes，也不调用完整 H3 VAE 做中间预览。\n- **预览帧数自动对齐当前片段实际导出帧数，续段排除重复上下文。** 时序解码器直接生成相应的连续帧，不再重复二维预览帧来补齐时长。帧数控件隐藏，旧工作流保存的 `preview_frames` 值不再生效。\n- **预览帧率 `preview_fps`：默认 10fps，范围 1–60。** 24fps 与正式视频同速；调低慢放、调高快放，只改预览播放速度，正式视频仍为 24fps。\n- **预览更新间隔 `preview_interval`：默认 2 步。** 间隔越小，更新越频繁，耗时越多。\n- **预览最长边 `preview_max_resolution`：默认 768，控件范围 128–2048。** 只限制预览尺寸，正式视频分辨率不变；JPEG 质量固定80。\n\n四项预览控件全部集中在“高级设置与 LATENT 保存”中，依次为开关、帧率、更新间隔、最长边。点击“返回参数”只隐藏本次覆盖层，已排队任务仍继续预览解码；要省去开销，应在排队前关闭开关。下次排队可重新显示，任务结束自动恢复参数。片段越长，预览开销越大。\n\n预览按任务及当前工作流归属过滤，避免旧任务或其他工作流的画面覆盖当前节点。模型缺失、使用旧二维权重或解码失败仅停用该次预览，视频生成继续；用户中止仍生效。时序 TAE 仍为近似解码，不代表成片画质。节点只读取本地权重，不会自动联网下载；权重来源和校验值见 README。"
       ],
+      "widgets_values_named": {
+        "text": "# 05｜采样与自定义 Sigmas\n\n- **采样步数 `steps`：默认 8。** 未接 SIGMAS 时用于内部调度；需与模型和加速 LoRA 配套。\n- **采样器 `sampler_name`：默认 `er_sde`。** 接自定义 SIGMAS 后仍然生效。\n- **调度器 `scheduler`：默认 `simple`。** 未接 SIGMAS 时，与步数、降噪共同生成序列。\n- **降噪 `denoise`：默认 1.0。** 只作用于内部调度器；不是上一段上下文的保留强度。\n\n## 当前接入的自定义 SIGMAS（5 步）\n\n```text\n1.0000, 0.9825, 0.9234, 0.7207, 0.3604, 0.0000\n```\n\n当前连线来自 **5 步**节点：共 6 个值，实际执行 **5 个采样步**；主节点保存的 8 步不参与内部调度计算。LoRA 文件名中的 `4step` 也不会覆盖这条序列。这里说明当前配置，不代表该 LoRA 与 5 步组合已经验证效果。\n\n旁边保留一个**未连接的 10 步备用节点**（11 个值），不会参与当前运行：\n\n```text\n1, .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0\n```\n\n改接这条备用序列才执行 10 步；修改后按实际输入序列长度减 1 计算。\n\n接入 `sigmas` 后，内部 `steps` / `scheduler` / `denoise` 不再计算或截取序列；输入值原样用于各段，采样器仍由主节点选择。普通完整序列由高到低并以 0 结束，需与当前 H3 模型及加速方案匹配。\n\n正常生成时，断开 SIGMAS 连线即可恢复面板上的内部调度设置。\n\n**恢复片段重抽时：**原片段使用外接 SIGMAS，就复用记录的原始序列及类型，当前 SIGMAS 连线不参与该次重抽；原片段使用内部调度器，就按恢复后可修改的步数、调度器和降噪重新计算。\n\n## 可选采样预览\n\n- **预览采样（增加耗时）`live_preview`：新建节点默认关闭，本示例保存为开启。** 关闭时不加载预览模型、不额外解码，官方低清缩略图也不再追加到节点下方。\n- 开启后，使用本地 `models/vae_approx/taeh3_temporal.safetensors`，通过 ComfyUI 原生 TAEHV 时序解码器生成连续画面，在现有黑色面板内覆盖循环播放，无音频。不依赖 KJNodes，也不调用完整 H3 VAE 做中间预览。\n- **预览帧数自动对齐当前片段实际导出帧数，续段排除重复上下文。** 时序解码器直接生成相应的连续帧，不再重复二维预览帧来补齐时长。帧数控件隐藏，旧工作流保存的 `preview_frames` 值不再生效。\n- **预览帧率 `preview_fps`：默认 10fps，范围 1–60。** 24fps 与正式视频同速；调低慢放、调高快放，只改预览播放速度，正式视频仍为 24fps。\n- **预览更新间隔 `preview_interval`：默认 2 步。** 间隔越小，更新越频繁，耗时越多。\n- **预览最长边 `preview_max_resolution`：默认 768，控件范围 128–2048。** 只限制预览尺寸，正式视频分辨率不变；JPEG 质量固定80。\n\n四项预览控件全部集中在“高级设置与 LATENT 保存”中，依次为开关、帧率、更新间隔、最长边。点击“返回参数”只隐藏本次覆盖层，已排队任务仍继续预览解码；要省去开销，应在排队前关闭开关。下次排队可重新显示，任务结束自动恢复参数。片段越长，预览开销越大。\n\n预览按任务及当前工作流归属过滤，避免旧任务或其他工作流的画面覆盖当前节点。模型缺失、使用旧二维权重或解码失败仅停用该次预览，视频生成继续；用户中止仍生效。时序 TAE 仍为近似解码，不代表成片画质。节点只读取本地权重，不会自动联网下载；权重来源和校验值见 README。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
@@ -904,7 +764,7 @@
         900
       ],
       "flags": {},
-      "order": 28,
+      "order": 14,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -916,8 +776,11 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 06｜续接、动态掩码与防漂移\n\n## 上下文 `context_frames`：默认 22 帧\n\n从上一段音视频 LATENT 尾部续接动作与声音，常用 5/22/39/56…帧；按 `17k+5` 网格及可用尾部长度限制。续段包含这个前缀，导出时删掉重复画面和对应音频；全新首段完整保留。更长上下文会增加开销，也可能继承前段误差。\n\n## 动态掩码 `dynamic_mask`：默认 false\n\n关闭时使用原生 Guide 续接。开启后，仅对有上一段的续接生效：将尾部放入一次性目标前缀，视频前缀按实际 sigma 动态重绘，靠近接缝处强调保留；音频前缀受保护，新区域正常生成。结束仍裁掉重叠前缀。\n\n使用本段 MODEL 克隆，不改输入模型、原存档或 SIGMAS，不增加第二轮采样。需要原生 H3 掩码支持；与已有动态掩码（如 Differential Diffusion）冲突时会报错。动作与细节可能存在取舍，建议同种子对照。\n\n## 防偏色与亮度漂移 `drift_correction`：默认 false\n\n轻量调整续段视频 LATENT 主体的通道均值/对比度，固定混合强度 0.35；全新首段不调整。音频、头部重叠和用于下一段续接的尾部保持原值，不增加采样，可与动态掩码同时使用。\n\n适合同场景持续镜头；主动换光、昼夜或换场景时建议关闭。两种选项都不能保证修复丢失细节或消除长链漂移。\n\n**解码：**调用官方 VAE Decode，H3 后端处理原生时空分块。每段解码后裁掉上下文并同步裁音频，再写 temp H.264/AAC 缓存。"
+        "# 06｜续接、动态掩码与防漂移\n\n## 上下文 `context_frames`：默认 22 帧\n\n从上一段音视频 LATENT 尾部续接动作与声音，常用 5/22/39/56…帧；按 `17k+5` 网格及可用尾部长度限制。续段包含这个前缀，导出时删掉重复画面和对应音频；全新首段完整保留。更长上下文会增加开销，也可能继承前段误差。\n\n自动重抽仍使用该段生成时保存的前段尾部上下文；默认引导为 22 帧，同时保留对应音频，不会改用刚生成的其他片段。首段没有前段上下文。\n\n## 动态掩码 `dynamic_mask`：默认 true\n\n关闭时使用原生 Guide 续接。开启后，仅对有上一段的续接生效：将尾部放入一次性目标前缀，视频前缀按实际 sigma 动态重绘，靠近接缝处强调保留；音频前缀受保护，新区域正常生成。结束仍裁掉重叠前缀。\n\n使用本段 MODEL 克隆，不改输入模型、原存档或 SIGMAS，不增加第二轮采样。需要原生 H3 掩码支持；与已有动态掩码（如 Differential Diffusion）冲突时会报错。动作与细节可能存在取舍，建议同种子对照。\n\n## 防偏色与亮度漂移 `drift_correction`：默认 true\n\n轻量调整续段视频 LATENT 主体的通道均值/对比度，固定混合强度 0.35；全新首段不调整。音频、头部重叠和用于下一段续接的尾部保持原值，不增加采样，可与动态掩码同时使用。\n\n适合同场景持续镜头；主动换光、昼夜或换场景时建议关闭。两种选项都不能保证修复丢失细节或消除长链漂移。\n\n**解码：**调用官方 VAE Decode，H3 后端处理原生时空分块。每段解码后裁掉上下文并同步裁音频，再立即正式保存为 output 批次目录中的 H.264/AAC MP4。"
       ],
+      "widgets_values_named": {
+        "text": "# 06｜续接、动态掩码与防漂移\n\n## 上下文 `context_frames`：默认 22 帧\n\n从上一段音视频 LATENT 尾部续接动作与声音，常用 5/22/39/56…帧；按 `17k+5` 网格及可用尾部长度限制。续段包含这个前缀，导出时删掉重复画面和对应音频；全新首段完整保留。更长上下文会增加开销，也可能继承前段误差。\n\n自动重抽仍使用该段生成时保存的前段尾部上下文；默认引导为 22 帧，同时保留对应音频，不会改用刚生成的其他片段。首段没有前段上下文。\n\n## 动态掩码 `dynamic_mask`：默认 true\n\n关闭时使用原生 Guide 续接。开启后，仅对有上一段的续接生效：将尾部放入一次性目标前缀，视频前缀按实际 sigma 动态重绘，靠近接缝处强调保留；音频前缀受保护，新区域正常生成。结束仍裁掉重叠前缀。\n\n使用本段 MODEL 克隆，不改输入模型、原存档或 SIGMAS，不增加第二轮采样。需要原生 H3 掩码支持；与已有动态掩码（如 Differential Diffusion）冲突时会报错。动作与细节可能存在取舍，建议同种子对照。\n\n## 防偏色与亮度漂移 `drift_correction`：默认 true\n\n轻量调整续段视频 LATENT 主体的通道均值/对比度，固定混合强度 0.35；全新首段不调整。音频、头部重叠和用于下一段续接的尾部保持原值，不增加采样，可与动态掩码同时使用。\n\n适合同场景持续镜头；主动换光、昼夜或换场景时建议关闭。两种选项都不能保证修复丢失细节或消除长链漂移。\n\n**解码：**调用官方 VAE Decode，H3 后端处理原生时空分块。每段解码后裁掉上下文并同步裁音频，再立即正式保存为 output 批次目录中的 H.264/AAC MP4。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
@@ -933,7 +796,7 @@
         900
       ],
       "flags": {},
-      "order": 29,
+      "order": 15,
       "mode": 0,
       "inputs": [],
       "outputs": [],
@@ -945,8 +808,11 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 07｜分段提示词的四个参数\n\n“H3 长视频提示词”输出 `H3_PROMPTS`，接主节点的“提示词”。\n\n| 参数 | 用法 |\n| --- | --- |\n| 全片固定描述 `common` | 每段都会加入；放人物外观、场景、风格及共用约束。 |\n| 分段剧情 `segments` | 按生成顺序写各段，用**独占一行的 `---`** 分隔。 |\n| 不足时复用最后一段 `repeat_last` | 默认 false；开启后，提示词不足的段复用最后一段。只写一段也可供全片使用。 |\n| 起始提示词段号 `start_segment` | 默认 1，从 1 开始；设 3 就从第 3 段文本起取。 |\n\n本模板已写好 **4 段剧情**，每段会与共用描述合并。需要更多生成段时补写文本，或明确开启“复用最后一段”。没有开启复用且文本不足时，会在采样前报错；分隔出的空段也会报错。\n\n续段剧情应承接前段正在进行的动作，写清接下来可见变化。素材标签与接入顺序保持一致。\n\n**单独重抽第 3 段：**读取第 2 段 LATENT → 上一段 LATENT；起始提示词段号=3；生成段数=1。此选项只改变文本起点，原种子需另行填写。"
+        "# 07｜分段提示词的四个参数\n\n“H3 长视频提示词”输出 `H3_PROMPTS`，接主节点的“提示词”。\n\n| 参数 | 用法 |\n| --- | --- |\n| 全片固定描述 `common` | 每段都会加入；放人物外观、场景、风格及共用约束。 |\n| 分段剧情 `segments` | 按生成顺序写各段，用**独占一行的 `---`** 分隔。 |\n| 不足时复用最后一段 `repeat_last` | 默认 false；开启后，提示词不足的段复用最后一段。只写一段也可供全片使用。 |\n| 起始提示词段号 `start_segment` | 默认 1，从 1 开始；设 3 就从第 3 段文本起取。 |\n\n每段剧情都会与共用描述合并。生成几段就准备几段剧情，或明确开启“复用最后一段”。没有开启复用且文本不足时，会在采样前报错；分隔出的空段也会报错。\n\n续段剧情应承接前段正在进行的动作，写清接下来可见变化。素材标签与接入顺序保持一致。\n\n**自动重抽：**有片段记录时优先在“片段重抽”中恢复，面板自动回填该段最终提示词。**重抽提示词 `retry_prompt`** 可直接修改，留空沿用原记录；仅影响重抽，不修改本提示词节点。\n\n**手动重抽第 3 段：**读取第 2 段 LATENT → 上一段 LATENT；起始提示词段号=3；生成段数=1。此方式需另行填写该段原实际种子。"
       ],
+      "widgets_values_named": {
+        "text": "# 07｜分段提示词的四个参数\n\n“H3 长视频提示词”输出 `H3_PROMPTS`，接主节点的“提示词”。\n\n| 参数 | 用法 |\n| --- | --- |\n| 全片固定描述 `common` | 每段都会加入；放人物外观、场景、风格及共用约束。 |\n| 分段剧情 `segments` | 按生成顺序写各段，用**独占一行的 `---`** 分隔。 |\n| 不足时复用最后一段 `repeat_last` | 默认 false；开启后，提示词不足的段复用最后一段。只写一段也可供全片使用。 |\n| 起始提示词段号 `start_segment` | 默认 1，从 1 开始；设 3 就从第 3 段文本起取。 |\n\n每段剧情都会与共用描述合并。生成几段就准备几段剧情，或明确开启“复用最后一段”。没有开启复用且文本不足时，会在采样前报错；分隔出的空段也会报错。\n\n续段剧情应承接前段正在进行的动作，写清接下来可见变化。素材标签与接入顺序保持一致。\n\n**自动重抽：**有片段记录时优先在“片段重抽”中恢复，面板自动回填该段最终提示词。**重抽提示词 `retry_prompt`** 可直接修改，留空沿用原记录；仅影响重抽，不修改本提示词节点。\n\n**手动重抽第 3 段：**读取第 2 段 LATENT → 上一段 LATENT；起始提示词段号=3；生成段数=1。此方式需另行填写该段原实际种子。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
@@ -962,11 +828,11 @@
         900
       ],
       "flags": {},
-      "order": 30,
+      "order": 16,
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "08｜外部保存与五个输出",
+      "title": "08｜逐段保存与四个输出",
       "properties": {
         "h3_parameter_manual": true,
         "cnr_id": "comfy-core",
@@ -974,8 +840,11 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 08｜外部保存与五个输出\n\n**合并视频接外部 Save Video 保存整片；分段视频接另一个 Save Video 逐段保存。两路均可直接使用，也可同时保存。** 节点只准备组合 VIDEO，真正合并、写 MP4 和视频预览都由外部保存节点完成。\n\n| 输出顺序 | 内容 |\n| --- | --- |\n| 1. 合并视频 `VIDEO` | 本次所有新段的惰性组合；不包含输入的上一段 LATENT。 |\n| 2. 最后一段 `LATENT` | 最后采样得到的完整联合音视频 LATENT，可继续传给下一生成节点。 |\n| 3. 生成信息 `STRING` | 实际尺寸、各段帧数、总时长、实际种子、续接方式及缓存/存档路径。 |\n| 4. 分段视频 `VIDEO` 列表 | 按顺序输出临时片段；接一个 Save Video 可逐段正式保存。 |\n| 5. LATENT 文件路径 `STRING` 列表 | 仅开启 LATENT 保存时有值，按段号排列。 |\n\n## 视频缓存与可选 LATENT 存档\n\n- MP4 内部只写 **ComfyUI temp**；`video_paths` 带 `[temp]`，不是正式保存路径。成功后缓存保留供下游和执行缓存读取。\n- **保存每段 LATENT `save_latents`：默认 false。** 开启后才在 output 写完整 `.h3latent` 和 `segments.jsonl`；已写存档保留，播放视频不依赖它们。\n- **LATENT 保存前缀 `filename_prefix`：默认 `video/H3-SGUN/H3`。** 仅控制 LATENT 目录；本例值为 `video/H3_CustomSigmas/H3_parts`。该编号目录内是 `.h3latent` 与清单，不是 MP4。\n- 主节点保留输出节点属性，可不接视频保存器单独保存 LATENT；**没有内部视频播放器**，开启存档时仅提供最后一份 LATENT 下载条目。\n\n外部 Save Video 在主节点完成后执行；视频名称、格式和编码在外部设置。auto/MP4 + codec auto 可直接拼接兼容视频包；改编码或 CRF 可能转码。"
+        "# 08｜逐段保存与四个输出\n\n**每段生成完成就立即保存正式 MP4，无需等待全部片段完成。** 视频与重抽记录保存在 ComfyUI output 的独立编号批次目录。用户中止或后续报错时，已完成的视频、记录和 LATENT 保留；未完成文件不当作成品。\n\n“合并视频”可选连接外部官方 Save Video 保存整片，实际合并仅发生在下游保存时。不连接、断开或屏蔽合并 Save Video，也能正常生成和保存各段，不会因此报错，不产生额外合并文件。主节点本身是输出节点，不再要求视频保存下游。\n\n| 输出顺序 | 内容 |\n| --- | --- |\n| 1. 合并视频 `VIDEO` | 本次新段的惰性组合，外接保存时才合并，不包含输入的上一段 LATENT。 |\n| 2. 最后一段 `LATENT` | 最后采样的完整联合音视频 LATENT，可继续续接。 |\n| 3. 生成信息 `STRING` | 实际尺寸、时长、帧数、种子、续接方式和正式路径；“生成信息”标签也可查看。 |\n| 4. LATENT 文件路径 `STRING` 列表 | 开启 LATENT 保存时有值，按段号排列。 |\n\n原“分段视频”输出接口和它连接的分段 Save Video 已移除。输出 0/1/2 位置保持不变，LATENT 路径由旧槽位 4 移至 3；分段 MP4 直接在批次目录中查看。\n\n## 保存前缀与 LATENT\n\n- **保存前缀 `filename_prefix` 默认 `H3`。** 直接在 output 下创建一层编号目录，例如 `output/H3_00001/segment_0001.mp4`；正常生成使用独立批次编号防止覆盖；重抽 output 中的片段记录时复用原视频所属批次并忽略当前保存前缀。模板保存的自定义前缀用于正常生成；合并视频名称仍在外部 Save Video 设置，本例合并前缀为 `H3_combined`，合并文件直接保存在 output 根目录。\n- 批次根目录只保留 `segment_NNNN.mp4` 和 `segment_NNNN_retry_RRR.mp4` 正式分段；轻量 `.h3segment.json`、最小 CPU `.h3context`、`seam_*.mp4` 和 `context_preview_*.mp4` 统一放在 `_data` 子目录，不依赖 temp。`video_paths` 使用 `[output]` 标记，`output_subfolder` 始终给出本批次根目录。旧批次的平铺记录仍可读取，不自动移动已有文件。\n- **保存每段 LATENT `save_latents` 默认 false。** 开启后，在批次的 `_data` 子目录额外保存完整 `.h3latent` 与 LATENT 清单 `segments.jsonl`；关闭不影响视频及重抽记录。LATENT 路径与下载条目指向 `_data`；`manifest` 仅在开启时有值，路径为 `<批次>/_data/segments.jsonl`。\n- 完整片段记录及最小上下文可用于恢复该段重抽；要从任意前段手动续接，仍需完整 LATENT，MP4 无法恢复原采样数值。\n- 分段使用官方默认 H.264/AAC。外部合并 Save Video 的 auto/MP4 + codec auto 可拼接兼容视频包，其他设置可能触发转码。\n\n接缝播放器与采样覆盖层保留在固定高度面板内；成片播放器可通过外部合并 Save Video 查看。已完成批次会持续占用磁盘，请按需整理。\n\n## 片段重抽的种子\n\n“片段重抽”页的“重抽种子方式”默认 **随机种子 `randomize`**：每次运行重新随机，实际使用的种子写入生成信息和新片段记录。选择 **原种子 `original`** 才使用该片段记录的原实际种子；选择 **自定义种子 `custom`** 才显示相邻的“自定义重抽种子”输入，并使用填写的完整整数。\n\n自定义种子范围为 **0–18446744073709551615**；选 custom 时留空或填写非法值会报错。选随机或原种子时，隐藏的自定义值不参与执行。恢复参数保留原种子以便改选，默认仍按随机方式重抽。正常分段生成继续使用上方种子与“各段种子”，不受重抽方式影响。"
       ],
+      "widgets_values_named": {
+        "text": "# 08｜逐段保存与四个输出\n\n**每段生成完成就立即保存正式 MP4，无需等待全部片段完成。** 视频与重抽记录保存在 ComfyUI output 的独立编号批次目录。用户中止或后续报错时，已完成的视频、记录和 LATENT 保留；未完成文件不当作成品。\n\n“合并视频”可选连接外部官方 Save Video 保存整片，实际合并仅发生在下游保存时。不连接、断开或屏蔽合并 Save Video，也能正常生成和保存各段，不会因此报错，不产生额外合并文件。主节点本身是输出节点，不再要求视频保存下游。\n\n| 输出顺序 | 内容 |\n| --- | --- |\n| 1. 合并视频 `VIDEO` | 本次新段的惰性组合，外接保存时才合并，不包含输入的上一段 LATENT。 |\n| 2. 最后一段 `LATENT` | 最后采样的完整联合音视频 LATENT，可继续续接。 |\n| 3. 生成信息 `STRING` | 实际尺寸、时长、帧数、种子、续接方式和正式路径；“生成信息”标签也可查看。 |\n| 4. LATENT 文件路径 `STRING` 列表 | 开启 LATENT 保存时有值，按段号排列。 |\n\n原“分段视频”输出接口和它连接的分段 Save Video 已移除。输出 0/1/2 位置保持不变，LATENT 路径由旧槽位 4 移至 3；分段 MP4 直接在批次目录中查看。\n\n## 保存前缀与 LATENT\n\n- **保存前缀 `filename_prefix` 默认 `H3`。** 直接在 output 下创建一层编号目录，例如 `output/H3_00001/segment_0001.mp4`；正常生成使用独立批次编号防止覆盖；重抽 output 中的片段记录时复用原视频所属批次并忽略当前保存前缀。模板保存的自定义前缀用于正常生成；合并视频名称仍在外部 Save Video 设置，本例合并前缀为 `H3_combined`，合并文件直接保存在 output 根目录。\n- 批次根目录只保留 `segment_NNNN.mp4` 和 `segment_NNNN_retry_RRR.mp4` 正式分段；轻量 `.h3segment.json`、最小 CPU `.h3context`、`seam_*.mp4` 和 `context_preview_*.mp4` 统一放在 `_data` 子目录，不依赖 temp。`video_paths` 使用 `[output]` 标记，`output_subfolder` 始终给出本批次根目录。旧批次的平铺记录仍可读取，不自动移动已有文件。\n- **保存每段 LATENT `save_latents` 默认 false。** 开启后，在批次的 `_data` 子目录额外保存完整 `.h3latent` 与 LATENT 清单 `segments.jsonl`；关闭不影响视频及重抽记录。LATENT 路径与下载条目指向 `_data`；`manifest` 仅在开启时有值，路径为 `<批次>/_data/segments.jsonl`。\n- 完整片段记录及最小上下文可用于恢复该段重抽；要从任意前段手动续接，仍需完整 LATENT，MP4 无法恢复原采样数值。\n- 分段使用官方默认 H.264/AAC。外部合并 Save Video 的 auto/MP4 + codec auto 可拼接兼容视频包，其他设置可能触发转码。\n\n接缝播放器与采样覆盖层保留在固定高度面板内；成片播放器可通过外部合并 Save Video 查看。已完成批次会持续占用磁盘，请按需整理。\n\n## 片段重抽的种子\n\n“片段重抽”页的“重抽种子方式”默认 **随机种子 `randomize`**：每次运行重新随机，实际使用的种子写入生成信息和新片段记录。选择 **原种子 `original`** 才使用该片段记录的原实际种子；选择 **自定义种子 `custom`** 才显示相邻的“自定义重抽种子”输入，并使用填写的完整整数。\n\n自定义种子范围为 **0–18446744073709551615**；选 custom 时留空或填写非法值会报错。选随机或原种子时，隐藏的自定义值不参与执行。恢复参数保留原种子以便改选，默认仍按随机方式重抽。正常分段生成继续使用上方种子与“各段种子”，不受重抽方式影响。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
@@ -991,11 +860,11 @@
         900
       ],
       "flags": {},
-      "order": 31,
+      "order": 17,
       "mode": 0,
       "inputs": [],
       "outputs": [],
-      "title": "09｜重抽、资源与长链边界",
+      "title": "09｜片段重抽、接缝检查与资源",
       "properties": {
         "h3_parameter_manual": true,
         "cnr_id": "comfy-core",
@@ -1003,57 +872,237 @@
         "Node name for S&R": "MarkdownNote"
       },
       "widgets_values": [
-        "# 09｜重抽、资源与长链边界\n\n## 全新一段 / 单独重抽\n\n全新生成：生成段数=1、不接上一段 LATENT、起始提示词段号=1。主节点完成后，由外部 Save Video 正式保存 MP4。\n\n重抽第 3 段：读取第 2 段 `.h3latent` → 上一段 LATENT，文本起点=3、生成段数=1，保持分辨率并选用新种子或原实际种子。输出只含本次新段，文件重新从 `segment_0001` 编号；若要重做后续段，继续使用新结果的 LATENT。\n\n需要跨任务续接时，提前开启 LATENT 保存。MP4 不能恢复原采样 LATENT；同图可以直接传“最后一段 latent”。\n\n## 内存与磁盘\n\n内部逐段写 temp MP4，跨段只保留必要的独立 CPU 上下文尾部。默认 22 帧引导会保留 39 帧 AV 网格，容纳至少一秒音频；最后一段完整 LATENT 仍作为输出保留。\n\n完整中间 LATENT 和解码画面不随段数累计，但片段文件、路径、耗时仍增长，模型与单段采样/解码开销仍在。先跑 1–4 段、并发 1；资源不足先降低百万像素、每段时长与参考规模。外部若把全片 VIDEO 解成 IMAGE，会重新占用整片画面内存。\n\n## 长链与平台\n\n固定参考、共用描述和上下文只能帮助一致性，不能保证无限续接不劣化。可对照动态掩码与防漂移，比较接缝、人物、动作和后段细节；明显劣化时从较好段 LATENT 重抽。\n\nLinux / RunningHub 尚未实机验证。云端能否跨任务保留、下载或上传 LATENT，取决于平台。以上 Markdown 说明不参与采样。"
+        "# 09｜片段重抽、接缝检查与资源\n\n## 恢复参数重抽\n\n1. 打开“片段重抽”，必要时点“刷新已保存片段”，选择要重抽的记录。\n2. 点“恢复参数重抽”：回填生成参数、最终提示词和完整实际种子，生成段数设为 1，自动载入该段原来的续接上下文；不会自动排队。\n3. “重抽种子方式”默认“随机种子”，每次运行重新随机；可改选“原种子”，或选“自定义种子”后填写相邻的“自定义重抽种子”（0–18446744073709551615 的完整整数，不能为空）。可修改“重抽提示词”，`retry_prompt` 留空沿用原文；选好后点击运行，实际种子写入生成信息和新片段记录。\n4. 点“退出重抽”恢复进入前的参数。导入的工作流没有本次会话的进入快照时，只退出该模式。\n\n模型、CLIP、VAEs 和参考素材沿用当前连线；由连线控制的标量需先转回控件才能一键回填。`retry_segment` 是面板自动填写的记录路径，位于折叠的“片段记录路径”中。\n\n只重新生成选中的一段，后续片段不会自动跟着重做或替换整片；需要时沿新结果的 LATENT 继续生成。重抽 output 中的片段时保存回原视频所属批次，忽略当前保存前缀；第 2 段依次命名为 `segment_0002_retry_001.mp4`、`segment_0002_retry_002.mp4`。从重抽版本再次重抽仍沿用原逻辑段号并递增次数，不覆盖原版。记录、上下文、短预览和可选 LATENT 在 `_data` 内使用对应段号与次数，清单也在 `_data`。有完整片段记录时不用手动接上一段；旧文件缺少记录时，可按第 03、07 节手动读取前段完整 LATENT。MP4 不能恢复原采样 LATENT。\n\n## 一键清理\n\n点击“一键清理”只把当前列表中 output/temp 内的重抽记录、上下文、短预览和可选 LATENT 等辅助数据移到系统回收站；原片段与重抽片段的正式 MP4 保留在原文件夹。空的 `_data` 目录可以回收。input 导入记录、参考素材、外部合并视频、其他文件及仍被其他记录使用的共享数据保留。运行或排队期间不能清理。清理后移除已清理列表项、清空对应预览并退出失效的重抽状态；正式视频仍可播放，还原回收站中的记录后才能继续重抽。有进入前快照时恢复参数，部分失败则保留失败记录，不会永久删除。\n\n## 接缝预览\n\n在“接缝预览”选择片段，选择项与重抽页同步。短视频通常为前段末 1 秒 + 新段首 2 秒，保留对应音频，并标明接缝帧与时间；实际以面板显示为准。\n\n“接缝可能异常”提示疑似画面跳变、亮度或偏色；大动作和换光也可能触发，需播放确认，检查不会自动修图。预览失败不丢弃已完成视频；外接 LATENT 缺少前段视频时显示“未检查”。采样覆盖层与接缝视频分开；前者是快速解码近似画面，不代表成片画质，开启方法与耗时控制见第 05 节。\n\n## 资源与长链\n\n跨段只保留独立 CPU 尾部；默认 22 帧引导保留 39 帧 AV 网格以容纳至少一秒音频，最后一段完整 LATENT 仍作为输出保留。片段文件、路径和耗时随段数增长；外部把整片 VIDEO 解成 IMAGE 会重新占用整片画面内存。\n\n先跑 1–4 段、并发 1；资源不足先减小分辨率、每段时长和参考规模。一致性与画质不能保证无限续接；明显劣化时从较好片段重抽。Linux / RunningHub 未实机验证，云端存档能否跨任务保留取决于平台。说明文字不参与采样。"
       ],
+      "widgets_values_named": {
+        "text": "# 09｜片段重抽、接缝检查与资源\n\n## 恢复参数重抽\n\n1. 打开“片段重抽”，必要时点“刷新已保存片段”，选择要重抽的记录。\n2. 点“恢复参数重抽”：回填生成参数、最终提示词和完整实际种子，生成段数设为 1，自动载入该段原来的续接上下文；不会自动排队。\n3. “重抽种子方式”默认“随机种子”，每次运行重新随机；可改选“原种子”，或选“自定义种子”后填写相邻的“自定义重抽种子”（0–18446744073709551615 的完整整数，不能为空）。可修改“重抽提示词”，`retry_prompt` 留空沿用原文；选好后点击运行，实际种子写入生成信息和新片段记录。\n4. 点“退出重抽”恢复进入前的参数。导入的工作流没有本次会话的进入快照时，只退出该模式。\n\n模型、CLIP、VAEs 和参考素材沿用当前连线；由连线控制的标量需先转回控件才能一键回填。`retry_segment` 是面板自动填写的记录路径，位于折叠的“片段记录路径”中。\n\n只重新生成选中的一段，后续片段不会自动跟着重做或替换整片；需要时沿新结果的 LATENT 继续生成。重抽 output 中的片段时保存回原视频所属批次，忽略当前保存前缀；第 2 段依次命名为 `segment_0002_retry_001.mp4`、`segment_0002_retry_002.mp4`。从重抽版本再次重抽仍沿用原逻辑段号并递增次数，不覆盖原版。记录、上下文、短预览和可选 LATENT 在 `_data` 内使用对应段号与次数，清单也在 `_data`。有完整片段记录时不用手动接上一段；旧文件缺少记录时，可按第 03、07 节手动读取前段完整 LATENT。MP4 不能恢复原采样 LATENT。\n\n## 一键清理\n\n点击“一键清理”只把当前列表中 output/temp 内的重抽记录、上下文、短预览和可选 LATENT 等辅助数据移到系统回收站；原片段与重抽片段的正式 MP4 保留在原文件夹。空的 `_data` 目录可以回收。input 导入记录、参考素材、外部合并视频、其他文件及仍被其他记录使用的共享数据保留。运行或排队期间不能清理。清理后移除已清理列表项、清空对应预览并退出失效的重抽状态；正式视频仍可播放，还原回收站中的记录后才能继续重抽。有进入前快照时恢复参数，部分失败则保留失败记录，不会永久删除。\n\n## 接缝预览\n\n在“接缝预览”选择片段，选择项与重抽页同步。短视频通常为前段末 1 秒 + 新段首 2 秒，保留对应音频，并标明接缝帧与时间；实际以面板显示为准。\n\n“接缝可能异常”提示疑似画面跳变、亮度或偏色；大动作和换光也可能触发，需播放确认，检查不会自动修图。预览失败不丢弃已完成视频；外接 LATENT 缺少前段视频时显示“未检查”。采样覆盖层与接缝视频分开；前者是快速解码近似画面，不代表成片画质，开启方法与耗时控制见第 05 节。\n\n## 资源与长链\n\n跨段只保留独立 CPU 尾部；默认 22 帧引导保留 39 帧 AV 网格以容纳至少一秒音频，最后一段完整 LATENT 仍作为输出保留。片段文件、路径和耗时随段数增长；外部把整片 VIDEO 解成 IMAGE 会重新占用整片画面内存。\n\n先跑 1–4 段、并发 1；资源不足先减小分辨率、每段时长和参考规模。一致性与画质不能保证无限续接；明显劣化时从较好片段重抽。Linux / RunningHub 未实机验证，云端存档能否跨任务保留取决于平台。说明文字不参与采样。"
+      },
       "color": "#433e2b",
       "bgcolor": "#282519"
     },
     {
-      "id": 201,
-      "type": "SaveVideo",
+      "id": 203,
+      "type": "ManualSigmas",
       "pos": [
-        2440,
-        680
+        -30,
+        1310
       ],
       "size": [
-        700,
-        540
+        800,
+        100
       ],
       "flags": {},
-      "order": 32,
+      "order": 18,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            25
+          ]
+        }
+      ],
+      "title": "自定义 Sigmas · 接入后覆盖内部调度器（5步）",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.38.0",
+        "Node name for S&R": "ManualSigmas"
+      },
+      "widgets_values": [
+        "1.0000, 0.9825, 0.9234, 0.7207, 0.3604, 0.0000"
+      ],
+      "widgets_values_named": {
+        "sigmas": "1.0000, 0.9825, 0.9234, 0.7207, 0.3604, 0.0000"
+      }
+    },
+    {
+      "id": 204,
+      "type": "H3LongVideo",
+      "pos": [
+        870,
+        440
+      ],
+      "size": [
+        630,
+        870
+      ],
+      "flags": {},
+      "order": 22,
       "mode": 0,
       "inputs": [
         {
-          "name": "video",
-          "type": "VIDEO",
-          "link": 14
+          "name": "model",
+          "type": "MODEL",
+          "link": 17
+        },
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 18
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 19
+        },
+        {
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 20
+        },
+        {
+          "name": "prompts",
+          "type": "H3_PROMPTS",
+          "link": 21
+        },
+        {
+          "name": "ref_images.ref_image_0",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 22
+        },
+        {
+          "name": "ref_images.ref_image_1",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 23
+        },
+        {
+          "name": "ref_images.ref_image_2",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": 24
+        },
+        {
+          "name": "ref_images.ref_image_3",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "sigmas",
+          "shape": 7,
+          "type": "SIGMAS",
+          "link": 25
+        },
+        {
+          "name": "ref_videos.ref_video_0",
+          "shape": 7,
+          "type": "IMAGE",
+          "link": null
+        },
+        {
+          "name": "ref_video_audios.ref_video_audio_0",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "name": "ref_audios.ref_audio_0",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": null
+        },
+        {
+          "label": "上一段 LATENT",
+          "name": "previous_latent",
+          "shape": 7,
+          "type": "LATENT",
+          "link": null
         }
       ],
       "outputs": [
         {
-          "name": "video",
+          "name": "合并视频",
           "type": "VIDEO",
-          "links": []
+          "links": [
+            26
+          ]
+        },
+        {
+          "name": "最后一段 latent",
+          "type": "LATENT",
+          "links": null
+        },
+        {
+          "name": "生成信息",
+          "type": "STRING",
+          "links": null
+        },
+        {
+          "name": "LATENT 文件路径",
+          "shape": 6,
+          "type": "STRING",
+          "links": null
         }
       ],
-      "title": "保存分段视频（逐段正式保存）",
       "properties": {
-        "cnr_id": "comfy-core",
-        "ver": "0.33.0",
-        "Node name for S&R": "SaveVideo"
+        "aux_id": "SGUN-father/ComfyUI-H3-Latent-Guide-SGUN",
+        "ver": "7b8224ec1c05e934ba0362b545390275a7d54c68",
+        "Node name for S&R": "H3LongVideo"
       },
       "widgets_values": [
-        "video/H3_CustomSigmas/H3_segments",
-        "auto",
-        "auto",
-        "auto"
+        3,
+        10,
+        "16:9 (Widescreen)",
+        0.2,
+        818805243208098,
+        "randomize",
+        8,
+        "er_sde",
+        "simple",
+        22,
+        "fixed",
+        1,
+        "match",
+        false,
+        "H3",
+        true,
+        true,
+        "",
+        "",
+        "",
+        true,
+        2,
+        12,
+        768,
+        10,
+        "randomize",
+        ""
       ],
       "widgets_values_named": {
-        "filename_prefix": "video/H3_CustomSigmas/H3_segments",
-        "format": "auto",
-        "format.codec": "auto",
-        "codec": "auto"
-      }
+        "segments": 3,
+        "duration": 10,
+        "aspect_ratio": "16:9 (Widescreen)",
+        "megapixels": 0.2,
+        "seed": 818805243208098,
+        "randomize": "randomize",
+        "steps": 8,
+        "sampler_name": "er_sde",
+        "scheduler": "simple",
+        "context_frames": 22,
+        "seed_mode": "fixed",
+        "denoise": 1,
+        "ref_image_size": "match",
+        "save_latents": false,
+        "filename_prefix": "H3",
+        "dynamic_mask": true,
+        "drift_correction": true,
+        "retry_segment": "",
+        "retry_prompt": "",
+        "retry_seed": "",
+        "live_preview": true,
+        "preview_interval": 2,
+        "preview_frames": 12,
+        "preview_max_resolution": 768,
+        "preview_fps": 10,
+        "retry_seed_mode": "randomize",
+        "h3_sgun_director": ""
+      },
+      "color": "#233",
+      "bgcolor": "#355"
     }
   ],
   "links": [
@@ -1082,88 +1131,89 @@
       "MODEL"
     ],
     [
-      4,
+      17,
       173,
       0,
-      178,
+      204,
       0,
       "MODEL"
     ],
     [
-      5,
+      18,
       128,
       0,
-      178,
+      204,
       1,
       "CLIP"
     ],
     [
-      6,
+      19,
       119,
       0,
-      178,
+      204,
       2,
       "VAE"
     ],
     [
-      7,
+      20,
       120,
       0,
-      178,
+      204,
       3,
       "VAE"
     ],
     [
-      8,
+      21,
       177,
       0,
-      178,
+      204,
       4,
       "H3_PROMPTS"
     ],
     [
-      9,
+      22,
       137,
       0,
-      178,
+      204,
       5,
       "IMAGE"
     ],
     [
-      10,
+      23,
       139,
       0,
-      178,
+      204,
       6,
       "IMAGE"
     ],
     [
-      12,
-      178,
+      24,
+      202,
       0,
-      180,
-      0,
-      "VIDEO"
+      204,
+      7,
+      "IMAGE"
     ],
     [
-      13,
-      181,
+      25,
+      203,
       0,
-      178,
-      8,
+      204,
+      9,
       "SIGMAS"
     ],
     [
-      14,
-      178,
-      3,
-      201,
+      26,
+      204,
+      0,
+      180,
       0,
       "VIDEO"
     ]
   ],
   "groups": [
     {
+      "id": 1,
       "title": "参数说明书 · H3-Latent-Guide-SGUN · by神棍",
       "bounding": [
         -10,
@@ -1172,20 +1222,23 @@
         3060
       ],
       "color": "#C4A86A",
-      "font_size": 28,
       "flags": {}
     }
   ],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.45,
+      "scale": 0.7372887269528926,
       "offset": [
-        70,
-        30
+        -189.98479677996593,
+        -555.9249508537837
       ]
     },
-    "frontendVersion": "1.53.6"
+    "frontendVersion": "1.55.17",
+    "VHS_latentpreview": true,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": false,
+    "VHS_KeepIntermediate": false
   },
   "version": 0.4
 }

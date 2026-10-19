@@ -108,11 +108,16 @@ class MiniMaxH3LatentContinuationGuide(io.ComfyNode):
 from .long_video import H3LongVideo, H3VideoPromptPlan
 from .latent_io import H3LoadLatent, LATENT_LIST_ROUTE, get_h3_latents
 from .digital_human import H3DigitalHuman
+from .segment_review import (SEGMENTS_ROUTE, SEGMENT_ROUTE, SEGMENT_CLEANUP_ROUTE,
+                             get_segments, get_segment, cleanup_segments)
 
 
 class H3LatentGuideExtension(ComfyExtension):
     async def on_load(self):
         PromptServer.instance.routes.get(LATENT_LIST_ROUTE)(get_h3_latents)
+        PromptServer.instance.routes.get(SEGMENTS_ROUTE)(get_segments)
+        PromptServer.instance.routes.get(SEGMENT_ROUTE)(get_segment)
+        PromptServer.instance.routes.post(SEGMENT_CLEANUP_ROUTE)(cleanup_segments)
 
     async def get_node_list(self):
         return [MiniMaxH3LatentContinuationGuide, H3LoopPromptSchedule, H3LongVideo, H3VideoPromptPlan, H3LoadLatent, H3DigitalHuman]

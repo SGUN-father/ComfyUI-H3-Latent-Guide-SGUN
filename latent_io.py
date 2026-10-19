@@ -68,6 +68,21 @@ def save_h3_latent(latent, path, segment_info):
             os.remove(temporary)
 
 
+def load_h3_latent(path):
+    with safe_open(path, framework="pt", device="cpu") as file:
+        metadata = file.metadata() or {}
+        if metadata.get("h3_latent_format") != "joint_av_v1":
+            raise ValueError("请选择本插件保存的 .h3latent；普通单流 LATENT 不包含完整H3音视频。")
+        latent = {"samples": NestedTensor((file.get_tensor("video"), file.get_tensor("audio")))}
+        if "h3_audio_overhang" in metadata:
+            latent["_h3_audio_overhang"] = float(metadata["h3_audio_overhang"])
+        info = json.loads(metadata.get("segment_info", "{}"))
+        if isinstance(info.get("video_path"), str):
+            latent["_h3_video_path"] = info["video_path"]
+    _av_streams(latent, "加载的 LATENT")
+    return latent
+
+
 class H3LoadLatent(io.ComfyNode):
     @classmethod
     def define_schema(cls):
@@ -86,15 +101,7 @@ class H3LoadLatent(io.ComfyNode):
     @classmethod
     def execute(cls, latent_path="", latent_file=""):
         path = selected_latent_path(latent_path, latent_file)
-        with safe_open(path, framework="pt", device="cpu") as file:
-            metadata = file.metadata() or {}
-            if metadata.get("h3_latent_format") != "joint_av_v1":
-                raise ValueError("请选择本插件保存的 .h3latent；普通单流 LATENT 不包含完整H3音视频。")
-            latent = {"samples": NestedTensor((file.get_tensor("video"), file.get_tensor("audio")))}
-            if "h3_audio_overhang" in metadata:
-                latent["_h3_audio_overhang"] = float(metadata["h3_audio_overhang"])
-        _av_streams(latent, "加载的 LATENT")
-        return io.NodeOutput(latent)
+        return io.NodeOutput(load_h3_latent(path))
 
     @classmethod
     def validate_inputs(cls, latent_file=""):

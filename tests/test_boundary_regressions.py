@@ -130,7 +130,8 @@ class NodeOutput:
 
 
 LONG = load_definitions("long_video.py", functions=("_trim_audio",),
-                        methods={"H3LongVideo": ("fingerprint_inputs",)})
+                        methods={"H3LongVideo": ("fingerprint_inputs",)},
+                        namespace={"segment_review": SimpleNamespace(cleanup_revision=0)})
 GUIDE = load_definitions(
     "__init__.py", functions=("_av_streams",),
     methods={"MiniMaxH3LatentContinuationGuide": ("execute",)},
@@ -222,13 +223,13 @@ class TestRandomCacheFingerprint(unittest.TestCase):
         self.assertNotEqual(first, second)
 
     def test_default_single_segment_and_deterministic_modes_stay_cacheable(self):
-        self.assertIsNone(fingerprint())
+        self.assertEqual(fingerprint(), 0)
         for mode in ("fixed", "increment", "decrement", "randomize"):
             counts = (1,) if mode == "randomize" else (1, 4)
             for count in counts:
                 with self.subTest(mode=mode, count=count):
-                    self.assertIsNone(fingerprint(segments=count, seed_mode=mode,
-                                                  clip=None, prompts=None))
+                    self.assertEqual(fingerprint(segments=count, seed_mode=mode,
+                                                 clip=None, prompts=None), 0)
                     self.assertEqual(fingerprint(segments=count, seed_mode=mode),
                                      fingerprint(segments=count, seed_mode=mode))
 
@@ -239,7 +240,7 @@ class TestRandomCacheFingerprint(unittest.TestCase):
         for count, mode in ((1, None), (None, "fixed"), (None, "increment"),
                             (None, "decrement")):
             with self.subTest(count=count, mode=mode):
-                self.assertIsNone(fingerprint(segments=count, seed_mode=mode))
+                self.assertEqual(fingerprint(segments=count, seed_mode=mode), 0)
 
 
 class TestGuideBoundaries(unittest.TestCase):
