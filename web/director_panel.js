@@ -157,7 +157,7 @@ export function createDirectorPanel(node, nodeData) {
       const translated = panelInput(name);
       label.textContent = translated.name ?? native.label ?? options.display_name
         ?? (name === "control_after_generate" ? t("生成后种子", "Seed after generation") : name);
-      row.title = translated.tooltip ?? native.tooltip ?? t(options.tooltip ?? "", "");
+      row.title = translated.tooltip ?? native.tooltip ?? options.tooltip ?? "";
       hint.textContent = t("由连线控制", "Controlled by a connection");
       input.setAttribute("aria-label", label.textContent);
       const linked = node.inputs?.some((slot) => slot.link != null

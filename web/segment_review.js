@@ -263,6 +263,12 @@ function createPanel(node, nodeData) {
   });
   cleanup.addEventListener("click", () => {
     if (queueBusy || !entries.length) return;
+    // The refreshed list can span every batch in output; confirm the real scope first.
+    const batches = new Set(entries.map((entry) => String(entry.recipe_path)
+      .replace(/\s*\[\w+\]$/, "").replace(/\/[^/]*$/, "").replace(/\/_data$/, "")));
+    if (typeof globalThis.confirm === "function" && !globalThis.confirm(t(
+      `将清理列表中 ${entries.length} 条片段记录（涉及 ${batches.size} 个批次）的重抽数据。片段视频和保存的 LATENT 保留。继续吗？`,
+      `Clean up retry data for ${entries.length} segment records in this list (${batches.size} batches)? Segment videos and saved LATENTs are kept.`))) return;
     return perform(async () => {
       setStatus("正在将重抽记录和辅助数据移到回收站，保留片段视频…", "Moving retry records and supporting data to the Recycle Bin; keeping segment videos…");
       video.pause();
@@ -285,8 +291,8 @@ function createPanel(node, nodeData) {
       setEntries(data.segments, true);
       hasInfo = false;
       info.textContent = t("生成后显示实际种子、尺寸、时长与缓存路径。", "Actual seeds, dimensions, duration and cache paths appear after generation.");
-      const zh = `已将 ${data.recycled_records} 个片段记录及 ${data.recycled_files} 个辅助文件移到回收站，片段视频保留。`;
-      const en = `Moved ${data.recycled_records} segment records and ${data.recycled_files} supporting files to the Recycle Bin. Segment videos were kept.`;
+      const zh = `已将 ${data.recycled_records} 个片段记录及 ${data.recycled_files} 个辅助文件移到回收站，片段视频保留，保存的 LATENT 也保留。`;
+      const en = `Moved ${data.recycled_records} segment records and ${data.recycled_files} supporting files to the Recycle Bin. Segment videos and saved LATENTs were kept.`;
       setStatus(zh + (data.skipped_records ? ` 保留 ${data.skipped_records} 条导入记录。` : "")
           + (data.errors.length ? `\n部分文件未能清理：\n${data.errors.join("\n")}` : ""),
         en + (data.skipped_records ? ` Kept ${data.skipped_records} imported records.` : "")
@@ -309,7 +315,7 @@ function createPanel(node, nodeData) {
     restore.textContent = t("恢复参数重抽", "Restore settings for retry");
     exit.textContent = t("退出重抽", "Exit retry");
     cleanup.textContent = t("一键清理", "Clean up");
-    cleanup.title = t("仅将列表中的重抽记录及辅助数据移到系统回收站，保留原片段和重抽片段视频。导入记录保留，运行或排队时不可清理。", "Move only retry records and supporting data in this list to the system Recycle Bin. Keep original and retry segment videos. Imported records are kept. Unavailable while tasks are running or queued.");
+    cleanup.title = t("仅将列表中的重抽记录及辅助数据移到系统回收站，保留原片段和重抽片段视频及保存的 LATENT。刷新后列表包含 output 中所有批次。导入记录保留，运行或排队时不可清理。", "Move only retry records and supporting data in this list to the system Recycle Bin. Keep original and retry segment videos and saved LATENTs. After a refresh the list covers every batch in output. Imported records are kept. Unavailable while tasks are running or queued.");
     help.textContent = t("默认使用随机种子重抽，每次运行重新随机。选择“原种子”使用片段记录的实际种子；选择“自定义种子”可填写完整整数。重抽提示词留空沿用原文。模型、CLIP、VAE 和参考素材沿用当前连线；仅重抽选中一段。",
       "Retry uses a new random seed on every run by default. Original Seed uses the actual seed from the segment record; Custom Seed lets you enter an exact integer. A blank retry prompt uses the original text. Model, CLIP, VAE and references use the current connections. Only the selected segment is generated again.");
     if (!hasInfo) info.textContent = t("生成后显示实际种子、尺寸、时长与缓存路径。", "Actual seeds, dimensions, duration and cache paths appear after generation.");
