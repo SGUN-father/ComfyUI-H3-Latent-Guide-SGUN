@@ -108,10 +108,13 @@ class TestLongVideo(unittest.TestCase):
                 self.assertEqual(len(output[0].videos), count)
                 self.assertEqual([call.args[4] for call in render.call_args_list],
                                  ["identity\n\n" + text for text in expected])
-        for invalid in (0, 4):
-            for repeat in (False, True):
-                with self.assertRaisesRegex(ValueError, "不存在"):
-                    PromptPlan.execute("identity", "one\n---\ntwo\n---\nthree", repeat, invalid)
+        for invalid, repeat in ((0, False), (0, True), (4, False)):
+            with self.assertRaisesRegex(ValueError, "不存在"):
+                PromptPlan.execute("identity", "one\n---\ntwo\n---\nthree", repeat, invalid)
+        # With reuse enabled, any later segment number reuses the last written prompt.
+        for start in (4, 10):
+            plan = PromptPlan.execute("identity", "one\n---\ntwo\n---\nthree", True, start)[0]
+            self.assertEqual(plan["prompts"], ["identity\n\nthree"])
 
     def test_custom_sigmas_skip_scheduler_with_previous_latent(self):
         custom = torch.tensor([1., .9882, .973, .9524, .9231, .878, .8, .6316, .4737, .1579, 0.])

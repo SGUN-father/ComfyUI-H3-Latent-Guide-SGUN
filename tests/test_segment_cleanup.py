@@ -16,6 +16,7 @@ import test_long_video as legacy
 
 
 review = sys.modules[legacy.package.__name__ + ".segment_review"]
+KEPT = ("video_path", "latent")
 
 
 class TestSegmentCleanup(unittest.TestCase):
@@ -85,8 +86,11 @@ class TestSegmentCleanup(unittest.TestCase):
         self.assertEqual(files["video_path"].read_bytes(), b"owned video_path")
         self.assertNotIn(files["video_path"], self.moved)
         self.assertTrue(files["video_path"].parent.is_dir())
+        # Saved .h3latent files are user output and survive cleanup.
+        self.assertEqual(files["latent"].read_bytes(), b"owned latent")
+        self.assertNotIn(files["latent"], self.moved)
         for key, path in files.items():
-            if key != "video_path":
+            if key not in KEPT:
                 self.assertFalse(path.exists(), f"Record data should be recycled: {path}")
                 self.assertIn(path, self.moved)
 
@@ -110,7 +114,7 @@ class TestSegmentCleanup(unittest.TestCase):
         result = review.recycle_segment_records([name])
         self.assertFalse(result["errors"])
         self.assert_only_record_data_cleaned(files)
-        self.assertEqual(set(self.moved), {path for key, path in files.items() if key != "video_path"})
+        self.assertEqual(set(self.moved), {path for key, path in files.items() if key not in KEPT})
         self.assertTrue(all(path.is_file() for path in keep_files.values()))
         self.assertEqual(foreign.read_bytes(), b"keep combined")
         self.assertTrue(unrelated.is_file())
@@ -157,7 +161,7 @@ class TestSegmentCleanup(unittest.TestCase):
         self.assertFalse(set(videos).intersection(self.moved))
         for _, _, files in records:
             self.assertTrue(all(not path.exists() for key, path in files.items()
-                                if key != "video_path"))
+                                if key not in KEPT))
 
     def test_input_imports_are_skipped_and_temp_generated_records_can_be_recycled(self):
         imported, _, imported_files = self.create_record(kind="input")
@@ -176,13 +180,54 @@ class TestSegmentCleanup(unittest.TestCase):
                             encoding="utf-8")
         review.recycle_segment_records([first])
         self.assertTrue(manifest.is_file())
+        # Saved latents are user output; once the user removes them the manifest goes too.
+        first_files["latent"].unlink()
+        second_files["latent"].unlink()
         result = review.recycle_segment_records([second])
         self.assertFalse(result["errors"])
         self.assertFalse(manifest.exists())
         self.assertIn(manifest, self.moved)
-        self.assert_only_record_data_cleaned(first_files)
-        self.assert_only_record_data_cleaned(second_files)
+        for files in (first_files, second_files):
+            self.assertEqual(files["video_path"].read_bytes(), b"owned video_path")
+            self.assertNotIn(files["video_path"], self.moved)
+            self.assertTrue(all(not path.exists() for key, path in files.items() if key not in KEPT))
         self.assert_record_list(result, [])
+
+    def test_manifest_survives_while_saved_latents_remain(self):
+        first, _, first_files = self.create_record(1)
+        second, _, second_files = self.create_record(2)
+        manifest = first_files["recipe"].parent / "segments.jsonl"
+        manifest.write_text(json.dumps({"recipe": first}) + "\n", encoding="utf-8")
+        result = review.recycle_segment_records([first, second])
+        self.assertFalse(result["errors"])
+        self.assertTrue(manifest.is_file())
+        self.assertNotIn(manifest, self.moved)
+        self.assertTrue(first_files["latent"].is_file())
+        self.assertTrue(second_files["latent"].is_file())
+        self.assert_record_list(result, [])
+
+    @unittest.skipUnless(os.name == "nt", "Windows junction regression")
+    def test_output_root_behind_directory_junction_can_be_cleaned(self):
+        real = self.directory / "real-output"
+        real.mkdir()
+        link = self.directory / "linked-output"
+        created = subprocess.run(["cmd", "/c", "mklink", "/J", str(link), str(real)],
+                                 capture_output=True, check=False)
+        if created.returncode:
+            self.skipTest("Host does not permit creating directory junctions")
+        try:
+            self.roots["output"] = link
+            with patch.object(legacy.folder_paths, "get_output_directory", return_value=str(link)):
+                name, _, files = self.create_record()
+                result = review.recycle_segment_records([name])
+            self.assertFalse(result["errors"])
+            self.assertEqual(result["recycled_records"], 1)
+            self.assertFalse(files["recipe"].exists())
+            self.assertEqual(files["video_path"].read_bytes(), b"owned video_path")
+            self.assertTrue(files["latent"].is_file())
+        finally:
+            if link.is_junction():
+                link.rmdir()
 
     def test_shared_context_referenced_by_unselected_record_survives(self):
         selected, _, selected_files = self.create_record(2)

@@ -651,6 +651,33 @@ test("cleanup recycles listed records and supporting data, unloads preview and r
   node.onRemoved();
 });
 
+test("cleanup asks for confirmation with the real record and batch scope, and a cancel sends nothing", async () => {
+  const { node, cleanup, status } = createNode();
+  const records = [
+    record({ segment: 1, recipe_path: "H3_00001/_data/segment_0001.h3segment.json [output]" }),
+    record({ segment: 2, recipe_path: "H3_00001/_data/segment_0002.h3segment.json [output]" }),
+    record({ segment: 1, recipe_path: "H3_00007/_data/segment_0001.h3segment.json [output]" }),
+    record({ segment: 1, recipe_path: "old_flat/segment_0001.h3segment.json [temp]" })];
+  load(node, records);
+  const prompts = [];
+  try {
+    context.confirm = (message) => { prompts.push(message); return false; };
+    const count = requests.length;
+    await cleanup.fire("click");
+    assert.equal(requests.length, count);
+    assert.match(prompts[0], /4 条片段记录（涉及 3 个批次）/);
+    assert.match(prompts[0], /片段视频和保存的 LATENT 保留/);
+    context.confirm = (message) => { prompts.push(message); return true; };
+    response = { body: cleanupResult({ recycled_records: 4 }) };
+    await cleanup.fire("click");
+    assert.equal(requests.length, count + 1);
+    assert.match(status.textContent, /保存的 LATENT 也保留/);
+  } finally {
+    delete context.confirm;
+    node.onRemoved();
+  }
+});
+
 test("cleanup clears stale retry fields from a loaded workflow without changing its other settings", async () => {
   const { node, cleanup } = createNode();
   widget(node, "retry_segment").value = "deleted/old.h3segment.json [output]";
@@ -807,7 +834,7 @@ test("cleanup labels and its result follow language changes, and empty lists nev
     load(node);
     response = { body: cleanupResult({ recycled_records: 1 }) };
     await cleanup.fire("click");
-    assert.match(status.textContent, /Moved 1 segment records and 13 supporting files to the Recycle Bin. Segment videos were kept/);
+    assert.match(status.textContent, /Moved 1 segment records and 13 supporting files to the Recycle Bin. Segment videos and saved LATENTs were kept/);
     setLocale("zh");
     assert.equal(cleanup.textContent, "一键清理");
     assert.match(status.textContent, /移到回收站/);

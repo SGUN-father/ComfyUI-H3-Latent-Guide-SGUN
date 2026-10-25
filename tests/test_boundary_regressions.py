@@ -264,6 +264,8 @@ class TestGuideBoundaries(unittest.TestCase):
                                latent(previous_frames, clones), context)
                 self.assertEqual(output.result[1], expected)
                 self.assertLess(output.result[1], target_frames)
+                audio_guide = output.result[0][0][1]["minimax_keyframes"][1]
+                self.assertGreaterEqual(audio_guide["resolved_frame_index"], 0)
                 self.assertEqual(clones, ["video", "audio"])
 
     def test_default_context_retains_input_conditioning_and_metadata(self):
@@ -281,7 +283,8 @@ class TestGuideBoundaries(unittest.TestCase):
         self.assertEqual(metadata, {"reference": reference})
         keyframes = result[0][1]["minimax_keyframes"]
         self.assertEqual(keyframes[0]["latent"].shape, (1, 24, 7, 2, 2))
-        self.assertEqual(keyframes[1]["audio_latent"].shape, (1, 32, 2, 40))
+        self.assertEqual(keyframes[1]["audio_latent"].shape, (1, 32, 2, 37))
+        self.assertGreaterEqual(keyframes[1]["resolved_frame_index"], 0)
         self.assertEqual(tuple(stream.shape for stream in source["samples"].tensors), source_shapes)
         self.assertEqual(clones, ["video", "audio"])
 

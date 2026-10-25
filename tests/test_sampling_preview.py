@@ -86,14 +86,29 @@ class TestSamplingPreview(unittest.TestCase):
         self.assertEqual(payload["frame_count"], 243)
         self.assertEqual(payload["source_frames"], 243)
         self.assertEqual(payload["trim_frames"], 0)
-        self.assertEqual(len(payload["frames"]), 243)
+        picks, timeline = preview.preview_timeline(243)
+        self.assertEqual(len(picks), preview.MAX_PREVIEW_FRAMES)
+        self.assertEqual(len(payload["frames"]), preview.MAX_PREVIEW_FRAMES)
         self.assertEqual(len(payload["frame_indices"]), 243)
-        self.assertEqual(payload["frame_indices"], list(range(243)))
-        self.assertEqual(len(set(payload["frames"])), 243)
+        self.assertEqual(payload["frame_indices"], timeline)
+        self.assertEqual(len(set(payload["frames"])), preview.MAX_PREVIEW_FRAMES)
         for frame in payload["frames"]:
             image = Image.open(io.BytesIO(base64.b64decode(frame.split(",", 1)[1])))
             self.assertEqual(image.size, (64, 32))
             self.assertEqual(image.format, "JPEG")
+
+    def test_preview_timeline_caps_unique_frames_and_keeps_full_timeline(self):
+        for count in (1, 22, 60, 61, 119, 238, 3600):
+            with self.subTest(count=count):
+                picks, timeline = preview.preview_timeline(count)
+                self.assertEqual(len(timeline), count)
+                self.assertEqual(len(picks), min(count, preview.MAX_PREVIEW_FRAMES))
+                self.assertEqual(len(set(picks)), len(picks))
+                self.assertEqual((picks[0], picks[-1]), (0, count - 1))
+                self.assertEqual((timeline[0], timeline[-1]), (0, len(picks) - 1))
+                self.assertEqual(timeline, sorted(timeline))
+                for frame, index in enumerate(timeline):
+                    self.assertLessEqual(abs(picks[index] - frame), (count - 1) / max(1, len(picks) - 1))
 
     def test_continuation_skips_overlap_without_shortening_remaining_timeline(self):
         instance = preview.H3SamplingPreview("23")
@@ -106,10 +121,10 @@ class TestSamplingPreview(unittest.TestCase):
         self.assertEqual(payload["frame_count"], 238)
         self.assertEqual(payload["source_frames"], 260)
         self.assertEqual(payload["trim_frames"], 22)
-        self.assertEqual(len(payload["frames"]), 238)
+        self.assertEqual(len(payload["frames"]), preview.MAX_PREVIEW_FRAMES)
         self.assertEqual(len(payload["frame_indices"]), 238)
         self.assertEqual(patcher.model.inputs, [((1, 24, 77, 1, 1), [float(index * 2) for index in range(77)])])
-        self.assertEqual(payload["frame_indices"], list(range(238)))
+        self.assertEqual(payload["frame_indices"], preview.preview_timeline(238)[1])
         first = Image.open(io.BytesIO(base64.b64decode(payload["frames"][0].split(",", 1)[1])))
         self.assertEqual(first.getpixel((0, 0)), (21, 21, 21))
 
@@ -161,6 +176,41 @@ class TestSamplingPreview(unittest.TestCase):
         self.assertIsNone(instance.patcher)
         patcher.detach.assert_called_once()
         self.assertEqual([event[1]["status"] for event in self.events], ["error"])
+
+    def test_missing_comfyui_api_only_disables_preview(self):
+        # e.g. an older ComfyUI without comfy.model_prefetch.malloc_graph_scope
+        instance = preview.H3SamplingPreview("23")
+        patcher = self.fake_loaded(instance)
+        with mock.patch.object(instance, "_frames", side_effect=AttributeError("no malloc_graph_scope")):
+            with mock.patch.object(preview.mm, "cleanup_models"):
+                instance.update(1, 0, torch.zeros(1, 24, 1, 1, 1), 8, self.active)
+                instance.update(1, 7, torch.zeros(1, 24, 1, 1, 1), 8, self.active)
+                instance.finish()
+        self.assertTrue(instance.failed)
+        self.assertTrue(instance.closed)
+        patcher.detach.assert_called_once()
+        self.assertEqual([event[1]["status"] for event in self.events], ["error"])
+        self.assertIn("malloc_graph_scope", self.events[0][1]["message"])
+
+    def test_failing_cleanup_and_report_do_not_break_sampling(self):
+        instance = preview.H3SamplingPreview("23")
+        patcher = self.fake_loaded(instance)
+        patcher.detach.side_effect = RuntimeError("detach failed")
+        self.server.send_sync = mock.Mock(side_effect=ConnectionError("socket closed"))
+        with mock.patch.object(instance, "_frames", side_effect=RuntimeError("decode failed")):
+            instance.update(1, 0, torch.zeros(1, 24, 1, 1, 1), 8, self.active)
+        self.assertTrue(instance.failed)
+        self.assertTrue(instance.closed)
+        self.assertIsNone(instance.patcher)
+        instance.finish()
+
+    def test_interrupt_inside_decode_propagates(self):
+        instance = preview.H3SamplingPreview("23")
+        self.fake_loaded(instance)
+        with mock.patch.object(instance, "_frames", side_effect=preview.mm.InterruptProcessingException()):
+            with self.assertRaises(preview.mm.InterruptProcessingException):
+                instance.update(1, 0, torch.zeros(1, 24, 1, 1, 1), 8, self.active)
+        self.assertFalse(instance.failed)
 
     def test_interrupt_propagates(self):
         instance = preview.H3SamplingPreview("23")
@@ -252,9 +302,10 @@ class TestSamplingPreview(unittest.TestCase):
                 payload = self.events[-1][1]
                 count = source_frames - trim
                 self.assertEqual(payload["status"], "sampling")
-                self.assertEqual(len(payload["frames"]), count)
-                self.assertEqual(payload["frame_indices"], list(range(count)))
-                self.assertEqual(len(set(payload["frames"])), count)
+                unique = min(count, preview.MAX_PREVIEW_FRAMES)
+                self.assertEqual(len(payload["frames"]), unique)
+                self.assertEqual(payload["frame_indices"], preview.preview_timeline(count)[1])
+                self.assertEqual(len(set(payload["frames"])), unique)
                 image = Image.open(io.BytesIO(base64.b64decode(payload["frames"][0].split(",", 1)[1])))
                 self.assertEqual(image.size, (32, 32))
             self.assertIsInstance(instance.patcher, preview.comfy.model_patcher.ModelPatcher)

@@ -58,6 +58,20 @@ def prepare(patcher, source_frames=124, context=22, dtype=torch.float32, sigmas=
 
 
 class TestDynamicMask(unittest.TestCase):
+    def test_audio_context_after_target_origin_locks_only_copied_tokens(self):
+        _, _, _, guided, _, prepared, _ = prepare(model(), 124, 56)
+        audio_guide = guided[0][1]["minimax_keyframes"][1]
+        self.assertGreaterEqual(audio_guide["resolved_frame_index"], 0)
+        first = round(audio_guide["resolved_frame_index"] * package.FRAME_RESCALE)
+        end = first + audio_guide["audio_latent"].shape[-1]
+        self.assertGreater(first, 0)
+        audio = prepared["samples"].tensors[1]
+        mask = prepared["noise_mask"].tensors[1]
+        self.assertTrue(torch.all(mask[..., :first] == 1))
+        self.assertTrue(torch.all(mask[..., first:end] == 0))
+        self.assertTrue(torch.all(mask[..., end:] == 1))
+        self.assertTrue(torch.equal(audio[..., first:end], audio_guide["audio_latent"]))
+
     def test_prefix_copy_dtypes_audio_alignment_and_conditions(self):
         for dtype in (torch.float16, torch.float32, torch.bfloat16):
             for frames in (124, 141, 158):

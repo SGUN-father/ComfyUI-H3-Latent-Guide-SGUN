@@ -57,7 +57,9 @@ def check_tail_is_exact_independent_copy(device, dtype):
     audio = audio_guide["audio_latent"]
     assert trim == 22
     assert torch.equal(video, source_video[:, :, -7:])
-    assert torch.equal(audio, source_audio[..., -40:])
+    # Audio context is end-aligned and never anchored before the target origin.
+    assert torch.equal(audio, source_audio[..., -37:])
+    assert audio_guide["resolved_frame_index"] == 0
     assert video.untyped_storage().data_ptr() != source_video.untyped_storage().data_ptr()
     assert audio.untyped_storage().data_ptr() != source_audio.untyped_storage().data_ptr()
     assert video.dtype == audio.dtype == dtype
