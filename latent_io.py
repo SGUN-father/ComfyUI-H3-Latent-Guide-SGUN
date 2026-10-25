@@ -2,6 +2,7 @@ import asyncio
 import hashlib
 import json
 import os
+import time
 
 import comfy.utils
 import folder_paths
@@ -15,6 +16,10 @@ from . import _av_streams
 
 EMPTY_LATENT_LIST = "未找到 .h3latent（请先开启保存每段 LATENT，再刷新）"
 LATENT_LIST_ROUTE = "/h3-sgun/latents"
+# define_schema runs on every INPUT_TYPES call (several per queued prompt);
+# reuse a recent scan there. The refresh route always rescans.
+SCHEMA_LIST_TTL = 30.0
+_schema_list_cache = (0.0, None)
 
 
 def list_h3_latents():
@@ -42,8 +47,21 @@ def list_h3_latents():
     return [name for _, name in files] or [EMPTY_LATENT_LIST]
 
 
+def schema_latent_options():
+    global _schema_list_cache
+    scanned, files = _schema_list_cache
+    now = time.monotonic()
+    if files is None or now - scanned > SCHEMA_LIST_TTL:
+        files = list_h3_latents()
+        _schema_list_cache = (now, files)
+    return list(files)
+
+
 async def get_h3_latents(request):
-    return web.json_response(await asyncio.to_thread(list_h3_latents))
+    global _schema_list_cache
+    files = await asyncio.to_thread(list_h3_latents)
+    _schema_list_cache = (time.monotonic(), files)
+    return web.json_response(files)
 
 
 def selected_latent_path(latent_path, latent_file):
@@ -91,7 +109,7 @@ class H3LoadLatent(io.ComfyNode):
             description="读取本插件保存的 .h3latent，保留音视频张量的原始数值和dtype。路径限ComfyUI input/output/temp目录。",
             inputs=[io.String.Input("latent_path", display_name="手动路径（可留空）", default="", advanced=True,
                                     tooltip="通常留空，直接使用下方文件列表。填写或连接路径时优先读取该路径，兼容旧工作流。"),
-                    io.Combo.Input("latent_file", display_name="已保存的 LATENT", options=list_h3_latents(), optional=True,
+                    io.Combo.Input("latent_file", display_name="已保存的 LATENT", options=schema_latent_options(), optional=True,
                                    remote=io.RemoteOptions(route=LATENT_LIST_ROUTE, refresh_button=True,
                                                            control_after_refresh="first"),
                                    tooltip="自动扫描 output/input/temp 及子目录，最新文件在最前面。保存新片段后点击刷新按钮。")],

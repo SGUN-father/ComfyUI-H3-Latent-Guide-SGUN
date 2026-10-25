@@ -188,28 +188,29 @@ def recycle_segment_records(paths):
         for field, target in expected.items():
             reference = record.get(field)
             if reference:
-                actual = folder_paths.get_annotated_filepath(reference)
+                actual = os.path.realpath(folder_paths.get_annotated_filepath(reference))
                 if field == "video_path" and os.path.normcase(actual) != os.path.normcase(os.path.realpath(target)):
                     raise ValueError("片段视频路径与记录不匹配，未清理任何文件。")
-        # Formal segment videos remain user output after retry records are cleared.
+        # Formal segment videos and user-requested .h3latent saves remain user output
+        # after retry records are cleared; only an interrupted .h3latent temp is removed.
         candidates = {target for field, target in expected.items() if field != "video_path"}
-        candidates |= {os.path.join(record_folder, f"{stem}.h3latent"),
-                       os.path.join(record_folder, f"{stem}.reserve")}
+        candidates.add(os.path.join(record_folder, f"{stem}.reserve"))
         candidates |= {candidate + ".tmp" for candidate in candidates} | {path + ".tmp"}
+        candidates.add(os.path.join(record_folder, f"{stem}.h3latent.tmp"))
         candidates = {_cleanup_path(candidate, root) for candidate in candidates}
         selected.add(path)
         plan.append((path, candidates))
         batches.add((batch, record_folder, root))
     protected = set()
     for entry in list_segment_records():
-        path = folder_paths.get_annotated_filepath(entry["recipe_path"])
+        path = os.path.realpath(folder_paths.get_annotated_filepath(entry["recipe_path"]))
         if path in selected:
             continue
         record = load_record(entry["recipe_path"])
         protected.add(path)
         for key in ("video_path", "context", "seam_path", "context_video_path"):
             if record.get(key):
-                protected.add(folder_paths.get_annotated_filepath(record[key]))
+                protected.add(os.path.realpath(folder_paths.get_annotated_filepath(record[key])))
     protected = {os.path.normcase(path) for path in protected}
     existing = {path for recipe, files in plan for path in files | {recipe} if os.path.isfile(path)}
     errors, recycled = [], 0
@@ -227,7 +228,9 @@ def recycle_segment_records(paths):
     for batch, record_folder, root in batches:
         directories = {batch, record_folder, os.path.join(batch, "_data")}
         try:
-            if not any(name.endswith(RECORD_SUFFIX) for directory in directories if os.path.isdir(directory)
+            # Keep segments.jsonl while any record or saved .h3latent it indexes remains.
+            if not any(name.endswith(RECORD_SUFFIX) or name.lower().endswith(".h3latent")
+                       for directory in directories if os.path.isdir(directory)
                        for name in os.listdir(directory)):
                 manifests = [_cleanup_path(os.path.join(directory, "segments.jsonl"), root)
                              for directory in directories if os.path.isdir(directory)]

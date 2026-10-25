@@ -61,7 +61,8 @@ def prepare_dynamic_mask(model, latent, positive, sigmas):
     video_mask = torch.ones_like(video[:, :1], dtype=torch.float32)
     audio_mask = torch.ones_like(audio[:, :1], dtype=torch.float32)
     video_mask[:, :, :prefix_steps] = 0
-    audio_mask[..., :audio_end] = 0
+    # Lock only the copied context; tokens before it (inside the trimmed overlap) stay free.
+    audio_mask[..., start:audio_end] = 0
     prepared = latent.copy()
     prepared["samples"] = NestedTensor((result_video, result_audio))
     prepared["noise_mask"] = NestedTensor((video_mask, audio_mask))

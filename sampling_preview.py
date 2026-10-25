@@ -15,6 +15,21 @@ import folder_paths
 from server import PromptServer
 
 
+# Each update ships its frames as JPEG data URLs in one websocket message, so a
+# long segment at 768px could reach several MB per update. Send at most this
+# many evenly spaced frames; frame_indices still covers the full timeline.
+MAX_PREVIEW_FRAMES = 60
+
+
+def preview_timeline(count, limit=MAX_PREVIEW_FRAMES):
+    """Return (decoded frame offsets to encode, batch index for every timeline frame)."""
+    if count <= limit:
+        return list(range(count)), list(range(count))
+    picks = [round(index * (count - 1) / (limit - 1)) for index in range(limit)]
+    timeline = [round(frame * (limit - 1) / (count - 1)) for frame in range(count)]
+    return picks, timeline
+
+
 class H3SamplingPreview:
     def __init__(self, node_id, interval=2, max_resolution=768, fps=10):
         self.node_id = str(node_id)
@@ -90,16 +105,17 @@ class H3SamplingPreview:
         if decoded.shape[2] != self.source_frames or not 0 <= self.trim_frames < self.source_frames:
             raise ValueError("采样预览帧数与 H3 视频 latent 的时长不匹配")
         frames = []
-        for index in range(self.trim_frames, self.source_frames):
+        picks, timeline = preview_timeline(self.source_frames - self.trim_frames)
+        for offset in picks:
             mm.throw_exception_if_processing_interrupted()
-            frame = decoded[0, :, index].clamp(0, 1).mul(255).to(torch.uint8)
+            frame = decoded[0, :, self.trim_frames + offset].clamp(0, 1).mul(255).to(torch.uint8)
             pixels = frame.movedim(0, -1).contiguous().cpu().numpy()
             image = Image.fromarray(pixels)
             encoded = io.BytesIO()
             image.save(encoded, format="JPEG", quality=80)
             frames.append("data:image/jpeg;base64," + base64.b64encode(encoded.getvalue()).decode("ascii"))
             del frame, pixels, image
-        return frames, list(range(len(frames)))
+        return frames, timeline
 
     def update(self, segment, step, x0, total_steps, model_patcher):
         if self.closed or self.failed:
@@ -114,24 +130,34 @@ class H3SamplingPreview:
                 raise ValueError("采样预览需要 H3 视频 latent [B, 24, T, H, W]")
             frames, frame_indices = self._frames(video, model_patcher)
             self._send("sampling", frames, frame_indices)
-        except (RuntimeError, ValueError, OSError, KeyError, SafetensorError) as error:
+        except Exception as error:
+            # The preview is optional: any failure (missing weights, an API this ComfyUI
+            # lacks, OOM, ...) only disables it. User interrupts derive from BaseException
+            # (mm.InterruptProcessingException) and still propagate.
             self.failed = True
-            logging.warning("H3 sampling preview disabled for this execution: %s", error)
-            self._send("error", message=f"采样预览已停用：{error}")
+            logging.warning("H3 sampling preview disabled for this execution: %r", error)
+            try:
+                self._send("error", message=f"采样预览已停用：{error}")
+            except Exception as send_error:
+                logging.warning("H3 sampling preview could not report its error: %r", send_error)
             self.close()
 
     def close(self):
-        if self.patcher is not None:
-            self.patcher.detach()
-            self.patcher = None
-            self.vae = None
-            mm.cleanup_models()
         self.closed = True
+        if self.patcher is not None:
+            patcher, self.patcher, self.vae = self.patcher, None, None
+            try:
+                patcher.detach()
+                mm.cleanup_models()
+            except Exception as error:
+                logging.warning("H3 sampling preview cleanup failed: %r", error)
 
     def finish(self):
         if self.closed:
             return
         try:
             self._send("complete")
+        except Exception as error:
+            logging.warning("H3 sampling preview could not report completion: %r", error)
         finally:
             self.close()

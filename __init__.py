@@ -1,8 +1,13 @@
 """Native MiniMax H3 latent continuation and long-video generation."""
 
 import logging
-from server import PromptServer
 
+from .compat import check_comfyui
+
+# Fail early with a readable message instead of a bare ImportError deep in a module.
+check_comfyui()
+
+from server import PromptServer
 from comfy.nested_tensor import NestedTensor
 from comfy.ldm.minimax.model import FRAME_RESCALE
 from comfy_api.latest import ComfyExtension, io
@@ -78,10 +83,14 @@ class MiniMaxH3LatentContinuationGuide(io.ComfyNode):
         video_t = (frames - 5) // 17 * 5 + 2
         video_guide = {"resolved_frame_index": 0, "latent": video[:, :, -video_t:].clone()}
 
-        # End-align at least one second of audio with the video join on the target's 40 Hz grid.
-        audio_t = min(audio.shape[-1], round(max(24, frames) * FRAME_RESCALE))
+        # End-align the audio context with the video join on the target's 40 Hz grid.
+        # It starts no earlier than the target origin: like the official AddGuide, a
+        # negative anchor would place it on the reference tokens' RoPE time span.
         overhang = previous_latent.get("_h3_audio_overhang", audio.shape[-1] - previous_frames * FRAME_RESCALE)
-        audio_end = round(frames * FRAME_RESCALE + overhang)
+        audio_end = max(1, round(frames * FRAME_RESCALE + overhang))
+        # Never more audio than a `frames` tail holds, so a compact tail copy
+        # (_copy_context_tail) yields exactly the same guide as the full latent.
+        audio_t = min(audio.shape[-1], audio_end, round(frames * FRAME_RESCALE))
         audio_guide = {
             "resolved_frame_index": (audio_end - audio_t) / FRAME_RESCALE,
             "audio_latent": audio[..., -audio_t:].clone(),

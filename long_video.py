@@ -121,6 +121,9 @@ class H3VideoPromptPlan(io.ComfyNode):
         if segments.strip() and any(not section for section in sections):
             raise ValueError("分段剧情中有空段，请补写该段或删除多余的 ---。")
         prompts = ["\n\n".join(part for part in (common.strip(), section) if part) for section in sections]
+        if start_segment > len(prompts) and repeat_last:
+            # Every segment past the written ones reuses the last prompt.
+            start_segment = len(prompts)
         if not 1 <= start_segment <= len(prompts):
             raise ValueError(f"第 {start_segment} 段提示词不存在，目前共 {len(prompts)} 段（段号从1开始）。")
         return io.NodeOutput({"prompts": prompts[start_segment - 1:], "repeat_last": repeat_last})
@@ -172,21 +175,21 @@ class H3LongVideo(io.ComfyNode):
                 io.Boolean.Input("dynamic_mask", display_name="动态掩码", default=True,
                                  tooltip="仅续接时生效。按实际sigma动态重绘上下文，保护接缝及音频前缀；用于对照漂移控制，不保证恢复丢失细节。需原生H3音视频掩码支持，不能叠加其他动态掩码。"),
                 io.Autogrow.Input("ref_images", display_name="参考图", optional=True,
-                    template=io.Autogrow.TemplatePrefix(io.Image.Input("ref_image"), prefix="ref_image_", min=0, max=100)),
+                    template=io.Autogrow.TemplatePrefix(io.Image.Input("ref_image"), prefix="ref_image_", min=0, max=9)),
                 io.Sigmas.Input("sigmas", optional=True,
                                 tooltip="连接 Manual Sigmas 等节点后，全部片段直接使用此序列，覆盖内部调度器、步数和降噪设置。"),
                 io.Autogrow.Input("ref_videos", display_name="参考视频", optional=True,
                     template=io.Autogrow.TemplatePrefix(
                         io.Image.Input("ref_video", tooltip="与官方 H3 一致，输入24fps的IMAGE帧批次，至少5帧。"),
-                        prefix="ref_video_", min=0, max=100)),
+                        prefix="ref_video_", min=0, max=3)),
                 io.Autogrow.Input("ref_video_audios", display_name="参考视频音轨", optional=True,
                     template=io.Autogrow.TemplatePrefix(
                         io.Audio.Input("ref_video_audio", tooltip="按相同编号配对：ref_video_audio_0 对应 ref_video_0。"),
-                        prefix="ref_video_audio_", min=0, max=100)),
+                        prefix="ref_video_audio_", min=0, max=3)),
                 io.Autogrow.Input("ref_audios", display_name="独立参考音频", optional=True,
                     template=io.Autogrow.TemplatePrefix(
                         io.Audio.Input("ref_audio", tooltip="独立参考音频，沿用官方 H3 的 <Audio j> 编号。"),
-                        prefix="ref_audio_", min=0, max=100)),
+                        prefix="ref_audio_", min=0, max=3)),
                 io.Latent.Input("previous_latent", display_name="上一段 LATENT", optional=True,
                                 tooltip="连接H3读取音视频LATENT或上一生成节点的最后一段LATENT。必须包含完整音视频且分辨率相同；生成段数设1可单独重抽下一段。"),
                 io.Boolean.Input("drift_correction", display_name="防偏色与亮度漂移", default=True,
@@ -268,6 +271,9 @@ class H3LongVideo(io.ComfyNode):
         finally:
             if dynamic_mask and previous is not None:
                 model.model_options["denoise_mask_function"].__self__.current_mask = None
+        # The dynamic-mask prefix lock belongs to this sampling run only; do not leak it
+        # into the output LATENT, where another sampler would treat the prefix as locked.
+        sampled.pop("noise_mask", None)
         del guider, positive, latent, previous, model
         comfy.model_management.throw_exception_if_processing_interrupted()
         if drift_stats is not None:
@@ -381,6 +387,7 @@ class H3LongVideo(io.ComfyNode):
         sampling_preview = H3SamplingPreview(cls.hidden.unique_id, interval=preview_interval,
                                             max_resolution=preview_max_resolution, fps=preview_fps) if live_preview else None
         retry_reservation = None
+        pending_context = None
         try:
             if retry is not None:
                 retry_suffix, retry_reservation = _reserve_retry_name(run_folder, retry["segment"])
@@ -405,6 +412,7 @@ class H3LongVideo(io.ComfyNode):
                     os.makedirs(data_folder, exist_ok=True)
                     context_path = os.path.join(data_folder, f"{file_stem}.h3context")
                     save_h3_latent(previous, context_path, {"kind": "retry_context"})
+                    pending_context = context_path
                     context_name = annotated_path(context_path, "output")
                 saved_drift = [stat.tolist() for stat in drift_stats] if drift_stats is not None else None
                 previous, video, frames = cls._render_segment(
@@ -455,6 +463,7 @@ class H3LongVideo(io.ComfyNode):
                 recipe_path = os.path.join(data_folder, f"{file_stem}.h3segment.json")
                 recipe_name = annotated_path(recipe_path, "output")
                 save_record(record, recipe_path)
+                pending_context = None
                 segment_entries.append(record_entry(record, recipe_name))
                 if save_latents:
                     latent_filename = f"{file_stem}.h3latent"
@@ -497,6 +506,12 @@ class H3LongVideo(io.ComfyNode):
             preview["h3_sgun_info"] = [info]
             return io.NodeOutput(combined, previous, info, latent_paths, ui=preview)
         finally:
+            # A context saved for a segment that never got its record is unreachable.
+            if pending_context is not None:
+                try:
+                    os.remove(pending_context)
+                except FileNotFoundError:
+                    pass
             if retry_reservation is not None:
                 try:
                     os.remove(retry_reservation)
