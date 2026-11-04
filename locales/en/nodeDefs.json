@@ -201,7 +201,7 @@
       },
       "live_preview": {
         "name": "Preview sampling (adds time)",
-        "tooltip": "Decode sampling frames in sequence with the local taeh3_temporal.safetensors and play them over the settings panel. When off, no preview model is loaded and no sampling thumbnails are generated."
+        "tooltip": "Decode sampling frames in sequence with the local taeh3_temporal.safetensors (or taeh3.safetensors if it is missing) and play them over the settings panel. When off, no preview model is loaded and no sampling thumbnails are generated."
       },
       "preview_interval": {
         "name": "Preview interval (steps)",
