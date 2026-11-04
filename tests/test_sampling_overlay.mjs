@@ -207,9 +207,9 @@ test("language changes update active sampling text without interrupting the fram
 
 test("known preview errors and fallback messages are translated while preserving technical details", async () => {
   const view = await createView();
-  view.preview({ status: "error", message: "采样预览已停用：未找到 models/vae_approx/taeh3_temporal.safetensors" });
+  view.preview({ status: "error", message: "采样预览已停用：未找到 models/vae_approx/taeh3_temporal.safetensors 或 taeh3.safetensors" });
   view.setLocale("en");
-  assert.equal(view.status.textContent, "Sampling preview disabled: models/vae_approx/taeh3_temporal.safetensors was not found");
+  assert.equal(view.status.textContent, "Sampling preview disabled: neither models/vae_approx/taeh3_temporal.safetensors nor taeh3.safetensors was found");
   view.preview({ status: "error", message: "" });
   assert.equal(view.status.textContent, "Sampling preview failed. Generation continues.");
   view.setLocale("zh");
@@ -440,6 +440,6 @@ test("a task completed before its HTTP response never registers a stale preview"
 test("native temporal weight format failures explain the required weights in English", async () => {
   const view = await createView();
   view.setLocale("en");
-  view.preview({ status: "error", message: "采样预览已停用：采样预览需要 H3 时序 TAEHV 权重，不能使用逐帧二维 TAE" });
-  assert.equal(view.status.textContent, "Sampling preview disabled: Sampling preview requires H3 temporal TAEHV weights; frame-by-frame 2D TAE weights are unsupported");
+  view.preview({ status: "error", message: "采样预览已停用：采样预览需要 H3 的 taeh3 权重（时序版或逐帧二维版）" });
+  assert.equal(view.status.textContent, "Sampling preview disabled: Sampling preview requires H3 taeh3 weights (temporal or frame-by-frame 2D)");
 });

@@ -266,24 +266,72 @@ class TestSamplingPreview(unittest.TestCase):
         instance.finish()
         self.assertEqual(self.events, [])
 
-    def test_framewise_checkpoint_is_rejected(self):
+    def test_unsupported_checkpoint_is_rejected(self):
         instance = preview.H3SamplingPreview("23")
         state = {"1.weight": torch.empty(96, 24, 3, 3)}
-        with mock.patch.object(preview.folder_paths, "get_full_path", return_value="framewise.safetensors"), \
-                mock.patch.object(preview.comfy.utils, "load_torch_file", return_value=state), \
-                mock.patch.object(preview.comfy.sd, "VAE") as load_vae:
+        with mock.patch.object(preview.folder_paths, "get_full_path", return_value="unknown.safetensors"),                 mock.patch.object(preview.comfy.utils, "load_torch_file", return_value=state),                 mock.patch.object(preview.comfy.sd, "VAE") as load_vae:
             instance.update(1, 0, torch.zeros(1, 24, 1, 1, 1), 1, self.active)
         load_vae.assert_not_called()
         self.assertTrue(instance.failed)
-        self.assertIn("TAEHV", self.events[0][1]["message"])
+        self.assertIn("taeh3", self.events[0][1]["message"])
 
-    def test_missing_temporal_checkpoint_does_not_fall_back_to_2d_weights(self):
+    def test_missing_checkpoints_report_both_names(self):
         instance = preview.H3SamplingPreview("23")
         with mock.patch.object(preview.folder_paths, "get_full_path", return_value=None) as resolve:
             instance.update(1, 0, torch.zeros(1, 24, 1, 1, 1), 1, self.active)
-        resolve.assert_called_once_with("vae_approx", "taeh3_temporal.safetensors")
+        self.assertEqual([call.args for call in resolve.call_args_list],
+                         [("vae_approx", "taeh3_temporal.safetensors"), ("vae_approx", "taeh3.safetensors")])
         self.assertTrue(instance.failed)
         self.assertIn("taeh3_temporal.safetensors", self.events[0][1]["message"])
+        self.assertIn("taeh3.safetensors", self.events[0][1]["message"])
+
+    def test_framewise_pictures_cover_the_pixel_frames_of_their_latent(self):
+        instance = preview.H3SamplingPreview("23", max_resolution=32)
+        instance.framewise = True
+        decoder = Decoder()
+        values = torch.linspace(0, 1, 7).reshape(1, 1, 7, 1, 1)
+        decoder.decode = lambda samples: values.expand(1, 3, 7, 16, 16)
+        patcher = SimpleNamespace(model=decoder, load_device=torch.device("cpu"), detach=mock.Mock())
+        instance.patcher = patcher
+        instance.vae = SimpleNamespace(patcher=patcher, first_stage_model=decoder, vae_dtype=torch.float32,
+                                       device=torch.device("cpu"), memory_used_decode=lambda shape, dtype: 1024)
+        with mock.patch.object(preview.mm, "load_models_gpu"):
+            instance.update(1, 0, torch.zeros(1, 24, 7, 1, 1), 1, self.active)
+        payload = self.events[0][1]
+        self.assertEqual(payload["source_frames"], 22)
+        expected = [0] + [1] * 4 + [2] * 4 + [3] * 4 + [4] * 4 + [5] + [6] * 4
+        for frame, owner in zip(payload["frames"], expected):
+            image = Image.open(io.BytesIO(base64.b64decode(frame.split(",", 1)[1])))
+            self.assertAlmostEqual(image.getpixel((0, 0))[0], owner / 6 * 255, delta=4)
+
+    def test_real_framewise_taeh3_checkpoint_decodes_on_cpu(self):
+        path = preview.folder_paths.get_full_path("vae_approx", "taeh3.safetensors")
+        if path is None or "decoder.1.weight" in preview.comfy.utils.load_torch_file(path, safe_load=True):
+            self.skipTest("No local frame-by-frame taeh3 checkpoint")
+        instance = preview.H3SamplingPreview("23", max_resolution=32)
+        active = preview.comfy.model_patcher.ModelPatcher(torch.nn.Linear(1, 1), torch.device("cpu"), torch.device("cpu"))
+        active.model.latent_format = SimpleNamespace(process_out=lambda value: value)
+        resolve = lambda vae_dir, name: path if name == "taeh3.safetensors" else None
+        try:
+            with mock.patch.object(preview.folder_paths, "get_full_path", side_effect=resolve):
+                torch.manual_seed(7)
+                for segment, tokens, source_frames, trim in [(1, 7, 22, 0), (2, 72, 243, 0), (3, 77, 260, 22)]:
+                    samples = torch.randn(1, 24, tokens, 2, 2)
+                    instance.set_segment(source_frames, trim)
+                    instance.update(segment, 0, samples, 1, active)
+                    self.assertFalse(instance.failed)
+                    payload = self.events[-1][1]
+                    count = source_frames - trim
+                    self.assertEqual(payload["status"], "sampling")
+                    self.assertEqual(len(payload["frames"]), min(count, preview.MAX_PREVIEW_FRAMES))
+                    self.assertEqual(payload["frame_indices"], preview.preview_timeline(count)[1])
+                    image = Image.open(io.BytesIO(base64.b64decode(payload["frames"][0].split(",", 1)[1])))
+                    self.assertEqual(image.size, (32, 32))
+            self.assertTrue(instance.framewise)
+        finally:
+            instance.close()
+            active.detach()
+            preview.mm.cleanup_models()
 
     def test_real_temporal_taeh3_checkpoint_decodes_motion_on_cpu(self):
         path = preview.folder_paths.get_full_path("vae_approx", "taeh3_temporal.safetensors")
