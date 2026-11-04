@@ -139,8 +139,8 @@ export function createSamplingOverlay(node, panel) {
       if (message === "采样预览失败，生成继续运行。") english = "Sampling preview failed. Generation continues.";
       else if (message.startsWith("采样预览已停用：")) {
         const reason = message.slice("采样预览已停用：".length)
-          .replace("未找到 models/vae_approx/taeh3_temporal.safetensors", "models/vae_approx/taeh3_temporal.safetensors was not found")
-          .replace("采样预览需要 H3 时序 TAEHV 权重，不能使用逐帧二维 TAE", "Sampling preview requires H3 temporal TAEHV weights; frame-by-frame 2D TAE weights are unsupported")
+          .replace("未找到 models/vae_approx/taeh3_temporal.safetensors 或 taeh3.safetensors", "neither models/vae_approx/taeh3_temporal.safetensors nor taeh3.safetensors was found")
+          .replace("采样预览需要 H3 的 taeh3 权重（时序版或逐帧二维版）", "Sampling preview requires H3 taeh3 weights (temporal or frame-by-frame 2D)")
           .replace("采样预览需要 H3 视频 latent [B, 24, T, H, W]", "Sampling preview requires H3 video latents [B, 24, T, H, W]")
           .replace("采样预览帧数与 H3 视频 latent 的时长不匹配", "The preview frame count does not match the H3 video latent duration");
         english = `Sampling preview disabled: ${reason}`;
