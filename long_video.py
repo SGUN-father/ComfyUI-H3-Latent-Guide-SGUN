@@ -205,7 +205,7 @@ class H3LongVideo(io.ComfyNode):
                                 optional=True, advanced=True,
                                 tooltip="仅重抽种子方式选择“自定义种子”时生效，需填写0到18446744073709551615的完整整数。恢复时保留原记录种子，避免浏览器舍入。"),
                 io.Boolean.Input("live_preview", display_name="预览采样（增加耗时）", default=False,
-                                 optional=True, tooltip="使用本地 taeh3_temporal.safetensors 按时间顺序解码采样画面，在参数面板内覆盖播放。关闭不加载预览模型或生成采样缩略图。"),
+                                 optional=True, tooltip="使用本地 taeh3_temporal.safetensors（没有则用 taeh3.safetensors）按时间顺序解码采样画面，在参数面板内覆盖播放。关闭不加载预览模型或生成采样缩略图。"),
                 io.Int.Input("preview_interval", display_name="预览更新间隔（步）", default=2, min=1, max=10000,
                              optional=True, advanced=True, tooltip="每隔多少个采样步更新一次；首步和末步仍更新。数值越大，解码次数越少。"),
                 io.Int.Input("preview_frames", display_name="每次预览帧数", default=12, min=1, max=48,

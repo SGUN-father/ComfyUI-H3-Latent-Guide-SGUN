@@ -6,9 +6,12 @@ import torch
 from PIL import Image
 from safetensors import SafetensorError
 
+from comfy.ldm.minimax.model import FRAME_PER_TOKEN
 import comfy.model_management as mm
+import comfy.model_patcher
 import comfy.model_prefetch
 import comfy.sd
+from comfy.taesd.taesd import Block, Clamp, conv
 import comfy.utils
 from comfy_execution.utils import get_executing_context
 import folder_paths
@@ -20,6 +23,9 @@ from server import PromptServer
 # many evenly spaced frames; frame_indices still covers the full timeline.
 MAX_PREVIEW_FRAMES = 60
 
+# Latent frames the frame-by-frame decoder runs at once.
+DECODE_CHUNK = 8
+
 
 def preview_timeline(count, limit=MAX_PREVIEW_FRAMES):
     """Return (decoded frame offsets to encode, batch index for every timeline frame)."""
@@ -28,6 +34,38 @@ def preview_timeline(count, limit=MAX_PREVIEW_FRAMES):
     picks = [round(index * (count - 1) / (limit - 1)) for index in range(limit)]
     timeline = [round(frame * (limit - 1) / (count - 1)) for frame in range(count)]
     return picks, timeline
+
+
+class FramewiseDecoder(torch.nn.Sequential):
+    """The frame-by-frame taeh3: a 16x image decoder that draws one picture per latent frame."""
+
+    def __init__(self):
+        super().__init__(
+            Clamp(), conv(24, 96), torch.nn.ReLU(),
+            Block(96, 96), Block(96, 96), Block(96, 96), torch.nn.Upsample(scale_factor=2), conv(96, 96, bias=False),
+            Block(96, 96), Block(96, 96), Block(96, 96), torch.nn.Upsample(scale_factor=2), conv(96, 96, bias=False),
+            Block(96, 64), Block(64, 64), Block(64, 64), torch.nn.Upsample(scale_factor=2), conv(64, 64, bias=False),
+            Block(64, 64), Block(64, 64), torch.nn.Upsample(scale_factor=2), conv(64, 64, bias=False),
+            Block(64, 64), conv(64, 3),
+        )
+
+    def decode(self, samples):
+        frames = torch.cat([self(chunk) for chunk in samples[0].movedim(0, 1).split(DECODE_CHUNK)])
+        return frames.movedim(0, 1)[None]
+
+
+class FramewiseTAE:
+    """Carries the comfy.sd.VAE attributes the preview reads for the frame-by-frame decoder."""
+
+    def __init__(self, state):
+        self.first_stage_model = FramewiseDecoder()
+        self.first_stage_model.load_state_dict(state)
+        self.device = mm.get_torch_device()
+        self.vae_dtype = torch.float32
+        self.patcher = comfy.model_patcher.ModelPatcher(self.first_stage_model, self.device, mm.unet_offload_device())
+
+    def memory_used_decode(self, shape, dtype):
+        return DECODE_CHUNK * 64 * 4 * 256 * shape[-2] * shape[-1] * mm.dtype_size(dtype)
 
 
 class H3SamplingPreview:
@@ -40,6 +78,7 @@ class H3SamplingPreview:
         self.trim_frames = 0
         self.vae = None
         self.patcher = None
+        self.framewise = False
         self.failed = False
         self.closed = False
         self.segment = 0
@@ -70,15 +109,22 @@ class H3SamplingPreview:
     def _load(self):
         if self.patcher is not None:
             return
-        path = folder_paths.get_full_path("vae_approx", "taeh3_temporal.safetensors")
+        path = (folder_paths.get_full_path("vae_approx", "taeh3_temporal.safetensors")
+                or folder_paths.get_full_path("vae_approx", "taeh3.safetensors"))
         if path is None:
-            raise FileNotFoundError("未找到 models/vae_approx/taeh3_temporal.safetensors")
+            raise FileNotFoundError("未找到 models/vae_approx/taeh3_temporal.safetensors 或 taeh3.safetensors")
         state = comfy.utils.load_torch_file(path, safe_load=True)
-        if ("decoder.1.weight" not in state or "decoder.22.bias" not in state
-                or state["decoder.1.weight"].shape[:2] != (256, 24)
-                or state["decoder.22.bias"].shape != (12,)):
-            raise ValueError("采样预览需要 H3 时序 TAEHV 权重，不能使用逐帧二维 TAE")
-        self.vae = comfy.sd.VAE(sd=state)
+        if ("decoder.1.weight" in state and "decoder.22.bias" in state
+                and state["decoder.1.weight"].shape[:2] == (256, 24)
+                and state["decoder.22.bias"].shape == (12,)):
+            self.vae = comfy.sd.VAE(sd=state)
+        elif ("1.weight" in state and "23.bias" in state
+                and state["1.weight"].shape[:2] == (96, 24)
+                and state["23.bias"].shape == (3,)):
+            self.vae = FramewiseTAE(state)
+            self.framewise = True
+        else:
+            raise ValueError("采样预览需要 H3 的 taeh3 权重（时序版或逐帧二维版）")
         self.patcher = self.vae.patcher
 
     def _frames(self, video, model_patcher):
@@ -100,15 +146,19 @@ class H3SamplingPreview:
             decoded = self.vae.first_stage_model.decode(samples)
         del samples
         mm.throw_exception_if_processing_interrupted()
+        # picture index behind every video frame; a frame-by-frame decoder draws one picture per latent frame
+        owners = range(decoded.shape[2])
+        if self.framewise:
+            owners = [k for k in owners for _ in range(FRAME_PER_TOKEN[k % 5])]
         if not self.source_frames:
-            self.source_frames = decoded.shape[2]
-        if decoded.shape[2] != self.source_frames or not 0 <= self.trim_frames < self.source_frames:
+            self.source_frames = len(owners)
+        if len(owners) != self.source_frames or not 0 <= self.trim_frames < self.source_frames:
             raise ValueError("采样预览帧数与 H3 视频 latent 的时长不匹配")
         frames = []
         picks, timeline = preview_timeline(self.source_frames - self.trim_frames)
         for offset in picks:
             mm.throw_exception_if_processing_interrupted()
-            frame = decoded[0, :, self.trim_frames + offset].clamp(0, 1).mul(255).to(torch.uint8)
+            frame = decoded[0, :, owners[self.trim_frames + offset]].clamp(0, 1).mul(255).to(torch.uint8)
             pixels = frame.movedim(0, -1).contiguous().cpu().numpy()
             image = Image.fromarray(pixels)
             encoded = io.BytesIO()
