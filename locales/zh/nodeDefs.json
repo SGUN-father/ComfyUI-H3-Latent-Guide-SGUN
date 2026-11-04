@@ -201,7 +201,7 @@
       },
       "live_preview": {
         "name": "预览采样（增加耗时）",
-        "tooltip": "使用本地 taeh3_temporal.safetensors 按时间顺序解码采样画面，在参数面板内覆盖播放。关闭不加载预览模型或生成采样缩略图。"
+        "tooltip": "使用本地 taeh3_temporal.safetensors（没有则用 taeh3.safetensors）按时间顺序解码采样画面，在参数面板内覆盖播放。关闭不加载预览模型或生成采样缩略图。"
       },
       "preview_interval": {
         "name": "预览更新间隔（步）",
